@@ -1,13 +1,13 @@
 ---
-title: "Derby-Sieg: Assen gewinnen 3:1 gegen Laufamholz"
-excerpt: "Ein starkes Heimspiel auf dem Kunstrasen an der Marienbergstraße beschert der 1. Mannschaft drei wichtige Punkte im Abstiegskampf."
+title: 'Derby-Sieg: Assen gewinnen 3:1 gegen Laufamholz (CMS test)'
+excerpt: Ein starkes Heimspiel auf dem Kunstrasen an der Marienbergstraße beschert der 1. Mannschaft drei wichtige Punkte im Abstiegskampf.
 date: 2026-03-22
 sport: fussball
-author: "Webmaster"
+author: Webmaster
 featured: true
 ---
 
-Die 1. Mannschaft des ASN Pfeil Phönix hat sich im wichtigen Heimspiel gegen den TSV Laufamholz mit 3:1 durchgesetzt. Vor rund 80 Zuschauern auf dem Kunstrasen an der Marienbergstraße zeigte die Mannschaft von Trainer Markus Bauer eine starke Vorstellung.
+David is testing the CMS: Die 1. Mannschaft des ASN Pfeil Phönix hat sich im wichtigen Heimspiel gegen den TSV Laufamholz mit 3:1 durchgesetzt. Vor rund 80 Zuschauern auf dem Kunstrasen an der Marienbergstraße zeigte die Mannschaft von Trainer Markus Bauer eine starke Vorstellung.
 
 ## Spielverlauf
 
