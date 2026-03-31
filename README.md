@@ -188,3 +188,4 @@ Widgets sind eingebettet in:
 | Versionskontrolle | GitHub | Kostenlos, Backup, Zusammenarbeit |
 | Fixtures | BFV-Widget | Live-Daten ohne eigene API |
 | Karten | OpenStreetMap | Kein API-Key, datenschutzfreundlich |
+ 
