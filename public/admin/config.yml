@@ -2,7 +2,7 @@ backend:
   name: github
   repo: asnpfeilphoenix/asn-pfeil-phoenix
   branch: main
-  base_url: https://sveltia-cms-auth.vercel.app
+  base_url: https://sveltia-cms-auth-pearl.vercel.app
 
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
