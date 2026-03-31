@@ -49,6 +49,7 @@ collections:
         name: image
         widget: image
         required: false
+        hint: "Bitte vorher auf 1200x675px verkleinern — squoosh.app (kostenlos, kein Login)"
       - label: Entwurf?
         name: draft
         widget: boolean
