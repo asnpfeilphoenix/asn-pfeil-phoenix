@@ -2,7 +2,6 @@ backend:
   name: github
   repo: asnpfeilphoenix/asn-pfeil-phoenix
   branch: main
-  base_url: https://sveltia-cms-auth-pearl.vercel.app
 
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
@@ -12,6 +11,7 @@ collections:
     label: News & Berichte
     folder: src/content/news
     create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
       - label: Titel
         name: title
@@ -39,8 +39,6 @@ collections:
             value: dart
           - label: Radsport
             value: radsport
-          - label: Handball
-            value: handball
           - label: Allgemein
             value: allgemein
       - label: Autor
@@ -51,10 +49,6 @@ collections:
         name: image
         widget: image
         required: false
-      - label: Hervorheben?
-        name: featured
-        widget: boolean
-        default: false
       - label: Entwurf?
         name: draft
         widget: boolean
