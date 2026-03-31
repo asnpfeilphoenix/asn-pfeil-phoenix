@@ -1,0 +1,228 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+}
+
+const {
+  title,
+  description = 'ASN Pfeil Phönix e.V. — Sportverein aus Nürnberg seit 1905. Fußball, Tennis, Kegeln, Dart und Radsport.',
+  image = '/images/asn-grounds-photo.png'
+} = Astro.props;
+
+const fullTitle = title === 'ASN Pfeil Phönix' ? title : `${title} | ASN Pfeil Phönix`;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+const navLinks = [
+  { href: '/news',     label: 'News' },
+  { href: '/fussball', label: 'Fußball' },
+  { href: '/tennis',   label: 'Tennis' },
+  { href: '/kegeln',   label: 'Kegeln' },
+  { href: '/dart',     label: 'Dart' },
+  { href: 'https://www.pfeil-phoenix-radsport.com', label: 'Radsport ↗', external: true },
+  { href: '/verein',   label: 'Verein' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="canonical" href={canonicalURL} />
+  <title>{fullTitle}</title>
+  <meta name="description" content={description} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonicalURL} />
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={image} />
+  <link rel="icon" type="image/svg+xml" href="/images/asn-logo.svg" />
+</head>
+<body>
+
+<header class="site-header" id="site-header">
+  <div class="container header-inner">
+    <a href="/" class="logo" aria-label="ASN Pfeil Phönix — Startseite">
+      <img src="/images/asn-logo.svg" class="logo__mark" alt="" aria-hidden="true" width="52" height="52" />
+      <div class="logo__wordmark">
+        <span class="logo__name">ASN Pfeil Phönix</span>
+        <span class="logo__sub">Die Assen · Nürnberg · seit 1905</span>
+      </div>
+    </a>
+
+    <nav class="nav-desktop" aria-label="Hauptnavigation">
+      <ul class="nav-list">
+        {navLinks.map(link => (
+          <li>
+            <a
+              href={link.href}
+              class:list={['nav-link', { 'nav-link--active': !link.external && currentPath.startsWith(link.href) }]}
+              {...(link.external ? { target: '_blank', rel: 'noopener' } : {})}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+        <li><a href="/verein#mitglied" class="nav-link nav-link--cta">Mitglied werden</a></li>
+      </ul>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="Menü öffnen" aria-expanded="false" aria-controls="mobile-nav">
+      <span class="menu-toggle__bar"></span>
+      <span class="menu-toggle__bar"></span>
+      <span class="menu-toggle__bar"></span>
+    </button>
+  </div>
+
+  <nav class="nav-mobile" id="mobile-nav" aria-hidden="true">
+    <ul class="nav-mobile__list">
+      {navLinks.map(link => (
+        <li>
+          <a
+            href={link.href}
+            class:list={['nav-mobile__link', { 'nav-mobile__link--active': !link.external && currentPath.startsWith(link.href) }]}
+            {...(link.external ? { target: '_blank', rel: 'noopener' } : {})}
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+      <li><a href="/verein#mitglied" class="nav-mobile__link nav-mobile__link--cta">Mitglied werden</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main-content">
+  <slot />
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <a href="/" class="logo">
+        <img src="/images/asn-logo.svg" alt="ASN Pfeil Phönix" width="40" height="40" />
+        <div class="logo__wordmark">
+          <span class="logo__name" style="color:white">ASN Pfeil Phönix</span>
+          <span class="logo__sub">Die Assen · Nürnberg</span>
+        </div>
+      </a>
+      <p class="footer-tagline">Allgemeiner Sportverein Nürnberg<br>Pfeil Phönix e.V. — seit 1905.</p>
+    </div>
+    <div>
+      <h4 class="footer-col__head">Abteilungen</h4>
+      <ul class="footer-col__list">
+        <li><a href="/fussball">Fußball</a></li>
+        <li><a href="/tennis">Tennis</a></li>
+        <li><a href="/kegeln">Kegeln</a></li>
+        <li><a href="/dart">Dart</a></li>
+        <li><a href="https://www.pfeil-phoenix-radsport.com" target="_blank" rel="noopener">Radsport ↗</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="footer-col__head">Verein</h4>
+      <ul class="footer-col__list">
+        <li><a href="/verein">Über uns</a></li>
+        <li><a href="/verein#vorstand">Vorstand</a></li>
+        <li><a href="/verein#mitglied">Mitglied werden</a></li>
+        <li><a href="/verein#kontakt">Kontakt</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="footer-col__head">Adresse</h4>
+      <address class="footer-address">
+        Marienbergstraße 41<br>
+        90411 Nürnberg<br>
+        <a href="mailto:info@asn-pfeil-phoenix.de">info@asn-pfeil-phoenix.de</a>
+      </address>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container footer-bottom__inner">
+      <span>© {new Date().getFullYear()} ASN Pfeil Phönix e.V.</span>
+      <nav aria-label="Rechtliches">
+        <a href="/impressum">Impressum</a>
+        <a href="/datenschutz">Datenschutz</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const toggle = document.getElementById('menu-toggle')!;
+  const mobileNav = document.getElementById('mobile-nav')!;
+  toggle.addEventListener('click', () => {
+    const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!isOpen));
+    mobileNav.setAttribute('aria-hidden', String(isOpen));
+    toggle.classList.toggle('is-open', !isOpen);
+    mobileNav.classList.toggle('is-open', !isOpen);
+  });
+  window.addEventListener('scroll', () => {
+    document.getElementById('site-header')!.classList.toggle('is-scrolled', window.scrollY > 10);
+  }, { passive: true });
+</script>
+
+</body>
+</html>
+
+<style>
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.97); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border); transition: box-shadow 0.2s;
+}
+.site-header.is-scrolled { box-shadow: 0 2px 20px rgba(15,41,114,.1); }
+.header-inner { display: flex; align-items: center; justify-content: space-between; height: 70px; }
+
+.logo { display: flex; align-items: center; gap: 0.85rem; }
+.logo__mark { width: 52px; height: 52px; flex-shrink: 0; transition: transform 0.25s; }
+.logo:hover .logo__mark { transform: scale(1.05) rotate(3deg); }
+.logo__name { display: block; font-family: var(--fd); font-size: 1.25rem; letter-spacing: 0.05em; color: var(--navy); line-height: 1; }
+.logo__sub { display: block; font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+
+.nav-desktop { display: flex; }
+.nav-list { display: flex; align-items: center; gap: 0.1rem; flex-wrap: wrap; }
+.nav-link { font-size: 0.8rem; font-weight: 500; color: var(--mid); padding: 0.45em 0.85em; border-radius: var(--radius); transition: color 0.15s, background 0.15s; white-space: nowrap; }
+.nav-link:hover { color: var(--navy); background: var(--navy-pale); }
+.nav-link--active { color: var(--navy); font-weight: 600; }
+.nav-link--cta { background: var(--navy); color: var(--white) !important; margin-left: 0.4rem; }
+.nav-link--cta:hover { background: var(--navy-dark) !important; }
+
+.menu-toggle { display: none; flex-direction: column; justify-content: center; gap: 5px; width: 36px; height: 36px; background: none; border: none; cursor: pointer; padding: 4px; }
+.menu-toggle__bar { display: block; width: 100%; height: 2px; background: var(--ink); border-radius: 2px; transition: transform 0.2s, opacity 0.2s; }
+.menu-toggle.is-open .menu-toggle__bar:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.menu-toggle.is-open .menu-toggle__bar:nth-child(2) { opacity: 0; }
+.menu-toggle.is-open .menu-toggle__bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.nav-mobile { background: var(--white); border-top: 1px solid var(--border); max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.nav-mobile.is-open { max-height: 500px; }
+.nav-mobile__list { padding: 0.5rem 0 1rem; }
+.nav-mobile__link { display: block; font-family: var(--fd); font-size: 1.4rem; letter-spacing: 0.04em; color: var(--mid); padding: 0.6rem 1.5rem; transition: color 0.15s, background 0.15s; }
+.nav-mobile__link:hover, .nav-mobile__link--active { color: var(--navy); background: var(--navy-pale); }
+.nav-mobile__link--cta { color: var(--white) !important; background: var(--navy); margin: 0.5rem 1rem; border-radius: var(--radius); text-align: center; }
+
+@media (max-width: 860px) { .nav-desktop { display: none; } .menu-toggle { display: flex; } }
+
+.site-footer { background: var(--ink); padding-top: 3.5rem; }
+.footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 2rem 3rem; padding-bottom: 3rem; border-bottom: 1px solid rgba(255,255,255,.08); }
+@media (max-width: 800px) { .footer-grid { grid-template-columns: 1fr 1fr; } .footer-brand { grid-column: 1 / -1; } }
+.footer-tagline { font-size: 0.85rem; color: rgba(255,255,255,.4); line-height: 1.7; margin-top: 0.75rem; }
+.footer-col__head { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--orange); margin-bottom: 0.9rem; }
+.footer-col__list li { margin-bottom: 0.4rem; }
+.footer-col__list a { font-size: 0.85rem; color: rgba(255,255,255,.45); transition: color 0.15s; }
+.footer-col__list a:hover { color: var(--white); }
+.footer-address { font-style: normal; font-size: 0.85rem; color: rgba(255,255,255,.45); line-height: 1.9; }
+.footer-address a { color: rgba(255,255,255,.45); transition: color 0.15s; }
+.footer-address a:hover { color: var(--white); }
+.footer-bottom { padding-block: 1.1rem; font-size: 0.75rem; color: rgba(255,255,255,.25); }
+.footer-bottom__inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+.footer-bottom nav { display: flex; gap: 1.5rem; }
+.footer-bottom nav a { color: rgba(255,255,255,.25); transition: color 0.15s; }
+.footer-bottom nav a:hover { color: rgba(255,255,255,.65); }
+</style>

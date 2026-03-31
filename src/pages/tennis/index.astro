@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('news', ({ data }) => !data.draft && data.sport === 'tennis'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 6);
+
+function formatDate(d: Date) {
+  return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+---
+
+<BaseLayout title="Tennis" description="Die Tennisabteilung des ASN Pfeil Phönix e.V. — Vereinstennis für alle Spielstärken in Nürnberg.">
+
+  <header class="dept-header dept-header--tennis">
+    <div class="container">
+      <span class="section-label">Abteilung</span>
+      <h1>Tennis</h1>
+      <p class="dept-sub">Vereinstennis für Mitglieder aller Spielstärken und Altersstufen.</p>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="container">
+
+      <div class="grid-2 info-grid">
+        <div class="info-block">
+          <h2>Unsere Anlagen</h2>
+          <p>Die Tennisplätze des ASN Pfeil Phönix befinden sich auf dem Vereinsgelände an der Marienbergstraße 41 in Nürnberg-Ziegelstein. Wir verfügen über mehrere Sandplätze und eine vereinseigene Umkleide.</p>
+        </div>
+        <div class="info-block">
+          <h2>Mitmachen</h2>
+          <p>Ob Anfänger oder erfahrener Spieler — bei uns ist jeder willkommen. Wir bieten Mannschaftsspielbetrieb, Clubmeisterschaften und gesellige Veranstaltungen. Für Einsteiger gibt es Schnupperkurse auf Anfrage.</p>
+          <a href="/verein#mitglied" class="btn btn--outline" style="margin-top:1.25rem; --red:#1a6b3a; border-color:#1a6b3a; color:#1a6b3a;">Mitglied werden →</a>
+        </div>
+      </div>
+
+      {posts.length > 0 && (
+        <div class="dept-news">
+          <h2>Tennis-News</h2>
+          <div class="grid-3">
+            {posts.map(post => (
+              <a href={`/news/${post.slug}`} class="card">
+                {post.data.image && <img class="card__img" src={post.data.image} alt={post.data.title} loading="lazy" />}
+                <div class="card__body">
+                  <div class="card__meta">
+                    <span class="tag tag--tennis">Tennis</span>
+                    <time>{formatDate(post.data.date)}</time>
+                  </div>
+                  <h3 class="card__title">{post.data.title}</h3>
+                  <p class="card__excerpt">{post.data.excerpt}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {posts.length === 0 && (
+        <p style="color:var(--muted); font-style:italic;">Noch keine Tennis-Beiträge vorhanden.</p>
+      )}
+
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+.dept-header {
+  padding: 4rem 0 3rem;
+  background: var(--navy-dark);
+  border-bottom: 4px solid var(--navy-mid);
+}
+.dept-header h1 { color: var(--white); font-size: clamp(2.5rem, 8vw, 6rem); }
+.dept-sub { color: rgba(255,255,255,0.55); margin-top: 0.75rem; }
+.section-label { color: #5aaa7a !important; }
+
+.info-grid { margin-bottom: 4rem; }
+.info-block h2 { margin-bottom: 1rem; }
+.info-block p { color: var(--mid); line-height: 1.75; }
+
+.dept-news h2 { margin-bottom: 1.5rem; }
+</style>

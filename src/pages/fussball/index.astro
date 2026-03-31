@@ -1,0 +1,126 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('news', ({ data }) => !data.draft && data.sport === 'fussball'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 6);
+
+function formatDate(d: Date) {
+  return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+---
+
+<BaseLayout title="Fußball" description="Die Fußballabteilung des ASN Pfeil Phönix e.V. — Herren, Damen & Jugend in Nürnberg.">
+
+  <header class="dept-header dept-header--fussball">
+    <div class="container">
+      <span class="section-label">Abteilung</span>
+      <h1>Fußball</h1>
+      <p class="dept-sub">Herren, Damen & Jugend im Kreisbetrieb Nürnberg/Frankenhöhe.</p>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="container">
+
+      <!-- BFV live table/fixtures widget -->
+      <div class="widget-block">
+        <h2 class="widget-block__head">Tabelle & Spielplan</h2>
+        <p class="widget-block__sub">Live-Daten vom Bayerischen Fußball-Verband</p>
+
+        <!-- Replace iframe src with the widget URL from bfv.de for your specific team -->
+        <iframe
+          src="https://www.bfv.de/widgets/spielplan?vereinId=00ES8GNKEO000012VV0AG08LVUPGND5I&teamId=016PKM56R8000000VV0AG811VUDIC8D7&saison=2526"
+          frameborder="0"
+          scrolling="no"
+          title="Spielplan 1. Mannschaft"
+          loading="lazy"
+          class="bfv-iframe"
+        ></iframe>
+      </div>
+
+      <!-- Teams -->
+      <div class="teams-section">
+        <h2>Mannschaften</h2>
+        <div class="grid-3 teams-grid">
+          {[
+            { name: '1. Mannschaft', league: 'A-Klasse 7', trainer: 'Markus Bauer' },
+            { name: '2. Mannschaft', league: 'B-Klasse', trainer: 'N.N.' },
+            { name: 'Jugend', league: 'Diverse Klassen', trainer: 'Jugendleiter' },
+          ].map(team => (
+            <div class="team-card">
+              <div class="team-card__num">⚽</div>
+              <h3 class="team-card__name">{team.name}</h3>
+              <p class="team-card__league">{team.league}</p>
+              <p class="team-card__trainer">Trainer: {team.trainer}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Latest news -->
+      {posts.length > 0 && (
+        <div class="dept-news">
+          <h2>Aktuelle Fußball-News</h2>
+          <div class="grid-3">
+            {posts.map(post => (
+              <a href={`/news/${post.slug}`} class="card">
+                {post.data.image && <img class="card__img" src={post.data.image} alt={post.data.title} loading="lazy" />}
+                <div class="card__body">
+                  <div class="card__meta">
+                    <span class="tag tag--fussball">Fußball</span>
+                    <time>{formatDate(post.data.date)}</time>
+                  </div>
+                  <h3 class="card__title">{post.data.title}</h3>
+                  <p class="card__excerpt">{post.data.excerpt}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+          <div style="text-align:center; margin-top:2rem;">
+            <a href="/news?sport=fussball" class="btn btn--outline">Alle Fußball-News →</a>
+          </div>
+        </div>
+      )}
+
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+.dept-header {
+  padding: 4rem 0 3rem;
+  background: var(--black);
+  border-bottom: 4px solid var(--red);
+}
+.dept-header h1 { color: var(--white); font-size: clamp(2.5rem, 8vw, 6rem); }
+.dept-sub { color: rgba(255,255,255,0.55); margin-top: 0.75rem; font-size: 1rem; }
+
+.widget-block { margin-bottom: 4rem; }
+.widget-block__head { margin-bottom: 0.25rem; }
+.widget-block__sub { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.9rem; }
+.bfv-iframe {
+  width: 100%;
+  min-height: 420px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  display: block;
+}
+
+.teams-section { margin-bottom: 4rem; }
+.teams-section h2 { margin-bottom: 1.5rem; }
+.team-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--navy);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+}
+.team-card__num { font-size: 2rem; margin-bottom: 0.75rem; }
+.team-card__name { font-size: 1.2rem; margin-bottom: 0.25rem; }
+.team-card__league { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.25rem; }
+.team-card__trainer { font-size: 0.85rem; color: var(--mid); }
+
+.dept-news h2 { margin-bottom: 1.5rem; }
+</style>

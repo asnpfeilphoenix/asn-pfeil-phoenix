@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Datenschutzerklärung" description="Datenschutzerklärung des ASN Pfeil Phönix e.V.">
+  <section class="section">
+    <div class="container">
+      <h1>Datenschutzerklärung</h1>
+      <div class="prose" style="margin-top:2rem;">
+        <h2>1. Datenschutz auf einen Blick</h2>
+        <p>Diese Website wird als statische Website betrieben und erhebt keine personenbezogenen Daten durch eigene Formulare oder Tracking-Tools. Es werden keine Cookies gesetzt.</p>
+
+        <h2>2. Hosting</h2>
+        <p>Diese Website wird über <strong>Vercel</strong> gehostet. Beim Aufruf der Website werden durch Vercel Server-Log-Dateien gespeichert (IP-Adresse, Datum/Uhrzeit, aufgerufene Seite). Diese Daten werden nicht mit anderen Datenquellen zusammengeführt. Weitere Informationen: <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">Vercel Privacy Policy</a>.</p>
+
+        <h2>3. Eingebettete Inhalte</h2>
+        <p>Diese Website bindet Karten von <strong>OpenStreetMap</strong> sowie Widgets des <strong>Bayerischen Fußball-Verbandes (BFV)</strong> ein. Beim Laden dieser Inhalte können Daten an die jeweiligen Anbieter übertragen werden. Bitte beachten Sie die Datenschutzerklärungen von <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener">OpenStreetMap</a> und <a href="https://www.bfv.de/datenschutz" target="_blank" rel="noopener">BFV</a>.</p>
+
+        <h2>4. Kontakt</h2>
+        <p>Bei Fragen zum Datenschutz wenden Sie sich an:<br>
+        ASN Pfeil Phönix e.V.<br>
+        Marienbergstraße 41, 90411 Nürnberg<br>
+        <a href="mailto:info@asn-pfeil-phoenix.de">info@asn-pfeil-phoenix.de</a></p>
+
+        <p><em>Stand: {new Date().toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}</em></p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

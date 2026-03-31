@@ -1,0 +1,248 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Über den Verein" description="Geschichte, Vorstand, Mitgliedschaft und Kontakt — ASN Pfeil Phönix e.V. Nürnberg seit 1905.">
+
+  <header class="page-header section--dark">
+    <div class="container">
+      <span class="section-label">Unser Verein</span>
+      <h1>ASN Pfeil Phönix e.V.</h1>
+      <p class="page-sub">Einer der traditionsreichsten Sportvereine Nürnbergs.</p>
+    </div>
+  </header>
+
+  <!-- History -->
+  <section class="section" id="geschichte">
+    <div class="container">
+      <div class="history-layout">
+        <div class="history-text">
+          <span class="section-label">Geschichte</span>
+          <h2>Seit 1905 in Nürnberg</h2>
+          <p>Der ASN Pfeil Phönix e.V. wurde 1905 unter dem Namen FC Vorwärts Nürnberg gegründet und ist damit einer der ältesten Sportvereine der Stadt. Nach zahlreichen Fusionen und Namensänderungen fand der Verein seine heutige Heimat im Stadtteil Ziegelstein im Nürnberger Norden.</p>
+          <p>Im Jahr 2005 wurde nicht nur das 100-jährige Jubiläum gefeiert — in diesem Jahr fand auch die letzte große Fusion statt: der ASN Pfeil schloss sich mit dem SB Phönix zusammen und wurde zum heutigen ASN Pfeil Phönix e.V.</p>
+          <p>Heute bietet der Verein in den Abteilungen Fußball, Tennis und Kegeln ein vielfältiges Sportangebot für Kinder, Jugendliche und Erwachsene.</p>
+        </div>
+        <div class="history-timeline">
+          {[
+            { year: '1905', event: 'Gründung als FC Vorwärts Nürnberg' },
+            { year: '1925', event: 'Beitritt als Nürnberger FV zum ASN' },
+            { year: '1946', event: 'Neuaufstellung nach dem Krieg' },
+            { year: '2005', event: 'Fusion mit SB Phönix & 100-Jahrfeier' },
+            { year: '2026', event: 'Aktiv und lebendig in Ziegelstein' },
+          ].map(item => (
+            <div class="timeline-item">
+              <span class="timeline-year">{item.year}</span>
+              <span class="timeline-event">{item.event}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vorstand -->
+  <section class="section section--dark" id="vorstand">
+    <div class="container">
+      <span class="section-label">Führung</span>
+      <h2>Vorstand</h2>
+      <p class="vorstand-sub">Der Vorstand des ASN Pfeil Phönix e.V. — gewählt auf der Jahreshauptversammlung.</p>
+
+      <div class="grid-4 vorstand-grid">
+        {[
+          { rolle: '1. Vorsitzender', name: 'Bitte ergänzen' },
+          { rolle: '2. Vorsitzender', name: 'Bitte ergänzen' },
+          { rolle: 'Kassenwart', name: 'Bitte ergänzen' },
+          { rolle: 'Schriftführer', name: 'Bitte ergänzen' },
+        ].map(person => (
+          <div class="vorstand-card">
+            <div class="vorstand-card__avatar">
+              <span>{person.name.charAt(0)}</span>
+            </div>
+            <p class="vorstand-card__role">{person.rolle}</p>
+            <p class="vorstand-card__name">{person.name}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Membership -->
+  <section class="section" id="mitglied">
+    <div class="container">
+      <div class="grid-2 member-layout">
+        <div>
+          <span class="section-label">Mitmachen</span>
+          <h2>Mitglied werden</h2>
+          <p>Werde Teil des ASN Pfeil Phönix! Wir freuen uns über neue Mitglieder in allen Abteilungen. Der Mitgliedsbeitrag ist je nach Alter und Abteilung gestaffelt.</p>
+          <p>Für eine Mitgliedschaft einfach das Formular ausfüllen und an uns senden, oder direkt beim Training vorbeikommen.</p>
+          <a href="/mitgliedsantrag.pdf" class="btn btn--primary" style="margin-top:1.5rem;" target="_blank">Mitgliedsantrag (PDF) →</a>
+        </div>
+        <div class="beitraege">
+          <h3>Beiträge (Richtwerte)</h3>
+          <table class="beitrags-table">
+            <thead>
+              <tr><th>Kategorie</th><th>Beitrag/Jahr</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Kinder (bis 14)</td><td>Bitte ergänzen</td></tr>
+              <tr><td>Jugend (15–18)</td><td>Bitte ergänzen</td></tr>
+              <tr><td>Erwachsene</td><td>Bitte ergänzen</td></tr>
+              <tr><td>Familien</td><td>Bitte ergänzen</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="section section--dark" id="kontakt">
+    <div class="container">
+      <span class="section-label">Kontakt</span>
+      <h2>So findet ihr uns</h2>
+      <div class="grid-2 contact-grid">
+        <div class="contact-info">
+          <address>
+            <p><strong>ASN Pfeil Phönix e.V.</strong></p>
+            <p>Marienbergstraße 41<br>90411 Nürnberg</p>
+            <p style="margin-top:1rem;">
+              <a href="mailto:info@asn-pfeil-phoenix.de">info@asn-pfeil-phoenix.de</a>
+            </p>
+          </address>
+        </div>
+        <div class="contact-map">
+          <!-- Embedded OpenStreetMap — no API key required -->
+          <iframe
+            src="https://www.openstreetmap.org/export/embed.html?bbox=11.075,49.469,11.085,49.475&layer=mapnik&marker=49.472,11.080"
+            title="Vereinsgelände ASN Pfeil Phönix"
+            loading="lazy"
+          ></iframe>
+          <a
+            href="https://www.openstreetmap.org/?mlat=49.472&mlon=11.080#map=16/49.472/11.080"
+            target="_blank"
+            rel="noopener"
+            class="map-link"
+          >
+            Größere Karte anzeigen →
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+.page-header { padding: 3rem 0 2.5rem; }
+.page-header h1 { color: var(--white); }
+.page-sub { color: rgba(255,255,255,0.5); margin-top: 0.5rem; }
+
+/* History */
+.history-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+@media (max-width: 768px) { .history-layout { grid-template-columns: 1fr; } }
+.history-text h2 { margin-bottom: 1.25rem; }
+.history-text p { color: var(--mid); line-height: 1.75; margin-bottom: 1rem; }
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 1rem;
+  align-items: start;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.timeline-item:last-child { border-bottom: none; }
+.timeline-year {
+  font-family: var(--font-head);
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: var(--navy);
+}
+.timeline-event { font-size: 0.9rem; color: var(--mid); padding-top: 0.2rem; line-height: 1.5; }
+
+/* Vorstand */
+.vorstand-sub { color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.vorstand-card {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  background: rgba(255,255,255,0.04);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.vorstand-card__avatar {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--navy);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-head);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: white;
+  margin: 0 auto 0.75rem;
+}
+.vorstand-card__role {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 0.25rem;
+  font-family: var(--font-head);
+}
+.vorstand-card__name {
+  font-family: var(--font-head);
+  font-weight: 700;
+  color: var(--white);
+  font-size: 1rem;
+}
+
+/* Membership */
+.member-layout h2 { margin-bottom: 1rem; }
+.member-layout p { color: var(--mid); line-height: 1.75; margin-bottom: 0.75rem; }
+.beitraege h3 { margin-bottom: 1rem; font-size: 1.2rem; }
+.beitrags-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.beitrags-table th, .beitrags-table td {
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.beitrags-table th {
+  font-family: var(--font-head);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--bg);
+}
+.beitrags-table td { color: var(--mid); }
+
+/* Contact */
+.contact-info address {
+  font-style: normal;
+  line-height: 1.9;
+  font-size: 1rem;
+  color: rgba(255,255,255,0.6);
+}
+.contact-info strong { color: var(--white); }
+.contact-info a { color: var(--navy); }
+.contact-map iframe {
+  width: 100%;
+  height: 280px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: block;
+}
+.map-link {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.35);
+  text-align: right;
+}
+.map-link:hover { color: rgba(255,255,255,0.7); }
+</style>

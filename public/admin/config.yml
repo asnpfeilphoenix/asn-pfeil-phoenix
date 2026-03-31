@@ -1,0 +1,64 @@
+backend:
+  name: github
+  repo: asnpfeilphoenix/asn-pfeil-phoenix
+  branch: main
+  base_url: https://sveltia-cms-auth.vercel.app
+
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  - name: news
+    label: News & Berichte
+    folder: src/content/news
+    create: true
+    fields:
+      - label: Titel
+        name: title
+        widget: string
+      - label: Kurzbeschreibung
+        name: excerpt
+        widget: text
+      - label: Datum
+        name: date
+        widget: datetime
+        format: YYYY-MM-DD
+        date_format: DD.MM.YYYY
+        time_format: false
+      - label: Sportart
+        name: sport
+        widget: select
+        options:
+          - label: Fußball
+            value: fussball
+          - label: Tennis
+            value: tennis
+          - label: Kegeln
+            value: kegeln
+          - label: Dart
+            value: dart
+          - label: Radsport
+            value: radsport
+          - label: Handball
+            value: handball
+          - label: Allgemein
+            value: allgemein
+      - label: Autor
+        name: author
+        widget: string
+        required: false
+      - label: Titelbild
+        name: image
+        widget: image
+        required: false
+      - label: Hervorheben?
+        name: featured
+        widget: boolean
+        default: false
+      - label: Entwurf?
+        name: draft
+        widget: boolean
+        default: false
+      - label: Inhalt
+        name: body
+        widget: markdown

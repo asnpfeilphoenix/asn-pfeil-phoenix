@@ -1,0 +1,82 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('news', ({ data }) => !data.draft);
+const posts = allPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+function formatDate(d: Date) {
+  return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+const sports = ['fussball', 'tennis', 'kegeln', 'dart', 'radsport', 'allgemein'];
+---
+
+<BaseLayout title="News" description="Alle Nachrichten des ASN Pfeil Phönix e.V.">
+
+  <header class="page-header section--navy">
+    <div class="container">
+      <span class="section-eyebrow">Neuigkeiten</span>
+      <h1>News &amp; Berichte</h1>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="container">
+      <div class="filter-bar" role="group" aria-label="Nach Sportart filtern">
+        <button class="filter-btn is-active" data-filter="all">Alle</button>
+        {sports.map(sport => (
+          <button class="filter-btn" data-filter={sport}>
+            {sport.charAt(0).toUpperCase() + sport.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      <div class="grid-3" id="news-grid">
+        {posts.map(post => (
+          <a href={`/news/${post.slug}`} class="card" data-sport={post.data.sport}>
+            {post.data.image && <img class="card__img" src={post.data.image} alt={post.data.title} loading="lazy" />}
+            <div class="card__body">
+              <div class="card__meta">
+                <span class={`tag tag--${post.data.sport}`}>{post.data.sport}</span>
+                <time>{formatDate(post.data.date)}</time>
+              </div>
+              <h2 class="card__title">{post.data.title}</h2>
+              <p class="card__excerpt">{post.data.excerpt}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+
+      {posts.length === 0 && <p style="color:var(--muted);font-style:italic">Noch keine Beiträge vorhanden.</p>}
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
+  const cards = document.querySelectorAll<HTMLElement>('[data-sport]');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      const filter = btn.dataset.filter!;
+      cards.forEach(card => {
+        card.style.display = filter === 'all' || card.dataset.sport === filter ? '' : 'none';
+      });
+    });
+  });
+</script>
+
+<style>
+.page-header { padding: 3rem 0 2.5rem; }
+.filter-bar { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 2rem; }
+.filter-btn {
+  font-family: var(--fb); font-size: .78rem; font-weight: 600;
+  letter-spacing: .04em; padding: .45em 1em; border-radius: var(--radius);
+  border: 1px solid var(--border); background: var(--white);
+  color: var(--mid); cursor: pointer; transition: all .15s;
+}
+.filter-btn:hover { border-color: var(--navy); color: var(--navy); }
+.filter-btn.is-active { background: var(--navy); border-color: var(--navy); color: var(--white); }
+</style>

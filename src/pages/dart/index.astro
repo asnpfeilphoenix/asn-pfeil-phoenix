@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('news', ({ data }) => !data.draft && data.sport === 'dart'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 6);
+---
+
+<BaseLayout title="Dart" description="Die Dartabteilung des ASN Pfeil Phönix e.V. — neu gegründet in Nürnberg.">
+
+  <header class="dept-header">
+    <div class="container">
+      <span class="section-eyebrow">Abteilung · Neu</span>
+      <h1>Dart</h1>
+      <p class="dept-sub">Neu gegründet — Wettkampf und geselliges Spiel für alle Levels.</p>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid-2">
+        <div>
+          <h2>Willkommen bei den Dart-Assen</h2>
+          <p style="color:var(--mid);line-height:1.75;margin-top:1rem">Die Dartabteilung des ASN Pfeil Phönix ist die jüngste Ergänzung unserer Vereinsfamilie. Ob Einsteiger oder erfahrener Spieler — bei uns ist jeder willkommen. Wir spielen regelmäßig im Vereinsheim und nehmen am Ligabetrieb teil.</p>
+          <a href="/verein#mitglied" class="btn btn--primary" style="margin-top:1.5rem">Mitglied werden →</a>
+        </div>
+        <div>
+          <h2>Kontakt</h2>
+          <p style="color:var(--mid);margin-top:1rem">Interesse an der Dartabteilung? Meldet euch beim Vorstand oder schreibt an <a href="mailto:info@asn-pfeil-phoenix.de" style="color:var(--navy)">info@asn-pfeil-phoenix.de</a>.</p>
+        </div>
+      </div>
+
+      {posts.length > 0 && (
+        <div style="margin-top:3rem">
+          <h2 style="margin-bottom:1.5rem">Dart-News</h2>
+          <div class="grid-3">
+            {posts.map(post => (
+              <a href={`/news/${post.slug}`} class="card">
+                <div class="card__body">
+                  <div class="card__meta">
+                    <span class="tag tag--dart">Dart</span>
+                    <time>{post.data.date.toLocaleDateString('de-DE')}</time>
+                  </div>
+                  <h3 class="card__title">{post.data.title}</h3>
+                  <p class="card__excerpt">{post.data.excerpt}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+.dept-header { padding: 4rem 0 3rem; background: #2d0a47; border-bottom: 4px solid #6b1a8a; }
+.dept-header h1 { color: var(--white); font-size: clamp(2.5rem, 8vw, 6rem); }
+.dept-header .section-eyebrow { color: rgba(255,255,255,.5); }
+.dept-header .section-eyebrow::before { background: var(--orange); }
+.dept-sub { color: rgba(255,255,255,.55); margin-top: .75rem; }
+</style>

@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('news', ({ data }) => !data.draft && data.sport === 'kegeln'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 6);
+---
+
+<BaseLayout title="Kegeln" description="Die Kegelabteilung des ASN Pfeil Phönix e.V. — geselliges Kegeln mit Mannschaftsbetrieb in Nürnberg.">
+
+  <header class="dept-header">
+    <div class="container">
+      <span class="section-label">Abteilung</span>
+      <h1>Kegeln</h1>
+      <p class="dept-sub">Geselliges Kegeln mit Mannschaftsbetrieb und Turnieren.</p>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid-2">
+        <div>
+          <h2>Über die Abteilung</h2>
+          <p style="color:var(--mid); line-height:1.75; margin-top:1rem;">Die Kegelabteilung des ASN Pfeil Phönix ist eine feste Größe im Vereinsleben. Wir spielen regelmäßig im Mannschaftsbetrieb und veranstalten vereinseigene Turniere. Dabei steht neben dem sportlichen auch der gesellige Aspekt stets im Vordergrund.</p>
+          <p style="color:var(--mid); line-height:1.75; margin-top:1rem;">Interessierte sind herzlich willkommen — meld euch einfach beim Vorstand!</p>
+        </div>
+        <div>
+          <h2>Kontakt Abteilung</h2>
+          <p style="color:var(--mid); margin-top:1rem;">Für Anfragen zur Kegelabteilung wendet euch an die Vereinsadresse oder schreibt an <a href="mailto:info@asn-pfeil-phoenix.de" style="color:var(--red)">info@asn-pfeil-phoenix.de</a>.</p>
+        </div>
+      </div>
+
+      {posts.length > 0 && (
+        <div style="margin-top:3rem;">
+          <h2 style="margin-bottom:1.5rem;">Kegeln-News</h2>
+          <div class="grid-3">
+            {posts.map(post => (
+              <a href={`/news/${post.slug}`} class="card">
+                <div class="card__body">
+                  <div class="card__meta">
+                    <span class="tag tag--kegeln">Kegeln</span>
+                    <time>{post.data.date.toLocaleDateString('de-DE')}</time>
+                  </div>
+                  <h3 class="card__title">{post.data.title}</h3>
+                  <p class="card__excerpt">{post.data.excerpt}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+.dept-header {
+  padding: 4rem 0 3rem;
+  background: var(--navy-dark);
+  border-bottom: 4px solid var(--navy-mid);
+}
+.dept-header h1 { color: var(--white); font-size: clamp(2.5rem, 8vw, 6rem); }
+.dept-sub { color: rgba(255,255,255,0.55); margin-top: 0.75rem; }
+.section-label { color: #6a9fd8 !important; }
+</style>

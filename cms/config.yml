@@ -1,0 +1,116 @@
+backend:
+  name: github
+  repo: YOUR_GITHUB_USERNAME/asn-pfeil-phoenix  # ← change this
+  branch: main
+
+# Uploads go to public/images/uploads
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+# Editorial workflow: drafts → review → publish
+publish_mode: editorial_workflow
+
+locale: de
+
+collections:
+  # ---- NEWS POSTS ----
+  - name: "news"
+    label: "News & Berichte"
+    label_singular: "Beitrag"
+    folder: "src/content/news"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    preview_path: "news/{{slug}}"
+    fields:
+      - label: "Titel"
+        name: "title"
+        widget: "string"
+        hint: "Kurzer, prägnanter Titel (z.B. '3:1-Sieg gegen FC Stein')"
+
+      - label: "Kurzbeschreibung"
+        name: "excerpt"
+        widget: "text"
+        hint: "1–2 Sätze als Vorschautext auf der Startseite und in der Übersicht."
+
+      - label: "Datum"
+        name: "date"
+        widget: "datetime"
+        format: "YYYY-MM-DD"
+        date_format: "DD.MM.YYYY"
+        time_format: false
+        default: ""
+
+      - label: "Sportart"
+        name: "sport"
+        widget: "select"
+        options:
+          - { label: "Fußball",   value: "fussball" }
+          - { label: "Tennis",    value: "tennis" }
+          - { label: "Kegeln",    value: "kegeln" }
+          - { label: "Handball",  value: "handball" }
+          - { label: "Allgemein", value: "allgemein" }
+        default: "allgemein"
+
+      - label: "Autor"
+        name: "author"
+        widget: "string"
+        required: false
+        hint: "Optional — z.B. 'Markus Bauer' oder 'Redaktion'"
+
+      - label: "Titelbild"
+        name: "image"
+        widget: "image"
+        required: false
+        hint: "Empfohlene Größe: 1200×675 px (16:9). JPG oder PNG."
+
+      - label: "Auf Startseite hervorheben?"
+        name: "featured"
+        widget: "boolean"
+        default: false
+        hint: "Als erstes auf der Startseite anzeigen."
+
+      - label: "Entwurf (nicht veröffentlichen)"
+        name: "draft"
+        widget: "boolean"
+        default: false
+
+      - label: "Inhalt"
+        name: "body"
+        widget: "markdown"
+        hint: "Haupttext des Beitrags. Überschriften, Fettschrift, Links und Bilder werden unterstützt."
+
+  # ---- STATIC PAGES ----
+  - name: "pages"
+    label: "Vereinsseiten"
+    label_singular: "Seite"
+    files:
+      - label: "Verein — Über uns"
+        name: "verein"
+        file: "src/content/pages/verein.md"
+        fields:
+          - { label: "Vereinsgeschichte", name: "history", widget: "markdown" }
+          - { label: "Mitgliedsbeitrag Kinder (Text)", name: "beitrag_kinder", widget: "string", required: false }
+          - { label: "Mitgliedsbeitrag Jugend (Text)", name: "beitrag_jugend", widget: "string", required: false }
+          - { label: "Mitgliedsbeitrag Erwachsene (Text)", name: "beitrag_erwachsene", widget: "string", required: false }
+          - { label: "Mitgliedsbeitrag Familie (Text)", name: "beitrag_familie", widget: "string", required: false }
+          - label: "Vorstand"
+            name: "vorstand"
+            widget: "list"
+            label_singular: "Person"
+            fields:
+              - { label: "Rolle", name: "rolle", widget: "string", hint: "z.B. '1. Vorsitzender'" }
+              - { label: "Name", name: "name", widget: "string" }
+              - { label: "E-Mail (optional)", name: "email", widget: "string", required: false }
+
+      - label: "Fußball — Mannschaften"
+        name: "fussball"
+        file: "src/content/pages/fussball.md"
+        fields:
+          - label: "Mannschaften"
+            name: "teams"
+            widget: "list"
+            label_singular: "Mannschaft"
+            fields:
+              - { label: "Name", name: "name", widget: "string", hint: "z.B. '1. Mannschaft'" }
+              - { label: "Liga/Klasse", name: "league", widget: "string" }
+              - { label: "Trainer", name: "trainer", widget: "string" }
