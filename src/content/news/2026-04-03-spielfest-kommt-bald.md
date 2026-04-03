@@ -10,4 +10,4 @@ draft: false
 
 Da unser Kinderfußballfest schon bald vor der Tür steht, wollen wir uns noch einmal ins Gedächtnis rufen, wie viel Spaß das macht!
 
-<iframe width="100%" height="400" src="https://www.youtube.com/watch?v=xIjvDTqIKI4" frameborder="0" allowfullscreen></iframe>
+<iframe width="100%" height="400" src="https://www.youtube-nocookie.com/embed/v=xIjvDTqIKI4" frameborder="0" allowfullscreen></iframe>
