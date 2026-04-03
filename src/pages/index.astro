@@ -126,6 +126,53 @@ const depts = [
     </div>
   </section>
 
+  <!-- ===== FÜR ASSEN-FANS ===== -->
+  <section class="section">
+    <div class="container">
+      <p class="section-eyebrow">Für Assen-Fans</p>
+      <h2>Shop &amp; Unterstützung</h2>
+      <div class="fans-grid">
+
+        <!-- Fan Webshop -->
+        <a href="https://asnpfeilphoenix.myteamshop.de/" target="_blank" rel="noopener" class="fans-card">
+          <div class="fans-card__img">
+            <img src="/images/asn-shop-banner.png" alt="ASN Pfeil Phönix Onlineshop" />
+          </div>
+          <div class="fans-card__body">
+            <h3 class="fans-card__title">Fan-Webshop</h3>
+            <p class="fans-card__text">Trikots, Merch und mehr — direkt vom Verein.</p>
+            <span class="fans-card__cta">Zum Shop →</span>
+          </div>
+        </a>
+
+        <!-- Jako Kit Shop -->
+        <a href="https://team.jako.com/de-de/team/asn_pfeil_phoenix/" target="_blank" rel="noopener" class="fans-card">
+          <div class="fans-card__img fans-card__img--white">
+            <img src="/images/guenthers-sport-shop.png" alt="Günther's Sport-Shop Nürnberg" />
+          </div>
+          <div class="fans-card__body">
+            <h3 class="fans-card__title">Jako Teamshop</h3>
+            <p class="fans-card__text">Offizielle Vereinsausrüstung von Jako — für Spieler und Fans.</p>
+            <span class="fans-card__cta">Zum Teamshop →</span>
+          </div>
+        </a>
+
+        <!-- Klubkasse -->
+        <a href="https://www.klubkasse.de/klub-page.html?club_id=1934" target="_blank" rel="noopener" class="fans-card">
+          <div class="fans-card__img fans-card__img--navy">
+            <img src="https://mzm.klubkasse.de/banner.php?id=364&club_id=1934" alt="Klubkasse.de" loading="lazy" />
+          </div>
+          <div class="fans-card__body">
+            <h3 class="fans-card__title">Klubkasse</h3>
+            <p class="fans-card__text">Unterstütze den Verein direkt — einfach und unkompliziert.</p>
+            <span class="fans-card__cta">Zur Klubkasse →</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
   <!-- ===== DEPARTMENTS ===== -->
   <section class="section">
     <div class="container">
@@ -314,6 +361,36 @@ const depts = [
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .news-item__date { font-size: .68rem; color: var(--muted); margin-top: .15rem; display: block; }
+
+/* ---- Fans section ---- */
+.fans-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem; margin-top: 2rem;
+}
+@media (max-width: 800px) { .fans-grid { grid-template-columns: 1fr; } }
+
+.fans-card {
+  background: var(--white); border-radius: var(--radius-lg);
+  border: 1px solid var(--border); overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: box-shadow .2s, transform .2s;
+}
+.fans-card:hover { box-shadow: 0 12px 40px rgba(15,41,114,.1); transform: translateY(-3px); }
+.fans-card__img {
+  aspect-ratio: 16/7; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--navy-pale);
+}
+.fans-card__img img { width: 100%; height: 100%; object-fit: cover; }
+.fans-card__img--white { background: var(--white); padding: 1.5rem; }
+.fans-card__img--white img { object-fit: contain; }
+.fans-card__img--navy { background: var(--navy); padding: 1rem; }
+.fans-card__img--navy img { object-fit: contain; }
+.fans-card__body { padding: 1.25rem 1.5rem 1.5rem; flex: 1; display: flex; flex-direction: column; }
+.fans-card__title { font-family: var(--fd); font-size: 1.3rem; margin-bottom: .4rem; }
+.fans-card__text { font-size: .88rem; color: var(--mid); line-height: 1.6; flex: 1; }
+.fans-card__cta { margin-top: 1rem; font-size: .82rem; font-weight: 600; color: var(--navy); }
+.fans-card:hover .fans-card__cta { text-decoration: underline; }
 
 /* ---- Departments ---- */
 .dept-grid {
