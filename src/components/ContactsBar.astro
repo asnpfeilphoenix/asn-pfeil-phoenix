@@ -1,0 +1,116 @@
+---
+interface Contact {
+  rolle: string;
+  name: string;
+  telefon: string;
+  email: string;
+  foto: string;
+}
+
+interface Props {
+  contacts: Contact[];
+  title?: string;
+  eyebrow?: string;
+  dark?: boolean;
+}
+
+const { contacts, title = 'Ansprechpartner', eyebrow = 'Kontakt', dark = false } = Astro.props;
+---
+
+<section class={`contacts-section ${dark ? 'contacts-section--dark' : ''}`}>
+  <div class="container">
+    <p class={`section-eyebrow ${dark ? 'section-eyebrow--dark' : ''}`}>{eyebrow}</p>
+    <h2 class="contacts-title">{title}</h2>
+    <div class="contacts-grid">
+      {contacts.map(c => (
+        <div class="contact-card">
+          <div class="contact-card__photo">
+            {c.foto
+              ? <img src={c.foto} alt={c.name} loading="lazy" />
+              : <div class="contact-card__photo-ph">{c.name ? c.name.charAt(0) : '?'}</div>
+            }
+          </div>
+          <div class="contact-card__body">
+            <span class="contact-card__rolle">{c.rolle}</span>
+            <p class="contact-card__name">{c.name || 'Name folgt'}</p>
+            {c.telefon && (
+              <a class="contact-card__link" href={`tel:${c.telefon}`}>
+                📞 {c.telefon}
+              </a>
+            )}
+            {c.email && (
+              <a class="contact-card__link" href={`mailto:${c.email}`}>
+                ✉️ {c.email}
+              </a>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+.contacts-section { padding-block: clamp(3.5rem, 7vw, 6rem); background: var(--off); }
+.contacts-section--dark { background: var(--navy-dark); }
+.contacts-section--dark .contacts-title { color: var(--white); }
+
+.contacts-title { font-family: var(--fd); font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 2rem; }
+
+.section-eyebrow--dark { color: rgba(255,255,255,.5) !important; }
+.section-eyebrow--dark::before { background: var(--orange) !important; }
+
+.contacts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.contact-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: box-shadow .2s, transform .2s;
+}
+.contact-card:hover {
+  box-shadow: 0 8px 30px rgba(15,41,114,.1);
+  transform: translateY(-2px);
+}
+
+.contact-card__photo {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  border: 3px solid var(--navy-pale);
+}
+.contact-card__photo img { width: 100%; height: 100%; object-fit: cover; }
+.contact-card__photo-ph {
+  width: 100%; height: 100%;
+  background: var(--navy);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--fd); font-size: 2rem; color: var(--white);
+}
+
+.contact-card__rolle {
+  font-size: .65rem; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--orange); display: block; margin-bottom: .4rem;
+}
+.contact-card__name {
+  font-family: var(--fd); font-size: 1.1rem;
+  color: var(--navy); margin-bottom: .5rem;
+}
+.contact-card__link {
+  display: block; font-size: .8rem;
+  color: var(--mid); margin-top: .25rem;
+  transition: color .15s; word-break: break-all;
+}
+.contact-card__link:hover { color: var(--navy); }
+</style>

@@ -1,6 +1,22 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContactsBar from '../../components/ContactsBar.astro';
 import { getCollection } from 'astro:content';
+import Papa from 'papaparse';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const csvText = fs.readFileSync(
+  path.join(process.cwd(), 'public/data/dart-kontakte.csv'), 'utf-8'
+).replace(/^\uFEFF/, '');
+const { data: rows } = Papa.parse(csvText, { delimiter: ';', header: true, skipEmptyLines: true });
+const contacts = (rows as any[]).map(r => ({
+  rolle:   (r['Rolle']   || '').trim(),
+  name:    (r['Name']    || '').trim(),
+  telefon: (r['Telefon'] || '').trim(),
+  email:   (r['Email']   || '').trim(),
+  foto:    (r['Foto']    || '').trim(),
+}));
 
 const posts = (await getCollection('news', ({ data }) => !data.draft && data.sport === 'dart'))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
@@ -18,40 +34,44 @@ const posts = (await getCollection('news', ({ data }) => !data.draft && data.spo
   </header>
 
   <section class="section">
-    <div class="container">
-      <div class="grid-2">
-        <div>
-          <h2>Willkommen bei den Dart-Assen</h2>
-          <p style="color:var(--mid);line-height:1.75;margin-top:1rem">Die Dartabteilung des ASN Pfeil Phönix ist die jüngste Ergänzung unserer Vereinsfamilie. Ob Einsteiger oder erfahrener Spieler — bei uns ist jeder willkommen. Wir spielen regelmäßig im Vereinsheim und nehmen am Ligabetrieb teil.</p>
-          <a href="/verein#mitglied" class="btn btn--primary" style="margin-top:1.5rem">Mitglied werden →</a>
-        </div>
-        <div>
-          <h2>Kontakt</h2>
-          <p style="color:var(--mid);margin-top:1rem">Interesse an der Dartabteilung? Meldet euch beim Vorstand oder schreibt an <a href="mailto:info@asn-pfeil-phoenix.de" style="color:var(--navy)">info@asn-pfeil-phoenix.de</a>.</p>
-        </div>
+    <div class="container grid-2">
+      <div>
+        <h2>Willkommen bei den Dart-Assen</h2>
+        <p style="color:var(--mid);line-height:1.75;margin-top:1rem">Die Dartabteilung des ASN Pfeil Phönix ist die jüngste Ergänzung unserer Vereinsfamilie. Ob Einsteiger oder erfahrener Spieler — bei uns ist jeder willkommen. Wir spielen regelmäßig im Vereinsheim und nehmen am Ligabetrieb teil.</p>
+        <a href="/verein#mitglied" class="btn btn--primary" style="margin-top:1.5rem">Mitglied werden →</a>
       </div>
-
-      {posts.length > 0 && (
-        <div style="margin-top:3rem">
-          <h2 style="margin-bottom:1.5rem">Dart-News</h2>
-          <div class="grid-3">
-            {posts.map(post => (
-              <a href={`/news/${post.slug}`} class="card">
-                <div class="card__body">
-                  <div class="card__meta">
-                    <span class="tag tag--dart">Dart</span>
-                    <time>{post.data.date.toLocaleDateString('de-DE')}</time>
-                  </div>
-                  <h3 class="card__title">{post.data.title}</h3>
-                  <p class="card__excerpt">{post.data.excerpt}</p>
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
+      <div>
+        <h2>Kontakt</h2>
+        <p style="color:var(--mid);margin-top:1rem">Interesse an der Dartabteilung? Meldet euch beim Vorstand oder schreibt an <a href="mailto:info@asn-pfeil-phoenix.de" style="color:var(--navy)">info@asn-pfeil-phoenix.de</a>.</p>
+      </div>
     </div>
   </section>
+
+  <ContactsBar contacts={contacts} eyebrow="Dartabteilung" title="Ansprechpartner" />
+
+  {posts.length > 0 && (
+    <section class="section">
+      <div class="container">
+        <p class="section-eyebrow">Aktuelles</p>
+        <h2>Dart-News</h2>
+        <div class="grid-3">
+          {posts.map(post => (
+            <a href={`/news/${post.slug}`} class="card">
+              <div class="card__body">
+                <div class="card__meta">
+                  <span class="tag tag--dart">Dart</span>
+                  <time>{post.data.date.toLocaleDateString('de-DE')}</time>
+                </div>
+                <h3 class="card__title">{post.data.title}</h3>
+                <p class="card__excerpt">{post.data.excerpt}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
 </BaseLayout>
 
 <style>
