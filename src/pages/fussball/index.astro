@@ -1,126 +1,343 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import Papa from 'papaparse';
+import fs from 'node:fs';
+import path from 'node:path';
 
+// ---- Load teams from CSV ----
+const csvPath = path.join(process.cwd(), 'public/data/mannschaften.csv');
+const csvText = fs.readFileSync(csvPath, 'utf-8').replace(/^\uFEFF/, ''); // strip BOM
+
+const { data: rawRows } = Papa.parse(csvText, {
+  delimiter: ';',
+  header: true,
+  skipEmptyLines: true,
+});
+
+// Filter out section header rows (rows where only Mannschaft is set, rest empty)
+// and empty rows
+const teams = rawRows.filter((r: any) => {
+  const name = r['Mannschaft']?.trim();
+  if (!name) return false;
+  // Section headers: Herren, Mädels, Jugend — no trainer info
+  if (['Herren', 'Mädels', 'Jugend'].includes(name)) return false;
+  return true;
+});
+
+// Group by section
+const sections: Record<string, any[]> = { Herren: [], Mädels: [], Jugend: [] };
+let currentSection = 'Jugend';
+for (const row of (rawRows as any[])) {
+  const name = row['Mannschaft']?.trim();
+  if (!name) continue;
+  if (name === 'Herren') { currentSection = 'Herren'; continue; }
+  if (name === 'Mädels') { currentSection = 'Mädels'; continue; }
+  if (name === 'Jugend') { currentSection = 'Jugend'; continue; }
+  sections[currentSection].push(row);
+}
+
+// News for this page
 const posts = (await getCollection('news', ({ data }) => !data.draft && data.sport === 'fussball'))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 6);
+  .slice(0, 3);
 
 function formatDate(d: Date) {
   return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
+
+// Contacts
+const contacts = [
+  { rolle: 'Abteilungsleiter', name: '', foto: '', telefon: '', email: '' },
+  { rolle: 'Großfeldkoordinator', name: '', foto: '', telefon: '', email: '' },
+  { rolle: 'Kleinfeldkoordinator', name: '', foto: '', telefon: '', email: '' },
+  { rolle: 'Sportliche Leitung', name: '', foto: '', telefon: '', email: '' },
+];
 ---
 
-<BaseLayout title="Fußball" description="Die Fußballabteilung des ASN Pfeil Phönix e.V. — Herren, Damen & Jugend in Nürnberg.">
+<BaseLayout title="Fußball" description="Fußball bei ASN Pfeil Phönix — Herren, Mädels und Jugend in Nürnberg-Ziegelstein.">
 
-  <header class="dept-header dept-header--fussball">
+  <!-- Header -->
+  <header class="dept-header">
     <div class="container">
-      <span class="section-label">Abteilung</span>
+      <span class="section-eyebrow">Abteilung</span>
       <h1>Fußball</h1>
-      <p class="dept-sub">Herren, Damen & Jugend im Kreisbetrieb Nürnberg/Frankenhöhe.</p>
+      <p class="dept-sub">Herren, Mädels &amp; Jugend — vereint unter einem Dach in Ziegelstein.</p>
     </div>
   </header>
 
+  <!-- ===== MANNSCHAFTEN ===== -->
+  <section class="section section--off">
+    <div class="container">
+      <p class="section-eyebrow">Unsere Teams</p>
+      <h2>Mannschaften</h2>
+      <p class="section-intro">Vom Bambini bis zur 1. Mannschaft — hier findest du alle Teams, Trainer und Spielpläne.</p>
+
+      {Object.entries(sections).map(([gruppe, rows]) => rows.length > 0 && (
+        <div class="team-group">
+          <h3 class="team-group__title">{gruppe}</h3>
+          <div class="team-grid">
+            {rows.map((row: any) => {
+              const name = row['Mannschaft']?.trim();
+              const trainer1 = row['Trainer*in 1']?.trim();
+              const trainer2 = row['Trainer*in 2']?.trim();
+              const trainer3 = row['Trainer*in 3']?.trim();
+              const tel1 = row['Telefon ']?.trim();
+              const mail1 = row['Mail: ']?.trim();
+              const bfv = row['BFV link']?.trim();
+              const foto = row['Mannschaftsfoto']?.trim();
+              return (
+                <div class="team-card">
+                  <div class="team-card__photo">
+                    {foto
+                      ? <img src={foto} alt={name} loading="lazy" />
+                      : <div class="team-card__photo-ph">⚽</div>
+                    }
+                  </div>
+                  <div class="team-card__body">
+                    <h4 class="team-card__name">{name}</h4>
+                    {trainer1 && (
+                      <div class="team-card__trainers">
+                        <div class="trainer">
+                          <span class="trainer__name">⚽ {trainer1}</span>
+                          {tel1 && <a class="trainer__contact" href={`tel:${tel1}`}>{tel1}</a>}
+                          {mail1 && <a class="trainer__contact" href={`mailto:${mail1}`}>{mail1}</a>}
+                        </div>
+                        {trainer2 && <div class="trainer"><span class="trainer__name">⚽ {trainer2}</span></div>}
+                        {trainer3 && <div class="trainer"><span class="trainer__name">⚽ {trainer3}</span></div>}
+                      </div>
+                    )}
+                    {bfv && (
+                      <a href={bfv} class="team-card__bfv" target="_blank" rel="noopener">
+                        BFV-Spielplan →
+                      </a>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- ===== CONTACTS ===== -->
   <section class="section">
     <div class="container">
-
-      <!-- BFV live table/fixtures widget -->
-      <div class="widget-block">
-        <h2 class="widget-block__head">Tabelle & Spielplan</h2>
-        <p class="widget-block__sub">Live-Daten vom Bayerischen Fußball-Verband</p>
-
-        <!-- Replace iframe src with the widget URL from bfv.de for your specific team -->
-        <iframe
-          src="https://www.bfv.de/widgets/spielplan?vereinId=00ES8GNKEO000012VV0AG08LVUPGND5I&teamId=016PKM56R8000000VV0AG811VUDIC8D7&saison=2526"
-          frameborder="0"
-          scrolling="no"
-          title="Spielplan 1. Mannschaft"
-          loading="lazy"
-          class="bfv-iframe"
-        ></iframe>
-      </div>
-
-      <!-- Teams -->
-      <div class="teams-section">
-        <h2>Mannschaften</h2>
-        <div class="grid-3 teams-grid">
-          {[
-            { name: '1. Mannschaft', league: 'A-Klasse 7', trainer: 'Markus Bauer' },
-            { name: '2. Mannschaft', league: 'B-Klasse', trainer: 'N.N.' },
-            { name: 'Jugend', league: 'Diverse Klassen', trainer: 'Jugendleiter' },
-          ].map(team => (
-            <div class="team-card">
-              <div class="team-card__num">⚽</div>
-              <h3 class="team-card__name">{team.name}</h3>
-              <p class="team-card__league">{team.league}</p>
-              <p class="team-card__trainer">Trainer: {team.trainer}</p>
+      <p class="section-eyebrow">Ansprechpartner</p>
+      <h2>Abteilungsleitung</h2>
+      <div class="contacts-grid">
+        {contacts.map(c => (
+          <div class="contact-card">
+            <div class="contact-card__photo">
+              {c.foto
+                ? <img src={c.foto} alt={c.name} />
+                : <div class="contact-card__photo-ph">{c.rolle.charAt(0)}</div>
+              }
             </div>
+            <div class="contact-card__body">
+              <span class="contact-card__rolle">{c.rolle}</span>
+              <p class="contact-card__name">{c.name || 'Name folgt'}</p>
+              {c.telefon && <a class="contact-card__link" href={`tel:${c.telefon}`}>📞 {c.telefon}</a>}
+              {c.email && <a class="contact-card__link" href={`mailto:${c.email}`}>✉️ {c.email}</a>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== JUGENDPHILOSOPHIE ===== -->
+  <section class="section section--off">
+    <div class="container">
+      <div class="philosophy-layout">
+        <div class="philosophy-text">
+          <p class="section-eyebrow">Unsere Philosophie</p>
+          <h2>Jugendphilosophie</h2>
+          <p>Unser Großfeldkoordinator erläutert unsere Jugendphilosophie und erklärt, wie sie sich von der anderer Vereine unterscheidet. Bei ASN Pfeil Phönix steht die Entwicklung des ganzen Menschen im Vordergrund — nicht nur der fußballerischen Fähigkeiten.</p>
+          <p>Wir glauben daran, dass jedes Kind die Chance verdient, in einer unterstützenden Umgebung zu wachsen, Freude am Sport zu entwickeln und Teil einer echten Gemeinschaft zu sein.</p>
+        </div>
+        <div class="philosophy-video">
+          <div class="video-wrapper">
+            <iframe
+              src="https://www.youtube.com/embed/Vd7fHZlPhUs"
+              title="Jugendphilosophie ASN Pfeil Phönix"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              loading="lazy"
+            ></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MÄDCHENFUSSBALL ===== -->
+  <section class="section">
+    <div class="container">
+      <div class="girls-layout">
+        <div>
+          <p class="section-eyebrow">Mädchenfußball</p>
+          <h2>Fußball für Mädels</h2>
+          <p class="girls-text">Unter der Leitung von Wolle Steitz verfolgt ASN Pfeil Phönix das klare Ziel, die erste Adresse für Mädchenfußball im Nürnberger Norden zu werden. Wolle und sein Team schaffen eine Umgebung, in der Mädchen nicht nur Fußball lernen, sondern Selbstvertrauen, Teamgeist und Freude am Sport entwickeln. Wer Lust hat mitzumachen — Mädels jeden Alters sind herzlich willkommen!</p>
+          <a href="/verein#kontakt" class="btn btn--primary" style="margin-top:1.5rem">Kontakt aufnehmen →</a>
+        </div>
+        <div class="girls-stat-block">
+          <div class="girls-stat">
+            <span class="girls-stat__num">2</span>
+            <span class="girls-stat__label">Mädchenteams</span>
+          </div>
+          <div class="girls-stat">
+            <span class="girls-stat__num">U13</span>
+            <span class="girls-stat__label">bis</span>
+          </div>
+          <div class="girls-stat">
+            <span class="girls-stat__num">U17</span>
+            <span class="girls-stat__label">Altersgruppen</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== NEWS ===== -->
+  {posts.length > 0 && (
+    <section class="section section--off">
+      <div class="container">
+        <p class="section-eyebrow">Aktuelles</p>
+        <h2>Fußball-News</h2>
+        <div class="grid-3">
+          {posts.map(post => (
+            <a href={`/news/${post.slug}`} class="card">
+              {post.data.image && <img class="card__img" src={post.data.image} alt={post.data.title} loading="lazy" />}
+              <div class="card__body">
+                <div class="card__meta">
+                  <span class="tag tag--fussball">Fußball</span>
+                  <time>{formatDate(post.data.date)}</time>
+                </div>
+                <h3 class="card__title">{post.data.title}</h3>
+                <p class="card__excerpt">{post.data.excerpt}</p>
+              </div>
+            </a>
           ))}
         </div>
       </div>
+    </section>
+  )}
 
-      <!-- Latest news -->
-      {posts.length > 0 && (
-        <div class="dept-news">
-          <h2>Aktuelle Fußball-News</h2>
-          <div class="grid-3">
-            {posts.map(post => (
-              <a href={`/news/${post.slug}`} class="card">
-                {post.data.image && <img class="card__img" src={post.data.image} alt={post.data.title} loading="lazy" />}
-                <div class="card__body">
-                  <div class="card__meta">
-                    <span class="tag tag--fussball">Fußball</span>
-                    <time>{formatDate(post.data.date)}</time>
-                  </div>
-                  <h3 class="card__title">{post.data.title}</h3>
-                  <p class="card__excerpt">{post.data.excerpt}</p>
-                </div>
-              </a>
-            ))}
-          </div>
-          <div style="text-align:center; margin-top:2rem;">
-            <a href="/news?sport=fussball" class="btn btn--outline">Alle Fußball-News →</a>
-          </div>
-        </div>
-      )}
-
-    </div>
-  </section>
 </BaseLayout>
 
 <style>
-.dept-header {
-  padding: 4rem 0 3rem;
-  background: var(--black);
-  border-bottom: 4px solid var(--red);
-}
+/* Header */
+.dept-header { padding: 4rem 0 3rem; background: var(--navy-dark); border-bottom: 4px solid var(--navy-mid); }
 .dept-header h1 { color: var(--white); font-size: clamp(2.5rem, 8vw, 6rem); }
-.dept-sub { color: rgba(255,255,255,0.55); margin-top: 0.75rem; font-size: 1rem; }
+.dept-header .section-eyebrow { color: rgba(255,255,255,.5); }
+.dept-header .section-eyebrow::before { background: var(--orange); }
+.dept-sub { color: rgba(255,255,255,.55); margin-top: .75rem; font-size: 1rem; }
+.section-intro { color: var(--mid); margin-bottom: 2.5rem; max-width: 60ch; }
 
-.widget-block { margin-bottom: 4rem; }
-.widget-block__head { margin-bottom: 0.25rem; }
-.widget-block__sub { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.9rem; }
-.bfv-iframe {
-  width: 100%;
-  min-height: 420px;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  display: block;
+/* Team groups */
+.team-group { margin-bottom: 3rem; }
+.team-group__title {
+  font-family: var(--fd); font-size: 1.6rem;
+  color: var(--navy); margin-bottom: 1.25rem;
+  padding-bottom: .5rem; border-bottom: 2px solid var(--navy-pale);
 }
 
-.teams-section { margin-bottom: 4rem; }
-.teams-section h2 { margin-bottom: 1.5rem; }
+/* Team grid */
+.team-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
 .team-card {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-top: 3px solid var(--navy);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
+  background: var(--white); border-radius: var(--radius-lg);
+  border: 1px solid var(--border); overflow: hidden;
+  transition: box-shadow .2s, transform .2s;
 }
-.team-card__num { font-size: 2rem; margin-bottom: 0.75rem; }
-.team-card__name { font-size: 1.2rem; margin-bottom: 0.25rem; }
-.team-card__league { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.25rem; }
-.team-card__trainer { font-size: 0.85rem; color: var(--mid); }
+.team-card:hover { box-shadow: 0 8px 30px rgba(15,41,114,.1); transform: translateY(-2px); }
+.team-card__photo { aspect-ratio: 16/7; overflow: hidden; background: var(--navy-pale); }
+.team-card__photo img { width: 100%; height: 100%; object-fit: cover; }
+.team-card__photo-ph {
+  width: 100%; height: 100%; display: flex; align-items: center;
+  justify-content: center; font-size: 2.5rem; opacity: .3;
+}
+.team-card__body { padding: 1.1rem 1.25rem 1.25rem; }
+.team-card__name { font-family: var(--fd); font-size: 1.2rem; margin-bottom: .6rem; color: var(--navy); }
+.team-card__trainers { display: flex; flex-direction: column; gap: .4rem; margin-bottom: .75rem; }
+.trainer { display: flex; flex-direction: column; gap: .1rem; }
+.trainer__name { font-size: .85rem; font-weight: 500; color: var(--ink); }
+.trainer__contact { font-size: .78rem; color: var(--navy); }
+.trainer__contact:hover { text-decoration: underline; }
+.team-card__bfv {
+  display: inline-block; margin-top: .5rem;
+  font-size: .75rem; font-weight: 600; color: var(--navy);
+}
+.team-card__bfv:hover { text-decoration: underline; }
 
-.dept-news h2 { margin-bottom: 1.5rem; }
+/* Contacts */
+.contacts-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.5rem; margin-top: 2rem;
+}
+.contact-card {
+  background: var(--white); border-radius: var(--radius-lg);
+  border: 1px solid var(--border); overflow: hidden;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 2rem 1.5rem; text-align: center;
+  transition: box-shadow .2s, transform .2s;
+}
+.contact-card:hover { box-shadow: 0 8px 30px rgba(15,41,114,.1); transform: translateY(-2px); }
+.contact-card__photo { width: 90px; height: 90px; border-radius: 50%; overflow: hidden; margin-bottom: 1rem; }
+.contact-card__photo img { width: 100%; height: 100%; object-fit: cover; }
+.contact-card__photo-ph {
+  width: 100%; height: 100%; background: var(--navy);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--fd); font-size: 2rem; color: var(--white);
+}
+.contact-card__rolle {
+  font-size: .65rem; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--orange); display: block; margin-bottom: .4rem;
+}
+.contact-card__name { font-family: var(--fd); font-size: 1.1rem; color: var(--navy); margin-bottom: .5rem; }
+.contact-card__link {
+  display: block; font-size: .8rem; color: var(--mid);
+  margin-top: .25rem; transition: color .15s;
+}
+.contact-card__link:hover { color: var(--navy); }
+
+/* Philosophy */
+.philosophy-layout {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 3rem; align-items: center;
+}
+@media (max-width: 800px) { .philosophy-layout { grid-template-columns: 1fr; } }
+.philosophy-text p { color: var(--mid); line-height: 1.75; margin-top: 1rem; }
+.video-wrapper {
+  position: relative; aspect-ratio: 16/9;
+  border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: 0 12px 40px rgba(15,41,114,.15);
+}
+.video-wrapper iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* Girls football */
+.girls-layout {
+  display: grid; grid-template-columns: 1fr auto;
+  gap: 3rem; align-items: center;
+}
+@media (max-width: 700px) { .girls-layout { grid-template-columns: 1fr; } }
+.girls-text { color: var(--mid); line-height: 1.75; margin-top: 1rem; max-width: 60ch; }
+.girls-stat-block {
+  display: flex; flex-direction: column; gap: 1.5rem;
+  text-align: center; min-width: 120px;
+}
+.girls-stat__num {
+  display: block; font-family: var(--fd); font-size: 2.5rem;
+  color: var(--navy); line-height: 1;
+}
+.girls-stat__label {
+  display: block; font-size: .68rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted); margin-top: .2rem;
+}
 </style>

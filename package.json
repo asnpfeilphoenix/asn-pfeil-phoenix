@@ -10,7 +10,7 @@
   "dependencies": {
     "astro": "^4.0.0",
     "@astrojs/mdx": "^2.0.0",
-    "@astrojs/sitemap": "^3.0.0"
+    "papaparse": "^5.4.1"
   },
   "devDependencies": {
     "typescript": "^5.0.0"
