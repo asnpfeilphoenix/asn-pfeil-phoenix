@@ -9,31 +9,30 @@ import path from 'node:path';
 const csvPath = path.join(process.cwd(), 'public/data/mannschaften.csv');
 const csvText = fs.readFileSync(csvPath, 'utf-8').replace(/^\uFEFF/, ''); // strip BOM
 
-const { data: rawRows } = Papa.parse(csvText, {
+const { data: allRows } = Papa.parse(csvText, {
   delimiter: ';',
-  header: true,
-  skipEmptyLines: true,
+  header: false,
+  skipEmptyLines: false,
 });
 
-// Filter out section header rows (rows where only Mannschaft is set, rest empty)
-// and empty rows
-const teams = rawRows.filter((r: any) => {
-  const name = r['Mannschaft']?.trim();
-  if (!name) return false;
-  // Section headers: Herren, Mädels, Jugend — no trainer info
-  if (['Herren', 'Mädels', 'Jugend'].includes(name)) return false;
-  return true;
-});
+// Column indices (0-based):
+// 0=Mannschaft, 1=Trainingszeiten, 2=Trainer1, 3=Tel1, 4=Mail1,
+// 5=Trainer2, 6=Tel2, 7=Mail2, 8=Trainer3, 9=Tel3, 10=Mail3,
+// 11=BFV, 12=Foto
+const COLS = { name:0, tz:1, t1:2, p1:3, m1:4, t2:5, p2:6, m2:7, t3:8, p3:9, m3:10, bfv:11, foto:12 };
 
-// Group by section
+function cell(row: any[], idx: number) { return (row[idx] || '').toString().trim(); }
+
+// Skip header row (row 0), group into sections
 const sections: Record<string, any[]> = { Herren: [], Mädels: [], Jugend: [] };
 let currentSection = 'Jugend';
-for (const row of (rawRows as any[])) {
-  const name = row['Mannschaft']?.trim();
+const sectionHeaders = ['Herren', 'Mädels', 'Jugend'];
+
+for (let i = 1; i < (allRows as any[]).length; i++) {
+  const row = (allRows as any[])[i];
+  const name = cell(row, COLS.name);
   if (!name) continue;
-  if (name === 'Herren') { currentSection = 'Herren'; continue; }
-  if (name === 'Mädels') { currentSection = 'Mädels'; continue; }
-  if (name === 'Jugend') { currentSection = 'Jugend'; continue; }
+  if (sectionHeaders.includes(name)) { currentSection = name; continue; }
   sections[currentSection].push(row);
 }
 
@@ -78,14 +77,18 @@ const contacts = [
           <h3 class="team-group__title">{gruppe}</h3>
           <div class="team-grid">
             {rows.map((row: any) => {
-              const name = row['Mannschaft']?.trim();
-              const trainer1 = row['Trainer*in 1']?.trim();
-              const trainer2 = row['Trainer*in 2']?.trim();
-              const trainer3 = row['Trainer*in 3']?.trim();
-              const tel1 = row['Telefon ']?.trim();
-              const mail1 = row['Mail: ']?.trim();
-              const bfv = row['BFV link']?.trim();
-              const foto = row['Mannschaftsfoto']?.trim();
+              const name = cell(row, COLS.name);
+              const t1 = cell(row, COLS.t1);
+              const p1 = cell(row, COLS.p1);
+              const m1 = cell(row, COLS.m1);
+              const t2 = cell(row, COLS.t2);
+              const p2 = cell(row, COLS.p2);
+              const m2 = cell(row, COLS.m2);
+              const t3 = cell(row, COLS.t3);
+              const p3 = cell(row, COLS.p3);
+              const m3 = cell(row, COLS.m3);
+              const bfv = cell(row, COLS.bfv);
+              const foto = cell(row, COLS.foto);
               return (
                 <div class="team-card">
                   <div class="team-card__photo">
@@ -96,15 +99,27 @@ const contacts = [
                   </div>
                   <div class="team-card__body">
                     <h4 class="team-card__name">{name}</h4>
-                    {trainer1 && (
+                    {t1 && (
                       <div class="team-card__trainers">
                         <div class="trainer">
-                          <span class="trainer__name">⚽ {trainer1}</span>
-                          {tel1 && <a class="trainer__contact" href={`tel:${tel1}`}>{tel1}</a>}
-                          {mail1 && <a class="trainer__contact" href={`mailto:${mail1}`}>{mail1}</a>}
+                          <span class="trainer__name">⚽ {t1}</span>
+                          {p1 && <a class="trainer__contact" href={`tel:${p1}`}>📞 {p1}</a>}
+                          {m1 && <a class="trainer__contact" href={`mailto:${m1}`}>✉️ {m1}</a>}
                         </div>
-                        {trainer2 && <div class="trainer"><span class="trainer__name">⚽ {trainer2}</span></div>}
-                        {trainer3 && <div class="trainer"><span class="trainer__name">⚽ {trainer3}</span></div>}
+                        {t2 && (
+                          <div class="trainer">
+                            <span class="trainer__name">⚽ {t2}</span>
+                            {p2 && <a class="trainer__contact" href={`tel:${p2}`}>📞 {p2}</a>}
+                            {m2 && <a class="trainer__contact" href={`mailto:${m2}`}>✉️ {m2}</a>}
+                          </div>
+                        )}
+                        {t3 && (
+                          <div class="trainer">
+                            <span class="trainer__name">⚽ {t3}</span>
+                            {p3 && <a class="trainer__contact" href={`tel:${p3}`}>📞 {p3}</a>}
+                            {m3 && <a class="trainer__contact" href={`mailto:${m3}`}>✉️ {m3}</a>}
+                          </div>
+                        )}
                       </div>
                     )}
                     {bfv && (
