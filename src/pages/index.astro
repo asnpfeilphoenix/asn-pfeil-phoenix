@@ -42,7 +42,7 @@ const depts = [
       <div class="slide slide--2">
         <div class="slide__fade"></div>
         <div class="container slide__body">
-          <span class="slide__tag">Fußball · Herren, Mädels &amp; Jugend</span>
+          <span class="slide__tag">Fußball · Herren, Damen &amp; Jugend</span>
           <h1 class="slide__title">Die<br><em>Assen</em></h1>
           <p class="slide__text">Leidenschaftlicher Fußball auf und neben dem Platz. Komm zum Probetraining an der Marienbergstraße.</p>
           <div class="slide__btns">
@@ -64,6 +64,30 @@ const depts = [
         </div>
       </div>
 
+      <!-- Slide 4: YouTube video -->
+      <div class="slide slide--4">
+        <div class="slide__video-wrap">
+          <iframe
+            id="yt-player"
+            src="https://www.youtube-nocookie.com/embed/YpWiMlTkDwE?autoplay=1&mute=1&loop=1&playlist=YpWiMlTkDwE&controls=0&modestbranding=1&rel=0&enablejsapi=1"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+        </div>
+        <div class="slide__fade"></div>
+        <div class="container slide__body">
+          <span class="slide__tag">ASN Pfeil Phönix</span>
+          <h1 class="slide__title">Die <em>Assen</em></h1>
+          <div class="slide__btns">
+            <button class="btn btn--ghost-w" id="yt-mute-toggle" onclick="toggleMute()">
+              🔇 Ton einschalten
+            </button>
+            <a href="/verein" class="btn btn--primary">Mehr über uns</a>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <button class="carousel-prev" id="carousel-prev" aria-label="Zurück">←</button>
@@ -72,6 +96,7 @@ const depts = [
       <button class="carousel-dot is-active" aria-label="Folie 1"></button>
       <button class="carousel-dot" aria-label="Folie 2"></button>
       <button class="carousel-dot" aria-label="Folie 3"></button>
+      <button class="carousel-dot" aria-label="Folie 4"></button>
     </div>
   </section>
 
@@ -140,7 +165,7 @@ const depts = [
           </div>
           <div class="fans-card__body">
             <h3 class="fans-card__title">Fan-Webshop</h3>
-            <p class="fans-card__text">Merch und mehr — unterstütze den Verein.</p>
+            <p class="fans-card__text">Trikots, Merch und mehr — direkt vom Verein.</p>
             <span class="fans-card__cta">Zum Shop →</span>
           </div>
         </a>
@@ -221,19 +246,46 @@ const depts = [
   const track = document.getElementById('carousel-track')!;
   const dots = document.querySelectorAll<HTMLElement>('.carousel-dot');
   let cur = 0;
-  const total = 3;
+  const total = 4;
   let timer: ReturnType<typeof setInterval>;
+  let muted = true;
 
   function go(n: number) {
     cur = (n + total) % total;
     track.style.transform = `translateX(-${cur * 100}%)`;
     dots.forEach((d, i) => d.classList.toggle('is-active', i === cur));
+    // Pause auto-advance on video slide
+    if (cur === 3) {
+      clearInterval(timer);
+    } else {
+      reset();
+    }
   }
-  function reset() { clearInterval(timer); timer = setInterval(() => go(cur + 1), 5500); }
 
-  document.getElementById('carousel-next')!.addEventListener('click', () => { go(cur + 1); reset(); });
-  document.getElementById('carousel-prev')!.addEventListener('click', () => { go(cur - 1); reset(); });
-  dots.forEach((d, i) => d.addEventListener('click', () => { go(i); reset(); }));
+  function reset() {
+    clearInterval(timer);
+    timer = setInterval(() => go(cur + 1), 5500);
+  }
+
+  (window as any).toggleMute = function() {
+    const iframe = document.getElementById('yt-player') as HTMLIFrameElement;
+    const btn = document.getElementById('yt-mute-toggle')!;
+    if (iframe && iframe.contentWindow) {
+      if (muted) {
+        iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+        btn.textContent = '🔊 Ton ausschalten';
+        muted = false;
+      } else {
+        iframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
+        btn.textContent = '🔇 Ton einschalten';
+        muted = true;
+      }
+    }
+  };
+
+  document.getElementById('carousel-next')!.addEventListener('click', () => go(cur + 1));
+  document.getElementById('carousel-prev')!.addEventListener('click', () => go(cur - 1));
+  dots.forEach((d, i) => d.addEventListener('click', () => go(i)));
   reset();
 </script>
 
@@ -310,6 +362,21 @@ const depts = [
 }
 .carousel-dot.is-active { background: var(--white); transform: scale(1.3); }
 
+/* Slide 4 video */
+.slide--4 { background: var(--navy-dark); }
+.slide__video-wrap {
+  position: absolute; inset: 0; overflow: hidden;
+}
+.slide__video-wrap iframe {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 177.78vh; /* 16:9 at full height */
+  height: 56.25vw; /* 16:9 at full width */
+  min-width: 100%; min-height: 100%;
+  pointer-events: none; /* prevent iframe stealing clicks */
+}
+
 /* ---- News ---- */
 .news-layout { display: grid; grid-template-columns: 5fr 3fr; gap: 1.5rem; }
 @media (max-width: 800px) { .news-layout { grid-template-columns: 1fr; } }
@@ -382,10 +449,10 @@ const depts = [
   background: var(--navy-pale);
 }
 .fans-card__img img { width: 100%; height: 100%; object-fit: cover; }
-.fans-card__img--white { background: var(--white); padding: 0.5rem; }
+.fans-card__img--white { background: var(--white); padding: 1.5rem; }
 .fans-card__img--white img { object-fit: contain; }
-.fans-card__img--navy { background: var(--navy); padding: 0.5rem; }
-.fans-card__img--navy img { object-fit: contain; width: 100%; height: 100%; }
+.fans-card__img--navy { background: var(--navy); padding: 1rem; }
+.fans-card__img--navy img { object-fit: contain; }
 .fans-card__body { padding: 1.25rem 1.5rem 1.5rem; flex: 1; display: flex; flex-direction: column; }
 .fans-card__title { font-family: var(--fd); font-size: 1.3rem; margin-bottom: .4rem; }
 .fans-card__text { font-size: .88rem; color: var(--mid); line-height: 1.6; flex: 1; }
