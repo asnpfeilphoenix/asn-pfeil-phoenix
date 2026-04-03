@@ -5,6 +5,7 @@ export default defineConfig({
   site: 'https://asn-pfeil-phoenix.vercel.app',
   integrations: [mdx()],
   markdown: {
-    shikiConfig: { theme: 'github-dark' }
+    shikiConfig: { theme: 'github-dark' },
+    allowDangerousHTML: true,
   }
 });
