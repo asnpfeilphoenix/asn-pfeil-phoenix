@@ -1,5 +1,21 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContactsBar from '../../components/ContactsBar.astro';
+import Papa from 'papaparse';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const csvText = fs.readFileSync(
+  path.join(process.cwd(), 'public/data/vorstand.csv'), 'utf-8'
+).replace(/^\uFEFF/, '');
+const { data: rows } = Papa.parse(csvText, { delimiter: ';', header: true, skipEmptyLines: true });
+const vorstand = (rows as any[]).map(r => ({
+  rolle:   (r['Rolle']   || '').trim(),
+  name:    (r['Name']    || '').trim(),
+  telefon: (r['Telefon'] || '').trim(),
+  email:   (r['Email']   || '').trim(),
+  foto:    (r['Foto']    || '').trim(),
+}));
 ---
 
 <BaseLayout title="Über den Verein" description="Geschichte, Vorstand, Mitgliedschaft und Kontakt — ASN Pfeil Phönix e.V. Nürnberg seit 1905.">
@@ -42,30 +58,14 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   </section>
 
   <!-- Vorstand -->
-  <section class="section section--dark" id="vorstand">
-    <div class="container">
-      <span class="section-label">Führung</span>
-      <h2>Vorstand</h2>
-      <p class="vorstand-sub">Der Vorstand des ASN Pfeil Phönix e.V. — gewählt auf der Jahreshauptversammlung.</p>
-
-      <div class="grid-4 vorstand-grid">
-        {[
-          { rolle: '1. Vorsitzender', name: 'Bitte ergänzen' },
-          { rolle: '2. Vorsitzender', name: 'Bitte ergänzen' },
-          { rolle: 'Kassenwart', name: 'Bitte ergänzen' },
-          { rolle: 'Schriftführer', name: 'Bitte ergänzen' },
-        ].map(person => (
-          <div class="vorstand-card">
-            <div class="vorstand-card__avatar">
-              <span>{person.name.charAt(0)}</span>
-            </div>
-            <p class="vorstand-card__role">{person.rolle}</p>
-            <p class="vorstand-card__name">{person.name}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
+  <div id="vorstand">
+    <ContactsBar
+      contacts={vorstand}
+      eyebrow="Führung"
+      title="Vorstand"
+      dark={true}
+    />
+  </div>
 
   <!-- Membership -->
   <section class="section" id="mitglied">
