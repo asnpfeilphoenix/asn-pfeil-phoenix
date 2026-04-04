@@ -1,0 +1,552 @@
+---
+// src/pages/verwaltung/antraege-2025.astro
+export const prerender = false;
+const SUPABASE_URL  = import.meta.env.SUPABASE_URL      || '';
+const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
+---
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verwaltung — ASN Pfeil Phönix</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script is:inline set:html={`window.__SB_URL__=${JSON.stringify(SUPABASE_URL)};window.__SB_KEY__=${JSON.stringify(SUPABASE_ANON)};`}></script>
+  <style>
+    :root {
+      --navy:      #0f2972;
+      --navy-dark: #091d52;
+      --navy-pale: #e8edf8;
+      --navy-tint: #f0f3fc;
+      --orange:    #E8780A;
+      --white:     #ffffff;
+      --ink:       #111318;
+      --mid:       #4A4F5C;
+      --muted:     #8A8F9E;
+      --border:    #E4E6EE;
+      --red:       #dc2626;
+      --green:     #16a34a;
+      --fd: 'Bebas Neue', sans-serif;
+      --fb: 'DM Sans', sans-serif;
+      --radius: 6px;
+      --radius-lg: 12px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; }
+    body { font-family: var(--fb); background: var(--navy-dark); color: var(--ink); min-height: 100vh; }
+
+    /* ── Header ── */
+    .header {
+      background: var(--navy);
+      border-bottom: 3px solid var(--orange);
+      padding: 1rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .header-brand { display: flex; align-items: center; gap: .75rem; }
+    .header-brand img { width: 40px; height: 40px; }
+    .header-brand-text strong { display: block; font-family: var(--fd); font-size: 1.2rem; color: var(--white); letter-spacing: .04em; }
+    .header-brand-text span { font-size: .72rem; color: rgba(255,255,255,.45); letter-spacing: .1em; text-transform: uppercase; }
+    .header-badge { font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: rgba(232,120,10,.2); color: var(--orange); border: 1px solid rgba(232,120,10,.3); padding: .3em .8em; border-radius: 99px; }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .header-user { font-size: .82rem; color: rgba(255,255,255,.5); }
+    .btn-logout { font-family: var(--fb); font-size: .82rem; font-weight: 600; background: transparent; border: 1px solid rgba(255,255,255,.2); color: rgba(255,255,255,.6); padding: .4em 1em; border-radius: var(--radius); cursor: pointer; transition: all .15s; }
+    .btn-logout:hover { border-color: rgba(255,255,255,.5); color: var(--white); }
+
+    /* ── Login screen ── */
+    .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    .login-card { background: var(--white); border-radius: var(--radius-lg); padding: 2.5rem; width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+    .login-logo { display: flex; align-items: center; gap: .75rem; margin-bottom: 2rem; }
+    .login-logo img { width: 48px; height: 48px; }
+    .login-logo-text strong { display: block; font-family: var(--fd); font-size: 1.3rem; color: var(--navy); }
+    .login-logo-text span { font-size: .72rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+    .login-title { font-family: var(--fd); font-size: 1.8rem; color: var(--navy); margin-bottom: .4rem; }
+    .login-sub { font-size: .85rem; color: var(--muted); margin-bottom: 1.75rem; }
+    .field { display: flex; flex-direction: column; gap: .35rem; margin-bottom: 1rem; }
+    .field label { font-size: .8rem; font-weight: 600; color: var(--mid); }
+    .field input { border: 2px solid var(--border); border-radius: var(--radius); padding: .65rem .85rem; font-family: var(--fb); font-size: .95rem; color: var(--ink); width: 100%; transition: border-color .15s; }
+    .field input:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(15,41,114,.1); }
+    .btn-login { width: 100%; background: var(--navy); color: var(--white); border: none; border-radius: var(--radius); padding: .8rem; font-family: var(--fd); font-size: 1.1rem; letter-spacing: .04em; cursor: pointer; transition: background .15s; margin-top: .5rem; display: flex; align-items: center; justify-content: center; gap: .5rem; }
+    .btn-login:hover { background: var(--navy-dark); }
+    .btn-login:disabled { opacity: .6; cursor: not-allowed; }
+    .login-error { background: #fef2f2; border: 1px solid #fecaca; color: var(--red); border-radius: var(--radius); padding: .75rem 1rem; font-size: .85rem; margin-top: 1rem; display: none; }
+    .login-error.visible { display: block; }
+
+    /* ── Main admin UI ── */
+    .admin-wrap { display: none; min-height: calc(100vh - 67px); }
+    .admin-wrap.visible { display: block; }
+    .admin-main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* Stats bar */
+    .stats-bar { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .stat-card { background: var(--white); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; flex: 1; min-width: 160px; border: 1px solid var(--border); }
+    .stat-card__val { font-family: var(--fd); font-size: 2.5rem; color: var(--navy); line-height: 1; }
+    .stat-card__label { font-size: .75rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-top: .3rem; }
+
+    /* Table */
+    .table-card { background: var(--white); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; }
+    .table-card__head { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .table-card__title { font-family: var(--fd); font-size: 1.4rem; color: var(--navy); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+    th { text-align: left; padding: .75rem 1rem; font-size: .67rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); border-bottom: 2px solid var(--border); white-space: nowrap; background: #fafafa; }
+    td { padding: .85rem 1rem; border-bottom: 1px solid var(--border); color: var(--ink); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--navy-tint); }
+    .td-name { font-weight: 600; }
+    .td-muted { color: var(--muted); font-size: .82rem; }
+    .badge { display: inline-block; font-size: .67rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: .25em .7em; border-radius: 99px; }
+    .badge--offen { background: #fef3c7; color: #92400e; }
+    .badge--fussball { background: var(--navy-pale); color: var(--navy); }
+    .badge--kegeln { background: #eef3fb; color: #2b4d8f; }
+    .badge--radsport { background: #fef0e0; color: #9a3412; }
+    .badge--dart { background: #f5eef8; color: #6b1a8a; }
+    .badge--allgemein { background: #f2f2f2; color: var(--mid); }
+
+    /* Row actions */
+    .row-actions { display: flex; gap: .5rem; }
+    .btn-view { background: var(--navy); color: var(--white); border: none; border-radius: var(--radius); padding: .4em .9em; font-family: var(--fb); font-size: .8rem; font-weight: 600; cursor: pointer; transition: background .15s; white-space: nowrap; }
+    .btn-view:hover { background: var(--navy-dark); }
+    .btn-delete { background: transparent; color: var(--red); border: 1px solid #fecaca; border-radius: var(--radius); padding: .4em .9em; font-family: var(--fb); font-size: .8rem; font-weight: 600; cursor: pointer; transition: all .15s; white-space: nowrap; }
+    .btn-delete:hover { background: #fef2f2; border-color: var(--red); }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+    .empty-state__icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .empty-state__text { font-size: .95rem; }
+
+    /* Loading */
+    .loading-state { text-align: center; padding: 3rem; color: var(--muted); }
+    .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--navy); border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Detail drawer ── */
+    .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 100; display: none; backdrop-filter: blur(2px); }
+    .drawer-overlay.visible { display: block; }
+    .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(600px, 100vw); background: var(--white); z-index: 101; overflow-y: auto; transform: translateX(100%); transition: transform .3s ease; box-shadow: -8px 0 40px rgba(0,0,0,.2); }
+    .drawer.visible { transform: translateX(0); }
+    .drawer-header { background: var(--navy); padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1; }
+    .drawer-header h2 { font-family: var(--fd); font-size: 1.4rem; color: var(--white); letter-spacing: .03em; }
+    .drawer-close { background: none; border: none; color: rgba(255,255,255,.6); font-size: 1.5rem; cursor: pointer; line-height: 1; padding: .25rem; transition: color .15s; }
+    .drawer-close:hover { color: var(--white); }
+    .drawer-body { padding: 1.5rem; }
+    .drawer-section { margin-bottom: 1.5rem; }
+    .drawer-section-title { font-size: .67rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--navy); margin-bottom: .75rem; padding-bottom: .4rem; border-bottom: 2px solid var(--orange); }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem 1.5rem; }
+    .detail-item { }
+    .detail-key { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+    .detail-val { font-size: .92rem; color: var(--ink); font-weight: 500; margin-top: .1rem; word-break: break-all; }
+    .detail-val--iban { font-family: monospace; font-size: .88rem; background: var(--navy-pale); padding: .2em .5em; border-radius: 3px; }
+    .drawer-actions { display: flex; gap: .75rem; padding: 1.5rem; border-top: 1px solid var(--border); background: #fafafa; position: sticky; bottom: 0; }
+    .btn-download { flex: 1; background: var(--navy); color: var(--white); border: none; border-radius: var(--radius); padding: .75rem; font-family: var(--fd); font-size: 1rem; letter-spacing: .04em; cursor: pointer; transition: background .15s; }
+    .btn-download:hover { background: var(--navy-dark); }
+    .btn-process { flex: 1; background: var(--red); color: var(--white); border: none; border-radius: var(--radius); padding: .75rem; font-family: var(--fd); font-size: 1rem; letter-spacing: .04em; cursor: pointer; transition: background .15s; }
+    .btn-process:hover { background: #b91c1c; }
+
+    /* Confirm dialog */
+    .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
+    .confirm-overlay.visible { display: flex; }
+    .confirm-box { background: var(--white); border-radius: var(--radius-lg); padding: 2rem; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+    .confirm-box h3 { font-family: var(--fd); font-size: 1.5rem; color: var(--red); margin-bottom: .75rem; }
+    .confirm-box p { font-size: .9rem; color: var(--mid); line-height: 1.6; margin-bottom: 1.5rem; }
+    .confirm-btns { display: flex; gap: .75rem; }
+    .btn-cancel { flex: 1; background: transparent; border: 2px solid var(--border); color: var(--mid); border-radius: var(--radius); padding: .7rem; font-family: var(--fb); font-size: .9rem; font-weight: 600; cursor: pointer; }
+    .btn-confirm-delete { flex: 1; background: var(--red); color: var(--white); border: none; border-radius: var(--radius); padding: .7rem; font-family: var(--fb); font-size: .9rem; font-weight: 600; cursor: pointer; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--white); padding: .75rem 1.5rem; border-radius: 99px; font-size: .875rem; font-weight: 500; z-index: 300; opacity: 0; transition: all .3s; pointer-events: none; white-space: nowrap; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.toast--success { background: var(--green); }
+    .toast.toast--error { background: var(--red); }
+
+    @media (max-width: 600px) {
+      .detail-grid { grid-template-columns: 1fr; }
+      .stats-bar { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Login screen ────────────────────────────────────────── -->
+<div class="login-wrap" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="/images/asn-logo.svg" alt="ASN Logo" />
+      <div class="login-logo-text">
+        <strong>ASN Pfeil Phönix</strong>
+        <span>Verwaltungsportal</span>
+      </div>
+    </div>
+    <h1 class="login-title">Anmelden</h1>
+    <p class="login-sub">Bitte mit deinen Zugangsdaten einloggen.</p>
+    <div class="field">
+      <label for="login-email">E-Mail</label>
+      <input type="email" id="login-email" placeholder="deine@email.de" autocomplete="email" />
+    </div>
+    <div class="field">
+      <label for="login-password">Passwort</label>
+      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+    <button class="btn-login" id="btn-login">
+      <span id="login-btn-text">Einloggen</span>
+      <span id="login-spinner" class="spinner" style="width:18px;height:18px;border-width:2px;border-top-color:white;display:none"></span>
+    </button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ── Admin UI ────────────────────────────────────────────── -->
+<div id="admin-wrap" class="admin-wrap">
+  <header class="header">
+    <div class="header-brand">
+      <img src="/images/asn-logo.svg" alt="" />
+      <div class="header-brand-text">
+        <strong>ASN Pfeil Phönix</strong>
+        <span>Verwaltungsportal</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="header-badge">Intern</span>
+      <span class="header-user" id="header-user"></span>
+      <button class="btn-logout" id="btn-logout">Ausloggen</button>
+    </div>
+  </header>
+
+  <div class="admin-main">
+    <div class="stats-bar" id="stats-bar">
+      <div class="stat-card">
+        <div class="stat-card__val" id="stat-total">—</div>
+        <div class="stat-card__label">Offene Anträge</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__val" id="stat-today">—</div>
+        <div class="stat-card__label">Heute eingegangen</div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-card__head">
+        <div class="table-card__title">Mitgliedsanträge</div>
+        <button class="btn-view" id="btn-refresh" onclick="loadAntraege()">↻ Aktualisieren</button>
+      </div>
+      <div id="table-content">
+        <div class="loading-state"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Detail Drawer ───────────────────────────────────────── -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <h2 id="drawer-title">Antrag</h2>
+    <button class="drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+  <div class="drawer-actions">
+    <button class="btn-download" id="btn-download">⬇ JSON herunterladen</button>
+    <button class="btn-process" id="btn-process">🗑 Bearbeitet & löschen</button>
+  </div>
+</div>
+
+<!-- ── Confirm Dialog ──────────────────────────────────────── -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <h3>Antrag löschen?</h3>
+    <p>Der Antrag von <strong id="confirm-name"></strong> wird unwiderruflich gelöscht. Diese Aktion kann nicht rückgängig gemacht werden (DSGVO-konforme Datenlöschung).</p>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Abbrechen</button>
+      <button class="btn-confirm-delete" id="btn-confirm-delete">Endgültig löschen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ───────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const SUPABASE_URL = window.__SB_URL__ || '';
+  const SUPABASE_KEY = window.__SB_KEY__ || '';
+  let currentUser = null;
+  let currentAntrag = null;
+  let accessToken = null;
+  let deleteId = null;
+
+  // ── Auth helpers ──────────────────────────────────────────
+  async function supabaseFetch(path, options = {}) {
+    const res = await fetch(`${SUPABASE_URL}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${accessToken || SUPABASE_KEY}`,
+        ...options.headers,
+      },
+    });
+    return res;
+  }
+
+  async function login(email, password) {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || data.msg || 'Login fehlgeschlagen');
+    return data;
+  }
+
+  async function logout() {
+    await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${accessToken}` },
+    });
+  }
+
+  // ── UI helpers ────────────────────────────────────────────
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast visible${type ? ' toast--' + type : ''}`;
+    setTimeout(() => t.classList.remove('visible'), 3000);
+  }
+
+  function showAdmin(email) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-wrap').classList.add('visible');
+    document.getElementById('header-user').textContent = email;
+    loadAntraege();
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString('de-DE', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin'
+    });
+  }
+
+  function abtBadge(abt) {
+    return `<span class="badge badge--${abt || 'allgemein'}">${abt || '—'}</span>`;
+  }
+
+  // ── Load applications ─────────────────────────────────────
+  async function loadAntraege() {
+    const content = document.getElementById('table-content');
+    content.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+    try {
+      const res = await supabaseFetch('/rest/v1/antraege?select=*&order=eingegangen_am.desc');
+      if (!res.ok) throw new Error('Fehler beim Laden');
+      const rows = await res.json();
+
+      // Stats
+      const today = new Date().toDateString();
+      const todayCount = rows.filter(r => new Date(r.eingegangen_am).toDateString() === today).length;
+      document.getElementById('stat-total').textContent = rows.length;
+      document.getElementById('stat-today').textContent = todayCount;
+
+      if (rows.length === 0) {
+        content.innerHTML = `<div class="empty-state"><div class="empty-state__icon">📭</div><div class="empty-state__text">Keine offenen Anträge.</div></div>`;
+        return;
+      }
+
+      const tbody = rows.map(r => `
+        <tr>
+          <td class="td-name">${r.anrede || ''} ${r.vorname} ${r.nachname}</td>
+          <td>${abtBadge(r.abteilung)}</td>
+          <td class="td-muted">${r.kategorie_label || '—'}</td>
+          <td class="td-muted">${r.betrag_jaehrlich ? r.betrag_jaehrlich + ' €' : '—'}</td>
+          <td class="td-muted">${formatDate(r.eingegangen_am)}</td>
+          <td>
+            <div class="row-actions">
+              <button class="btn-view" onclick="openDrawer('${r.id}')">Details</button>
+              <button class="btn-delete" onclick="confirmDelete('${r.id}', '${r.vorname} ${r.nachname}')">Löschen</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      content.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Abteilung</th>
+                <th>Kategorie</th>
+                <th>Beitrag</th>
+                <th>Eingegangen</th>
+                <th>Aktionen</th>
+              </tr>
+            </thead>
+            <tbody>${tbody}</tbody>
+          </table>
+        </div>
+      `;
+
+      // store rows globally for drawer
+      window.__antraege__ = rows;
+    } catch (err) {
+      content.innerHTML = `<div class="empty-state"><div class="empty-state__text">Fehler beim Laden: ${err.message}</div></div>`;
+    }
+  }
+  window.loadAntraege = loadAntraege;
+
+  // ── Detail Drawer ─────────────────────────────────────────
+  window.openDrawer = function(id) {
+    const r = (window.__antraege__ || []).find(a => a.id === id || String(a.id) === String(id));
+    if (!r) return;
+    currentAntrag = r;
+
+    document.getElementById('drawer-title').textContent = `${r.vorname} ${r.nachname}`;
+
+    const zahlungSection = r.but_gutschein
+      ? `<div class="detail-item"><div class="detail-key">Zahlungsart</div><div class="detail-val">BuT-Gutschein</div></div>`
+      : `<div class="detail-item"><div class="detail-key">Zahlungsart</div><div class="detail-val">SEPA-Lastschrift</div></div>
+         <div class="detail-item"><div class="detail-key">Kontoinhaber</div><div class="detail-val">${r.kontoinhaber || '—'}</div></div>
+         <div class="detail-item full"><div class="detail-key">IBAN</div><div class="detail-val detail-val--iban">${r.iban || '—'}</div></div>`;
+
+    document.getElementById('drawer-body').innerHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-title">Persönliche Daten</div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-key">Anrede</div><div class="detail-val">${r.anrede || '—'}</div></div>
+          <div class="detail-item"><div class="detail-key">Antrag-ID</div><div class="detail-val">${r.antrag_id}</div></div>
+          <div class="detail-item"><div class="detail-key">Vorname</div><div class="detail-val">${r.vorname}</div></div>
+          <div class="detail-item"><div class="detail-key">Nachname</div><div class="detail-val">${r.nachname}</div></div>
+          <div class="detail-item" style="grid-column:1/-1"><div class="detail-key">Adresse</div><div class="detail-val">${r.strasse}, ${r.plz} ${r.ort}</div></div>
+          <div class="detail-item"><div class="detail-key">Geburtsdatum</div><div class="detail-val">${r.geburtsdatum || '—'}</div></div>
+          <div class="detail-item"><div class="detail-key">Eintrittsdatum</div><div class="detail-val">${r.eintrittsdatum || '—'}</div></div>
+          <div class="detail-item"><div class="detail-key">E-Mail</div><div class="detail-val">${r.email}</div></div>
+          <div class="detail-item"><div class="detail-key">Telefon</div><div class="detail-val">${r.telefon || '—'}</div></div>
+        </div>
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">Mitgliedschaft</div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-key">Abteilung</div><div class="detail-val">${r.abteilung_label}</div></div>
+          <div class="detail-item"><div class="detail-key">Kategorie</div><div class="detail-val">${r.kategorie_label}</div></div>
+          <div class="detail-item"><div class="detail-key">Jahresbeitrag</div><div class="detail-val">${r.betrag_jaehrlich} €</div></div>
+          <div class="detail-item"><div class="detail-key">Eingegangen</div><div class="detail-val">${formatDate(r.eingegangen_am)}</div></div>
+        </div>
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">Zahlung & Bankdaten</div>
+        <div class="detail-grid">${zahlungSection}</div>
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">Einwilligungen</div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-key">Recht am Bild</div><div class="detail-val">${r.recht_am_bild ? '✅ Ja' : '❌ Nein'}</div></div>
+          <div class="detail-item"><div class="detail-key">Satzung anerkannt</div><div class="detail-val">✅ Ja</div></div>
+        </div>
+        ${r.sonstiges ? `<div style="margin-top:.75rem"><div class="detail-key">Sonstiges</div><div class="detail-val" style="margin-top:.25rem">${r.sonstiges}</div></div>` : ''}
+      </div>
+    `;
+
+    document.getElementById('drawer-overlay').classList.add('visible');
+    document.getElementById('drawer').classList.add('visible');
+  };
+
+  window.closeDrawer = function() {
+    document.getElementById('drawer-overlay').classList.remove('visible');
+    document.getElementById('drawer').classList.remove('visible');
+    currentAntrag = null;
+  };
+
+  // ── Download JSON ─────────────────────────────────────────
+  document.getElementById('btn-download').addEventListener('click', () => {
+    if (!currentAntrag) return;
+    const blob = new Blob([JSON.stringify(currentAntrag, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `antrag-${currentAntrag.antrag_id}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('JSON heruntergeladen', 'success');
+  });
+
+  // ── Delete flow ───────────────────────────────────────────
+  window.confirmDelete = function(id, name) {
+    deleteId = id;
+    document.getElementById('confirm-name').textContent = name;
+    document.getElementById('confirm-overlay').classList.add('visible');
+  };
+
+  window.closeConfirm = function() {
+    document.getElementById('confirm-overlay').classList.remove('visible');
+    deleteId = null;
+  };
+
+  document.getElementById('btn-process').addEventListener('click', () => {
+    if (!currentAntrag) return;
+    confirmDelete(currentAntrag.id, `${currentAntrag.vorname} ${currentAntrag.nachname}`);
+  });
+
+  document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
+    if (!deleteId) return;
+    const btn = document.getElementById('btn-confirm-delete');
+    btn.textContent = 'Wird gelöscht…';
+    btn.disabled = true;
+    try {
+      const res = await supabaseFetch(`/rest/v1/antraege?id=eq.${deleteId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Löschen fehlgeschlagen');
+      closeConfirm();
+      closeDrawer();
+      showToast('Antrag gelöscht', 'success');
+      loadAntraege();
+    } catch (err) {
+      showToast('Fehler: ' + err.message, 'error');
+    } finally {
+      btn.textContent = 'Endgültig löschen';
+      btn.disabled = false;
+    }
+  });
+
+  // ── Login handler ─────────────────────────────────────────
+  async function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const btn = document.getElementById('btn-login');
+    const errEl = document.getElementById('login-error');
+    errEl.classList.remove('visible');
+    document.getElementById('login-btn-text').style.display = 'none';
+    document.getElementById('login-spinner').style.display = '';
+    btn.disabled = true;
+    try {
+      const session = await login(email, password);
+      accessToken = session.access_token;
+      currentUser = session.user;
+      showAdmin(email);
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.classList.add('visible');
+    } finally {
+      document.getElementById('login-btn-text').style.display = '';
+      document.getElementById('login-spinner').style.display = 'none';
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById('btn-login').addEventListener('click', doLogin);
+  document.getElementById('login-password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  document.getElementById('btn-logout').addEventListener('click', async () => {
+    await logout();
+    accessToken = null;
+    currentUser = null;
+    document.getElementById('admin-wrap').classList.remove('visible');
+    document.getElementById('login-screen').style.display = '';
+    document.getElementById('login-password').value = '';
+    showToast('Ausgeloggt');
+  });
+</script>
+
+</body>
+</html>

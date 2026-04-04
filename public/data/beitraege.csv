@@ -1,0 +1,13 @@
+abteilung,kategorie,label,betrag_jaehrlich,arbeitsdienst,altersgruppe,min_alter,max_alter
+allgemein,passiv,Passives Vereinsmitglied,96,0,erwachsene,18,999
+allgemein,arbeitssuchend,Arbeitssuchend,84,0,erwachsene,18,999
+allgemein,familie,Familienbeitrag (max. 2 Erw. inkl. Kinder),240,0,familie,18,999
+fussball,erwachsene,Erwachsene,196,40,erwachsene,18,999
+fussball,studenten,Studenten / Azubis,148,40,erwachsene,18,999
+fussball,jugendliche,Jugendliche / Kinder,108,0,jugend,0,17
+kegeln,erwachsene,Erwachsene,180,0,erwachsene,18,999
+kegeln,studenten,Studenten / Azubis,132,0,erwachsene,18,999
+kegeln,jugendliche,Jugendliche / Kinder,108,0,jugend,0,17
+radsport,erwachsene,Erwachsene,156,0,erwachsene,18,999
+radsport,studenten,Studenten / Azubis,108,0,erwachsene,18,999
+radsport,jugendliche,Jugendliche / Kinder,108,0,jugend,0,17

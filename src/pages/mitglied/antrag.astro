@@ -1,0 +1,735 @@
+---
+// src/pages/mitglied/antrag.astro
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const csvPath = path.resolve('./public/data/beitraege.csv');
+const csvRaw = fs.readFileSync(csvPath, 'utf8');
+
+interface BeitragRow {
+  abteilung: string;
+  kategorie: string;
+  label: string;
+  betrag_jaehrlich: number;
+  arbeitsdienst: number;
+  altersgruppe: string;
+  min_alter: number;
+  max_alter: number;
+}
+
+function parseCSV(raw: string): BeitragRow[] {
+  const lines = raw.trim().split('\n');
+  const headers = lines[0].split(',');
+  return lines.slice(1).map(line => {
+    const vals = line.split(',');
+    const obj: Record<string, string | number> = {};
+    headers.forEach((h, i) => {
+      const v = vals[i]?.trim() ?? '';
+      obj[h.trim()] = isNaN(Number(v)) || v === '' ? v : Number(v);
+    });
+    return obj as unknown as BeitragRow;
+  });
+}
+
+const beitraege = parseCSV(csvRaw);
+
+const abteilungen: Record<string, { label: string; image: string; beschreibung: string }> = {
+  allgemein: { label: 'Allgemein', image: null, beschreibung: 'Passiv oder Familienbeitrag' },
+  fussball:  { label: 'Fußball',  image: '/images/abteilungen/football.jpg',   beschreibung: 'Aktiv in der Fußballabteilung' },
+  kegeln:    { label: 'Kegeln',   image: '/images/abteilungen/kegeln.jpg',     beschreibung: 'Aktiv in der Kegelabteilung' },
+  radsport:  { label: 'Radsport', image: '/images/abteilungen/radsport.jpg',   beschreibung: 'Aktiv in der Radsportabteilung' },
+  dart:      { label: 'Dart',     image: '/images/abteilungen/dart.jpg',       beschreibung: 'Aktiv in der Dartabteilung' },
+};
+
+const beitraegeJSON = JSON.stringify(beitraege);
+const abteilungenJSON = JSON.stringify(abteilungen);
+---
+
+<BaseLayout title="Mitglied werden" description="Jetzt online Mitglied beim ASN Pfeil Phönix e.V. Nürnberg werden.">
+
+  <section class="form-hero">
+    <div class="container">
+      <p class="section-eyebrow">Mitmachen</p>
+      <h1>Mitglied <em>werden</em></h1>
+      <p class="hero-sub">Werde Teil der Assen — einfach, digital, in wenigen Minuten.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container form-container">
+
+      <!-- Stepper -->
+      <nav class="stepper" id="stepper" aria-label="Fortschritt">
+        <div class="stepper__item active" data-step="1">
+          <div class="stepper__circle"><span>1</span></div>
+          <div class="stepper__label">Abteilung</div>
+        </div>
+        <div class="stepper__connector"></div>
+        <div class="stepper__item" data-step="2">
+          <div class="stepper__circle"><span>2</span></div>
+          <div class="stepper__label">Persönliches</div>
+        </div>
+        <div class="stepper__connector"></div>
+        <div class="stepper__item" data-step="3">
+          <div class="stepper__circle"><span>3</span></div>
+          <div class="stepper__label">Zahlung</div>
+        </div>
+        <div class="stepper__connector"></div>
+        <div class="stepper__item" data-step="4">
+          <div class="stepper__circle"><span>4</span></div>
+          <div class="stepper__label">Bestätigung</div>
+        </div>
+      </nav>
+
+      <!-- SCHRITT 1 -->
+      <div class="step-panel active" id="panel-1">
+        <div class="form-card">
+          <div class="form-card__head">
+            <h2>Abteilung wählen</h2>
+            <p>Welchem Sport möchtest du nachgehen?</p>
+          </div>
+
+          <div class="sport-grid" id="sport-grid"></div>
+
+          <div id="kategorie-section" class="js-hidden">
+            <div class="field-section-label">Mitgliedschaftskategorie</div>
+            <div class="kategorie-list" id="kategorie-list"></div>
+            <div class="notice notice--info" id="arbeitsdienst-info" style="display:none">
+              <span class="notice__icon">⚒</span>
+              <div>Diese Kategorie enthält eine <strong>Arbeitsdienst-Pauschale von <span id="ad-betrag"></span> €/Jahr</strong>. Pro geleisteter Stunde bei einem offiziellen Arbeitsdienst der Fußballabteilung werden <strong>10 €</strong> erstattet.</div>
+            </div>
+          </div>
+
+          <div class="cart" id="cart">
+            <div class="cart__empty" id="cart-empty">Bitte Abteilung und Kategorie wählen.</div>
+            <div class="cart__filled" id="cart-filled" style="display:none">
+              <div class="cart__info">
+                <div class="cart__abt" id="cart-abt-label"></div>
+                <div class="cart__kat" id="cart-kat-label"></div>
+                <div class="cart__ad" id="cart-ad" style="display:none"></div>
+              </div>
+              <div class="cart__price"><span id="cart-price"></span> €<small>pro Jahr</small></div>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <div></div>
+            <button class="btn btn--primary btn--lg" id="btn-1-weiter" disabled>Weiter →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCHRITT 2 -->
+      <div class="step-panel" id="panel-2">
+        <div class="form-card">
+          <div class="form-card__head">
+            <h2>Persönliche Daten</h2>
+            <p>Felder mit <span class="req">*</span> sind Pflichtfelder.</p>
+          </div>
+          <div class="field-grid">
+
+            <div class="field-group full">
+              <label class="field-label">Anrede <span class="req">*</span></label>
+              <div class="radio-row">
+                <label class="radio-opt"><input type="radio" name="anrede" value="Herr" /> Herr</label>
+                <label class="radio-opt"><input type="radio" name="anrede" value="Frau" /> Frau</label>
+                <label class="radio-opt"><input type="radio" name="anrede" value="Divers" /> Divers</label>
+              </div>
+              <div class="field-err" id="err-anrede">Bitte Anrede wählen.</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="vorname">Vorname <span class="req">*</span></label>
+              <input class="field-input" type="text" id="vorname" autocomplete="given-name" placeholder="Max" />
+              <div class="field-err" id="err-vorname">Pflichtfeld.</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="nachname">Nachname <span class="req">*</span></label>
+              <input class="field-input" type="text" id="nachname" autocomplete="family-name" placeholder="Mustermann" />
+              <div class="field-err" id="err-nachname">Pflichtfeld.</div>
+            </div>
+
+            <div class="field-group full">
+              <label class="field-label" for="strasse">Straße, Haus-Nr. <span class="req">*</span></label>
+              <input class="field-input" type="text" id="strasse" autocomplete="street-address" placeholder="Musterstraße 12" />
+              <div class="field-err" id="err-strasse">Pflichtfeld.</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="plz">PLZ <span class="req">*</span></label>
+              <input class="field-input" type="text" id="plz" autocomplete="postal-code" placeholder="90411" maxlength="5" />
+              <div class="field-err" id="err-plz">Bitte 5-stellige PLZ eingeben.</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="ort">Ort <span class="req">*</span></label>
+              <input class="field-input" type="text" id="ort" autocomplete="address-level2" placeholder="Nürnberg" />
+              <div class="field-err" id="err-ort">Pflichtfeld.</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="geburtsdatum">Geburtsdatum <span class="req">*</span></label>
+              <input class="field-input" type="date" id="geburtsdatum" autocomplete="bday" />
+              <div class="field-err" id="err-geburtsdatum">Bitte gültiges Datum angeben.</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="eintrittsdatum">Gewünschtes Eintrittsdatum <span class="req">*</span></label>
+              <input class="field-input" type="date" id="eintrittsdatum" />
+              <div class="field-err" id="err-eintrittsdatum">Pflichtfeld.</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="telefon">Telefon / Handy</label>
+              <input class="field-input" type="tel" id="telefon" autocomplete="tel" placeholder="+49 911 …" />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="email">E-Mail <span class="req">*</span></label>
+              <input class="field-input" type="email" id="email" autocomplete="email" placeholder="max@beispiel.de" />
+              <div class="field-err" id="err-email">Bitte gültige E-Mail-Adresse angeben.</div>
+            </div>
+
+            <div class="notice notice--warn full" id="warn-alter" style="display:none">
+              <span class="notice__icon">⚠</span>
+              <div><strong>Altershinweis:</strong> Die gewählte Kategorie ist nur für <span id="warn-alter-text"></span> verfügbar. Bitte Kategorie oder Geburtsdatum korrigieren.</div>
+            </div>
+
+            <div class="field-group full">
+              <label class="field-label" for="sonstiges">Sonstiges / Vereinbarungen</label>
+              <textarea class="field-input" id="sonstiges" rows="3" placeholder="Optionale Anmerkungen…"></textarea>
+            </div>
+
+            <div class="field-group full">
+              <label class="checkbox-opt">
+                <input type="checkbox" id="recht-am-bild" />
+                <span>Ich erkläre mich einverstanden, dass der Verein Fotos von mir in Verbindung mit Vereinsaktivitäten in den Medien (Print und Online) bis auf schriftlichen Widerruf nutzen und veröffentlichen darf. <span id="recht-bild-minderjährig" style="display:none">Bei Minderjährigen erteilen die Erziehungsberechtigten diese Einwilligung.</span></span>
+              </label>
+            </div>
+
+            <div class="notice notice--info full" id="info-minderjaehrig" style="display:none">
+              <span class="notice__icon">👨‍👩‍👧</span>
+              <div><strong>Hinweis für Minderjährige:</strong> Der Antrag muss von einem gesetzlichen Vertreter mitunterschrieben werden. Die Unterschrift erfolgt auf dem postalischen Antrag.</div>
+            </div>
+
+          </div>
+          <div class="btn-row">
+            <button class="btn btn--ghost" id="btn-2-zurück">← Zurück</button>
+            <button class="btn btn--primary btn--lg" id="btn-2-weiter">Weiter →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCHRITT 3 -->
+      <div class="step-panel" id="panel-3">
+        <div class="form-card">
+          <div class="form-card__head">
+            <h2>Bankdaten & Zahlung</h2>
+            <p>Der Jahresbeitrag wird einmal jährlich im Februar per Lastschrift eingezogen.</p>
+          </div>
+
+          <div id="but-option" style="display:none; margin-bottom:1.5rem">
+            <label class="checkbox-opt checkbox-opt--prominent">
+              <input type="checkbox" id="but-gutschein" />
+              <span><strong>Zahlung mit BuT-Gutschein</strong> (Bildungs- und Teilhabegutschein der Stadt Nürnberg)<br /><small>Bankdaten entfallen. Gutschein bitte beim Vereinseintritt vorlegen.</small></span>
+            </label>
+          </div>
+
+          <div id="bank-section">
+            <div class="notice notice--info" style="margin-bottom:1.25rem">
+              <span class="notice__icon">✅</span>
+              <div>Ich bin bis auf Widerruf damit einverstanden, dass der Jahresbeitrag mittels <strong>SEPA-Lastschrift</strong> im Februar eingezogen wird.</div>
+            </div>
+            <div class="field-grid">
+              <div class="field-group full">
+                <label class="field-label" for="kontoinhaber">Kontoinhaber <span class="req">*</span></label>
+                <input class="field-input" type="text" id="kontoinhaber" autocomplete="name" placeholder="Max Mustermann" />
+                <div class="field-err" id="err-kontoinhaber">Pflichtfeld.</div>
+              </div>
+              <div class="field-group full">
+                <label class="field-label" for="iban">IBAN <span class="req">*</span></label>
+                <input class="field-input" type="text" id="iban" placeholder="DE12 3456 7890 1234 5678 90" maxlength="34" autocomplete="off" />
+                <div class="field-err" id="err-iban">Bitte gültige deutsche IBAN eingeben.</div>
+                <div class="field-hint">Mit oder ohne Leerzeichen — beides wird akzeptiert.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field-section-label" style="margin-top:1.5rem">Hinweise</div>
+          <div class="notice notice--info"><span class="notice__icon">📋</span><div><strong>Kündigung:</strong> Schriftlich bis spätestens Ende September (3 Monate vor Jahresende) an die Vorstandschaft.</div></div>
+          <div class="notice notice--info" style="margin-top:.75rem"><span class="notice__icon">🔒</span><div><strong>Datenschutz:</strong> Deine Daten werden ausschließlich für Vereinsverwaltungszwecke verwendet.</div></div>
+
+          <div class="field-group" style="margin-top:1.5rem">
+            <label class="checkbox-opt">
+              <input type="checkbox" id="satzung" />
+              <span>Mit meiner Mitgliedschaft erkenne ich die <strong>Satzung des ASN Pfeil Phönix e.V.</strong> an. Die Satzung kann auf <a href="https://www.asn-pfeil-phoenix.de" target="_blank" rel="noopener">www.asn-pfeil-phoenix.de</a> eingesehen werden. <span class="req">*</span></span>
+            </label>
+            <div class="field-err" id="err-satzung">Bitte Satzung anerkennen.</div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn--ghost" id="btn-3-zurück">← Zurück</button>
+            <button class="btn btn--primary btn--lg" id="btn-3-weiter">Weiter →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCHRITT 4 -->
+      <div class="step-panel" id="panel-4">
+        <div class="form-card">
+          <div class="form-card__head">
+            <h2>Zusammenfassung</h2>
+            <p>Bitte alle Angaben vor dem Absenden prüfen.</p>
+          </div>
+          <div id="summary-content"></div>
+          <div class="cart cart--summary" id="summary-cart"></div>
+          <div class="btn-row">
+            <button class="btn btn--ghost" id="btn-4-zurück">← Zurück</button>
+            <button class="btn btn--submit btn--lg" id="btn-submit">
+              <span id="btn-submit-text">Antrag kostenpflichtig einreichen ✓</span>
+              <span id="btn-submit-spinner" class="spinner" style="display:none"></span>
+            </button>
+          </div>
+          <p class="submit-note">Mit dem Absenden bestätigst du, dass alle Angaben der Wahrheit entsprechen.</p>
+        </div>
+      </div>
+
+      <!-- ERFOLG -->
+      <div class="step-panel" id="panel-success">
+        <div class="form-card form-card--success">
+          <div class="success-icon">🎉</div>
+          <h2>Antrag eingereicht!</h2>
+          <p>Vielen Dank für deinen Mitgliedsantrag beim <strong>ASN Pfeil Phönix e.V.</strong></p>
+          <p>Du erhältst eine Bestätigungs-E-Mail an <strong id="success-email"></strong>.</p>
+          <div class="success-id" id="success-antrag-id"></div>
+          <p class="success-note">Bitte die Antrag-ID für Rückfragen notieren.<br />Der Vorstand wird deinen Antrag zeitnah bearbeiten.</p>
+          <a href="/" class="btn btn--primary btn--lg" style="margin-top:1.5rem">Zur Startseite</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style is:global>
+  .form-hero {
+    background: var(--navy);
+    padding-block: clamp(2.5rem, 5vw, 4rem);
+  }
+  .form-hero h1 { color: var(--white); }
+  .form-hero h1 em { color: var(--orange); font-style: normal; }
+  .form-hero .section-eyebrow { color: rgba(255,255,255,.5); }
+  .form-hero .section-eyebrow::before { background: var(--orange); }
+  .hero-sub { color: rgba(255,255,255,.65); font-size: 1.05rem; margin-top: .4rem; max-width: 50ch; }
+
+  .form-container { max-width: 720px; }
+
+  /* Stepper */
+  .stepper { display: flex; align-items: center; margin-bottom: 2.5rem; }
+  .stepper__item { display: flex; flex-direction: column; align-items: center; gap: .35rem; flex: 0 0 auto; }
+  .stepper__connector { flex: 1; height: 2px; background: var(--border); margin-bottom: 1.5rem; transition: background .3s; }
+  .stepper__circle { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: var(--fb); font-size: .85rem; font-weight: 700; color: var(--muted); background: var(--white); transition: all .25s; }
+  .stepper__label { font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+  .stepper__item.active .stepper__circle { background: var(--navy); border-color: var(--navy); color: var(--white); }
+  .stepper__item.active .stepper__label { color: var(--navy); }
+  .stepper__item.done .stepper__circle { background: var(--orange); border-color: var(--orange); color: var(--white); }
+  .stepper__item.done .stepper__label { color: var(--orange); }
+  .stepper__item.done + .stepper__connector { background: var(--orange); }
+
+  /* Panels */
+  .step-panel { display: none; }
+  .step-panel.active { display: block; animation: fadeUp .3s ease both; }
+
+  /* Form card */
+  .form-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: clamp(1.5rem, 4vw, 2.5rem); box-shadow: 0 4px 24px rgba(15,41,114,.07); }
+  .form-card__head { margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 3px solid var(--orange); }
+  .form-card__head h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); color: var(--navy); }
+  .form-card__head p { color: var(--mid); margin-top: .3rem; font-size: .9rem; }
+
+  /* Sport grid */
+  .sport-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .75rem; margin-bottom: 1.5rem; }
+  label.sport-card {
+    display: block;
+    border: 3px solid var(--border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: border-color .2s, box-shadow .2s;
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 3/2;
+    background: var(--navy-dark);
+    transform: none !important;
+    box-shadow: none;
+  }
+  label.sport-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0; height: 0;
+    margin: 0;
+  }
+  label.sport-card .sport-card__photo {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    transition: transform .35s ease;
+  }
+  label.sport-card .sport-card__overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(9,29,82,.85) 0%, rgba(9,29,82,.3) 60%, transparent 100%);
+    transition: background .2s;
+  }
+  label.sport-card .sport-card__label {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: .6rem .75rem;
+    font-family: var(--fd); font-size: 1.2rem; letter-spacing: .04em;
+    color: var(--white); line-height: 1;
+    z-index: 1;
+  }
+  label.sport-card:hover .sport-card__photo { transform: scale(1.06); }
+  label.sport-card:hover { border-color: var(--navy-mid); }
+  label.sport-card.selected {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px rgba(232,120,10,.25) !important;
+  }
+  label.sport-card.selected .sport-card__label { color: var(--orange); }
+  label.sport-card .sport-card__check {
+    position: absolute; top: .5rem; right: .5rem;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--orange); color: white;
+    font-size: .75rem; display: none;
+    align-items: center; justify-content: center; font-weight: 700;
+    z-index: 2;
+  }
+  label.sport-card.selected .sport-card__check { display: flex; }
+
+  /* Logo variant (Allgemein) */
+  label.sport-card .sport-card__logo-bg {
+    position: absolute; inset: 0;
+    background: var(--navy-dark);
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s;
+  }
+  label.sport-card .sport-card__logo {
+    width: 90px; height: 90px;
+    opacity: .6;
+    filter: brightness(0) invert(1);
+    transition: opacity .2s, transform .3s;
+  }
+  label.sport-card:hover .sport-card__logo { opacity: 1; filter: brightness(0) invert(1); transform: scale(1.08) rotate(3deg); }
+  label.sport-card.selected .sport-card__logo-bg { background: var(--navy); }
+  label.sport-card.selected .sport-card__logo { opacity: 1; }
+
+  /* Section label */
+  .field-section-label { font-size: .67rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--navy); margin-bottom: .75rem; margin-top: 1.5rem; display: flex; align-items: center; gap: .6rem; }
+  .field-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* Kategorie */
+  .kategorie-list { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 1rem; }
+  .kategorie-item { display: flex; align-items: center; gap: 1rem; border: 2px solid var(--border); border-radius: var(--radius); padding: .85rem 1rem; cursor: pointer; transition: all .15s; }
+  .kategorie-item:hover { border-color: var(--navy-mid); background: var(--navy-tint); }
+  .kategorie-item.selected { border-color: var(--navy); background: var(--navy-pale); }
+  .kategorie-item input[type="radio"] { accent-color: var(--navy); width: 16px; height: 16px; flex-shrink: 0; }
+  .kategorie-item__body { flex: 1; }
+  .kategorie-item__label { font-weight: 600; color: var(--ink); font-size: .93rem; }
+  .kategorie-item__sub { font-size: .73rem; color: var(--muted); margin-top: .1rem; }
+  .kategorie-item__price { font-family: var(--fd); font-size: 1.5rem; color: var(--navy); white-space: nowrap; line-height: 1; text-align: right; }
+  .kategorie-item__price small { font-family: var(--fb); font-size: .7rem; color: var(--muted); display: block; font-weight: 400; }
+
+  /* Cart */
+  .cart { background: var(--navy); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-top: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .cart__empty { color: rgba(255,255,255,.35); font-style: italic; font-size: .88rem; }
+  .cart__abt { font-family: var(--fd); font-size: 1.4rem; color: var(--white); letter-spacing: .03em; }
+  .cart__kat { font-size: .85rem; color: rgba(255,255,255,.5); margin-top: .2rem; }
+  .cart__ad { font-size: .75rem; color: rgba(232,120,10,.8); margin-top: .3rem; }
+  .cart__price { font-family: var(--fd); font-size: 2.5rem; color: var(--orange); white-space: nowrap; text-align: right; line-height: 1; }
+  .cart__price small { font-family: var(--fb); font-size: .78rem; color: rgba(255,255,255,.35); display: block; }
+  .cart--summary { margin-top: 0; }
+
+  /* Notices */
+  .notice { display: flex; align-items: flex-start; gap: .7rem; border-radius: var(--radius); padding: .85rem 1rem; font-size: .85rem; line-height: 1.55; }
+  .notice--info { background: var(--navy-tint); color: var(--navy); border: 1px solid var(--navy-pale); }
+  .notice--warn { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+  .notice__icon { font-size: 1rem; flex-shrink: 0; margin-top: .05rem; }
+  .notice strong { font-weight: 600; }
+
+  /* Fields */
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .field-grid .full { grid-column: 1 / -1; }
+  .field-group { display: flex; flex-direction: column; gap: .35rem; }
+  .field-label { font-size: .8rem; font-weight: 600; color: var(--mid); }
+  .req { color: #dc2626; }
+  .field-input { border: 2px solid var(--border); border-radius: var(--radius); padding: .6rem .85rem; font-family: var(--fb); font-size: .95rem; color: var(--ink); background: var(--white); transition: border-color .15s; width: 100%; }
+  .field-input:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(15,41,114,.1); }
+  .field-input.error { border-color: #dc2626; }
+  textarea.field-input { resize: vertical; }
+  .field-err { font-size: .75rem; color: #dc2626; font-weight: 500; display: none; }
+  .field-err.visible { display: block; }
+  .field-hint { font-size: .74rem; color: var(--muted); }
+
+  /* Radio / Checkbox */
+  .radio-row { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .radio-opt { display: flex; align-items: center; gap: .45rem; cursor: pointer; font-size: .9rem; }
+  .radio-opt input { accent-color: var(--navy); width: 16px; height: 16px; }
+  .checkbox-opt { display: flex; align-items: flex-start; gap: .7rem; cursor: pointer; font-size: .88rem; color: var(--mid); line-height: 1.5; }
+  .checkbox-opt input[type="checkbox"] { accent-color: var(--navy); width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; }
+  .checkbox-opt strong { color: var(--ink); }
+  .checkbox-opt a { color: var(--navy); text-decoration: underline; }
+  .checkbox-opt--prominent { background: var(--navy-tint); border: 1px solid var(--navy-pale); border-radius: var(--radius); padding: .85rem 1rem; }
+  .checkbox-opt--prominent small { color: var(--muted); font-size: .8rem; }
+
+  /* Buttons */
+  .btn-row { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; gap: 1rem; }
+  .btn--lg { padding: .8em 2.2em; font-size: .95rem; }
+  .btn--submit { background: var(--orange); color: var(--white); border-color: var(--orange); }
+  .btn--submit:hover { background: #c96508; border-color: #c96508; }
+  .submit-note { font-size: .75rem; color: var(--muted); text-align: center; margin-top: .75rem; }
+
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Summary */
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem 2rem; margin: 1rem 0 1.5rem; }
+  .summary-item { border-bottom: 1px solid var(--border); padding-bottom: .4rem; }
+  .summary-key { font-size: .67rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .summary-val { font-size: .9rem; color: var(--ink); font-weight: 500; margin-top: .15rem; }
+
+  /* Success */
+  .form-card--success { text-align: center; padding: 3rem 2rem; }
+  .success-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+  .form-card--success h2 { color: var(--navy); font-size: 2.2rem; margin-bottom: .75rem; }
+  .form-card--success p { color: var(--mid); margin-bottom: .4rem; }
+  .success-id { display: inline-block; background: var(--navy); color: var(--orange); font-family: var(--fd); font-size: 1.4rem; letter-spacing: .08em; padding: .4rem 1.25rem; border-radius: var(--radius); margin: 1rem 0; }
+  .success-note { font-size: .82rem; color: var(--muted); }
+
+  .js-hidden { display: none; }
+
+  @media (max-width: 600px) {
+    .field-grid { grid-template-columns: 1fr; }
+    .field-grid .full { grid-column: 1; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .sport-grid { grid-template-columns: repeat(3, 1fr); }
+    .stepper__label { display: none; }
+  }
+</style>
+
+<script define:vars={{ beitraegeJSON, abteilungenJSON }}>
+  window.__BEITRAEGE__ = JSON.parse(beitraegeJSON);
+  window.__ABTEILUNGEN__ = JSON.parse(abteilungenJSON);
+</script>
+
+<script>
+(() => {
+  'use strict';
+  const state = { step: 1, abteilung: null, kategorie: null, beitragRow: null };
+  const beitraege = window.__BEITRAEGE__;
+  const abteilungen = window.__ABTEILUNGEN__;
+  const $ = id => document.getElementById(id);
+  const show = id => { const e=$(id); if(e) e.style.display=''; };
+  const hide = id => { const e=$(id); if(e) e.style.display='none'; };
+  const setText = (id,t) => { const e=$(id); if(e) e.textContent=t; };
+  const setHTML = (id,h) => { const e=$(id); if(e) e.innerHTML=h; };
+  const val = id => { const e=$(id); return e?e.value.trim():''; };
+
+  function calcAlter(d) {
+    if (!d) return null;
+    const t=new Date(), g=new Date(d);
+    let a=t.getFullYear()-g.getFullYear();
+    const m=t.getMonth()-g.getMonth();
+    if(m<0||(m===0&&t.getDate()<g.getDate())) a--;
+    return a;
+  }
+
+  function goToStep(n) {
+    document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));
+    if(n){ const p=$(`panel-${n}`); if(p){p.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'});} }
+    document.querySelectorAll('.stepper__item').forEach(item=>{
+      const s=+item.dataset.step;
+      item.classList.remove('active','done');
+      if(s===n) item.classList.add('active');
+      else if(s<n) item.classList.add('done');
+      const c=item.querySelector('.stepper__circle span');
+      if(c) c.textContent=s<n?'✓':String(s);
+    });
+    state.step=n;
+  }
+
+  function buildSportGrid() {
+    const grid=$('sport-grid'); grid.innerHTML='';
+    Object.entries(abteilungen).forEach(([key,abt])=>{
+      const label=document.createElement('label');
+      label.className='sport-card';
+      const inner = abt.image
+        ? `<div class="sport-card__photo" style="background-image:url('${abt.image}')"></div>
+           <div class="sport-card__overlay"></div>`
+        : `<div class="sport-card__logo-bg">
+             <img src="/images/asn-logo.svg" alt="" class="sport-card__logo" />
+           </div>`;
+      label.innerHTML=`
+        <input type="radio" name="abteilung" value="${key}" />
+        ${inner}
+        <div class="sport-card__label">${abt.label}</div>
+        <div class="sport-card__check">✓</div>
+      `;
+      label.querySelector('input').addEventListener('change',()=>{
+        document.querySelectorAll('.sport-card').forEach(c=>c.classList.remove('selected'));
+        label.classList.add('selected');
+        state.abteilung=key; state.kategorie=null; state.beitragRow=null;
+        buildKategorieList(key);
+        $('kategorie-section').classList.remove('js-hidden');
+        updateCart(); $('btn-1-weiter').disabled=true;
+      });
+      grid.appendChild(label);
+    });
+  }
+
+  function buildKategorieList(abteilung) {
+    const rows=beitraege.filter(r=>r.abteilung===abteilung);
+    const list=$('kategorie-list'); list.innerHTML='';
+    rows.forEach(row=>{
+      const item=document.createElement('label');
+      item.className='kategorie-item';
+      item.innerHTML=`<input type="radio" name="kategorie" value="${row.kategorie}" /><div class="kategorie-item__body"><div class="kategorie-item__label">${row.label}</div>${row.arbeitsdienst>0?`<div class="kategorie-item__sub">inkl. ${row.arbeitsdienst} € Arbeitsdienst-Pauschale</div>`:''}</div><div class="kategorie-item__price">${row.betrag_jaehrlich} €<small>pro Jahr</small></div>`;
+      item.querySelector('input').addEventListener('change',()=>{
+        document.querySelectorAll('.kategorie-item').forEach(c=>c.classList.remove('selected'));
+        item.classList.add('selected');
+        state.kategorie=row.kategorie; state.beitragRow=row;
+        updateCart();
+        if(row.arbeitsdienst>0){setText('ad-betrag',row.arbeitsdienst);show('arbeitsdienst-info');}
+        else hide('arbeitsdienst-info');
+        $('btn-1-weiter').disabled=false;
+      });
+      list.appendChild(item);
+    });
+  }
+
+  function updateCart() {
+    if(!state.beitragRow){show('cart-empty');hide('cart-filled');return;}
+    hide('cart-empty');show('cart-filled');
+    const abt=abteilungen[state.abteilung];
+    setText('cart-abt-label', abt.label);
+    setText('cart-kat-label',state.beitragRow.label);
+    setText('cart-price',state.beitragRow.betrag_jaehrlich);
+    if(state.beitragRow.arbeitsdienst>0){show('cart-ad');setText('cart-ad',`⚒ inkl. ${state.beitragRow.arbeitsdienst} € Arbeitsdienst-Pauschale`);}
+    else hide('cart-ad');
+  }
+
+  $('btn-1-weiter').addEventListener('click',()=>{
+    if(!state.beitragRow) return;
+    if(state.beitragRow.altersgruppe==='jugend') show('but-option');
+    else{hide('but-option');if($('but-gutschein'))$('but-gutschein').checked=false;show('bank-section');}
+    goToStep(2);
+    if(!val('eintrittsdatum')) $('eintrittsdatum').value=new Date().toISOString().split('T')[0];
+  });
+
+  $('geburtsdatum').addEventListener('change',checkAlter);
+
+  function checkAlter() {
+    const alter=calcAlter(val('geburtsdatum'));
+    if(alter===null||!state.beitragRow) return true;
+    const row=state.beitragRow;
+    if(alter<18){show('info-minderjaehrig');show('recht-bild-minderjährig');}
+    else{hide('info-minderjaehrig');hide('recht-bild-minderjährig');}
+    if(alter<row.min_alter||alter>row.max_alter){
+      show('warn-alter');
+      setText('warn-alter-text',row.altersgruppe==='jugend'?'Jugendliche/Kinder (0–17 J.)':'Erwachsene (ab 18 J.)');
+      return false;
+    }
+    hide('warn-alter'); return true;
+  }
+
+  function showErr(id,visible){
+    const e=$(id); if(e) e.classList.toggle('visible',visible);
+    const inp=$(id.replace('err-',''));
+    if(inp) inp.classList.toggle('error',visible);
+  }
+
+  function validateStep2(){
+    let ok=true;
+    [{id:'vorname',err:'err-vorname',check:v=>v.length>0},{id:'nachname',err:'err-nachname',check:v=>v.length>0},{id:'strasse',err:'err-strasse',check:v=>v.length>0},{id:'plz',err:'err-plz',check:v=>/^\d{5}$/.test(v)},{id:'ort',err:'err-ort',check:v=>v.length>0},{id:'geburtsdatum',err:'err-geburtsdatum',check:v=>v.length>0},{id:'eintrittsdatum',err:'err-eintrittsdatum',check:v=>v.length>0},{id:'email',err:'err-email',check:v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)}]
+    .forEach(f=>{const valid=f.check(val(f.id));showErr(f.err,!valid);if(!valid)ok=false;});
+    const anredeOk=!!document.querySelector('input[name="anrede"]:checked');
+    showErr('err-anrede',!anredeOk); if(!anredeOk) ok=false;
+    if(!checkAlter()) ok=false;
+    return ok;
+  }
+
+  $('btn-2-zurück').addEventListener('click',()=>goToStep(1));
+  $('btn-2-weiter').addEventListener('click',()=>{if(validateStep2()) goToStep(3);});
+
+  $('but-gutschein')?.addEventListener('change',function(){$('bank-section').style.display=this.checked?'none':'';});
+
+  function validateStep3(){
+    let ok=true;
+    const satzOk=$('satzung').checked; showErr('err-satzung',!satzOk); if(!satzOk) ok=false;
+    if(!$('but-gutschein')?.checked){
+      [{id:'kontoinhaber',err:'err-kontoinhaber',check:v=>v.length>0},{id:'iban',err:'err-iban',check:v=>/^[A-Z]{2}\d{2}[\dA-Z]{1,30}$/.test(v.replace(/\s/g,'').toUpperCase())}]
+      .forEach(f=>{const valid=f.check(val(f.id));showErr(f.err,!valid);if(!valid)ok=false;});
+    }
+    return ok;
+  }
+
+  $('btn-3-zurück').addEventListener('click',()=>goToStep(2));
+  $('btn-3-weiter').addEventListener('click',()=>{if(validateStep3()){buildSummary();goToStep(4);}});
+
+  function buildSummary(){
+    const anrede=document.querySelector('input[name="anrede"]:checked')?.value||'';
+    const but=$('but-gutschein')?.checked;
+    const iban=val('iban').replace(/\s/g,'').toUpperCase();
+    const ibanMasked=iban.length>8?iban.slice(0,4)+'****'+iban.slice(-4):iban;
+    const rows=[
+      ['Anrede',anrede],['Vorname',val('vorname')],['Nachname',val('nachname')],
+      ['Adresse',`${val('strasse')}, ${val('plz')} ${val('ort')}`],
+      ['Geburtsdatum',val('geburtsdatum')],['E-Mail',val('email')],
+      ['Telefon',val('telefon')||'—'],['Eintrittsdatum',val('eintrittsdatum')],
+      ['Abteilung',abteilungen[state.abteilung]?.label],['Kategorie',state.beitragRow?.label],
+      ['Zahlung',but?'BuT-Gutschein':'SEPA-Lastschrift'],
+      ...(!but?[['Kontoinhaber',val('kontoinhaber')],['IBAN',ibanMasked]]:[]),
+      ['Recht am Bild',$('recht-am-bild')?.checked?'Ja':'Nein'],
+      ...(val('sonstiges')?[['Sonstiges',val('sonstiges')]]:[])
+    ];
+    setHTML('summary-content',`<div class="field-section-label">Deine Angaben</div><div class="summary-grid">${rows.map(([k,v])=>`<div class="summary-item"><div class="summary-key">${k}</div><div class="summary-val">${v}</div></div>`).join('')}</div>`);
+    const abt=abteilungen[state.abteilung];
+    setHTML('summary-cart',`<div class="cart__info"><div class="cart__abt">${abt.label}</div><div class="cart__kat">${state.beitragRow.label}</div></div><div class="cart__price">${state.beitragRow.betrag_jaehrlich} €<small>pro Jahr</small></div>`);
+  }
+
+  $('btn-4-zurück').addEventListener('click',()=>goToStep(3));
+
+  $('btn-submit').addEventListener('click',async()=>{
+    const btn=$('btn-submit');
+    $('btn-submit-text').style.display='none'; $('btn-submit-spinner').style.display=''; btn.disabled=true;
+    const but=$('but-gutschein')?.checked;
+    const payload={
+      anrede:document.querySelector('input[name="anrede"]:checked')?.value||'',
+      vorname:val('vorname'),nachname:val('nachname'),strasse:val('strasse'),plz:val('plz'),ort:val('ort'),
+      geburtsdatum:val('geburtsdatum'),eintrittsdatum:val('eintrittsdatum'),telefon:val('telefon'),email:val('email'),sonstiges:val('sonstiges'),
+      abteilung:state.abteilung,abteilung_label:abteilungen[state.abteilung]?.label,
+      kategorie:state.kategorie,kategorie_label:state.beitragRow?.label,
+      betrag_jaehrlich:state.beitragRow?.betrag_jaehrlich,arbeitsdienst_pauschale:state.beitragRow?.arbeitsdienst,
+      but_gutschein:but||false,
+      kontoinhaber:but?'':val('kontoinhaber'),
+      iban:but?'':val('iban').replace(/\s/g,'').toUpperCase(),
+      recht_am_bild:$('recht-am-bild')?.checked||false,
+    };
+    try{
+      const res=await fetch('/api/submit-antrag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const data=await res.json();
+      if(res.ok&&data.success){
+        setText('success-email',payload.email);
+        setText('success-antrag-id',`Antrag-ID: ${data.antragId}`);
+        $('stepper').style.display='none';
+        document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));
+        $('panel-success').classList.add('active');
+        window.scrollTo({top:0,behavior:'smooth'});
+      } else throw new Error(data.error||'Unbekannter Fehler');
+    }catch(err){
+      alert(`Fehler: ${err.message}\n\nBitte erneut versuchen oder Verein kontaktieren.`);
+      $('btn-submit-text').style.display=''; $('btn-submit-spinner').style.display='none'; btn.disabled=false;
+    }
+  });
+
+  buildSportGrid();
+})();
+</script>

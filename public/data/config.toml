@@ -1,0 +1,137 @@
+# Konfiguration für Mitgliedsantragsystem
+# Diese Datei wird zur Compile-Zeit eingelesen.
+
+[verein]
+name = "Allgemeiner Sportverein Nürnberg Pfeil Phönix e.V."
+kurzname = "ASN Pfeil Phönix"
+email = "vorstand@asn-pfeil-phoenix.de"
+adresse = "Marienbergstraße 41, 90411 Nürnberg"
+website = "https://www.asn-pfeil-phoenix.de"
+
+[email_templates]
+
+# Bestätigungs-E-Mail an den neuen Antragsteller
+bestaetigung_betreff = "Dein Mitgliedsantrag beim ASN Pfeil Phönix – Bestätigung"
+
+bestaetigung_text = """
+Hallo {{vorname}} {{nachname}},
+
+vielen Dank für deinen Mitgliedsantrag beim ASN Pfeil Phönix e.V.!
+
+Wir haben deinen Antrag erhalten und werden ihn in Kürze bearbeiten. 
+Du wirst von uns eine weitere Nachricht erhalten, sobald deine Mitgliedschaft 
+bestätigt wurde.
+
+Deine Angaben:
+- Abteilung: {{abteilung}}
+- Mitgliedschaftskategorie: {{kategorie}}
+- Jahresbeitrag: {{betrag}} €
+- Eintrittsdatum: {{eintrittsdatum}}
+
+Bei Fragen stehen wir dir gerne unter {{verein_email}} zur Verfügung.
+
+Mit sportlichen Grüßen
+Der Vorstand des ASN Pfeil Phönix e.V.
+{{verein_adresse}}
+{{verein_website}}
+"""
+
+# Entwurf der Bestätigungs-E-Mail, die der Verein an das neue Mitglied schicken kann
+# (wird als Text in der Vereinsmail beigefügt)
+willkommen_betreff = "Willkommen beim ASN Pfeil Phönix e.V.!"
+
+willkommen_text = """
+Liebe(r) {{vorname}} {{nachname}},
+
+wir freuen uns, dich als neues Mitglied beim ASN Pfeil Phönix e.V. begrüßen zu dürfen!
+
+Deine Mitgliedschaft ist ab {{eintrittsdatum}} aktiv.
+
+Details:
+- Abteilung: {{abteilung}}
+- Kategorie: {{kategorie}}
+- Jahresbeitrag: {{betrag}} €
+{{#if lastschrift}}- Lastschrift: Dein Beitrag wird jährlich im Februar von IBAN {{iban_masked}} eingezogen.{{/if}}
+{{#if but}}- Zahlung: BuT-Gutschein (Bildungs- und Teilhabegutschein){{/if}}
+
+Wir wünschen dir viel Spaß und Erfolg bei uns!
+
+Mit sportlichen Grüßen
+Der Vorstand
+{{verein_name}}
+{{verein_adresse}}
+"""
+
+# Benachrichtigung des Vereins über neuen Antrag  
+vereins_betreff = "Neuer Mitgliedsantrag: {{vorname}} {{nachname}} ({{abteilung}})"
+
+vereins_text = """
+Ein neuer Mitgliedsantrag ist eingegangen.
+
+ANTRAGSTELLER:
+{{vorname}} {{nachname}}
+{{strasse}}
+{{plz}} {{ort}}
+Geburtsdatum: {{geburtsdatum}}
+E-Mail: {{email}}
+Telefon: {{telefon}}
+
+MITGLIEDSCHAFT:
+Abteilung: {{abteilung}}
+Kategorie: {{kategorie}}
+Jahresbeitrag: {{betrag}} €
+Eintrittsdatum: {{eintrittsdatum}}
+
+ZAHLUNG:
+{{#if lastschrift}}Lastschrift
+Kontoinhaber: {{kontoinhaber}}
+IBAN: {{iban}}{{/if}}
+{{#if but}}BuT-Gutschein{{/if}}
+
+EINWILLIGUNGEN:
+Recht am Bild: {{recht_am_bild}}
+Satzung anerkannt: ja
+
+SONSTIGES:
+{{sonstiges}}
+
+---
+Im Anhang befindet sich die vollständige Antragsdaten als JSON-Datei.
+Bitte bearbeite den Antrag zeitnah und sende dem Antragsteller eine Bestätigung.
+
+ENTWURF FÜR WILLKOMMENSMAIL:
+Betreff: Willkommen beim ASN Pfeil Phönix e.V.!
+(siehe Vorlage weiter unten)
+
+{{willkommen_text}}
+"""
+
+[json_template]
+# Felder, die in der JSON-Ausgabe enthalten sein sollen
+felder = [
+  "antrag_id",
+  "eingegangen_am",
+  "anrede",
+  "vorname", 
+  "nachname",
+  "strasse",
+  "plz",
+  "ort",
+  "geburtsdatum",
+  "telefon",
+  "email",
+  "eintrittsdatum",
+  "abteilung",
+  "abteilung_label",
+  "kategorie",
+  "kategorie_label",
+  "betrag_jaehrlich",
+  "arbeitsdienst_pauschale",
+  "zahlungsart",
+  "kontoinhaber",
+  "iban",
+  "but_gutschein",
+  "recht_am_bild",
+  "sonstiges",
+  "satzung_anerkannt"
+]
