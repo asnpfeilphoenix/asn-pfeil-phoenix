@@ -1,11 +1,9 @@
-// astro.config.mjs
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
-import vercel from '@astrojs/vercel/serverless';
+import vercel from '@astrojs/vercel';
 
 export default defineConfig({
   site: 'https://asn-pfeil-phoenix.vercel.app',
-  // Hybrid: die meisten Seiten sind statisch, /api/* läuft serverseitig
   output: 'hybrid',
   adapter: vercel(),
   integrations: [mdx()],
