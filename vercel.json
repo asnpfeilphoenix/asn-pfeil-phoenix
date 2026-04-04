@@ -3,6 +3,11 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "framework": "astro",
+  "functions": {
+    "src/pages/api/*.ts": { "runtime": "nodejs20.x" },
+    "src/pages/mitglied/*.astro": { "runtime": "nodejs20.x" },
+    "src/pages/verwaltung/*.astro": { "runtime": "nodejs20.x" }
+  },
   "headers": [
     {
       "source": "/(.*)",
@@ -14,12 +19,19 @@
     },
     {
       "source": "/admin/(.*)",
-      "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex" }
-      ]
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
+    },
+    {
+      "source": "/mitglied/(.*)",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
+    },
+    {
+      "source": "/verwaltung/(.*)",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
     }
   ],
   "redirects": [
-    { "source": "/home", "destination": "/", "permanent": true }
+    { "source": "/home", "destination": "/", "permanent": true },
+    { "source": "/mitglied", "destination": "/mitglied/antrag", "permanent": false }
   ]
 }
