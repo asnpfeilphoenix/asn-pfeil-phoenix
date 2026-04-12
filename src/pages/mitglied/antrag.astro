@@ -182,8 +182,9 @@ const abteilungenJSON = JSON.stringify(abteilungen);
             </div>
 
             <div class="field-group">
-              <label class="field-label" for="telefon">Telefon / Handy</label>
+              <label class="field-label" for="telefon">Telefon / Handy <span class="req">*</span></label>
               <input class="field-input" type="tel" id="telefon" autocomplete="tel" placeholder="+49 911 …" />
+              <div class="field-err" id="err-telefon">Pflichtfeld.</div>
             </div>
 
             <div class="field-group">
@@ -648,7 +649,7 @@ const abteilungenJSON = JSON.stringify(abteilungen);
 
   function validateStep2(){
     let ok=true;
-    [{id:'vorname',err:'err-vorname',check:v=>v.length>0},{id:'nachname',err:'err-nachname',check:v=>v.length>0},{id:'strasse',err:'err-strasse',check:v=>v.length>0},{id:'plz',err:'err-plz',check:v=>/^\d{5}$/.test(v)},{id:'ort',err:'err-ort',check:v=>v.length>0},{id:'geburtsdatum',err:'err-geburtsdatum',check:v=>v.length>0},{id:'eintrittsdatum',err:'err-eintrittsdatum',check:v=>v.length>0},{id:'email',err:'err-email',check:v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)}]
+    [{id:'vorname',err:'err-vorname',check:v=>v.length>0},{id:'nachname',err:'err-nachname',check:v=>v.length>0},{id:'strasse',err:'err-strasse',check:v=>v.length>0},{id:'plz',err:'err-plz',check:v=>/^\d{5}$/.test(v)},{id:'ort',err:'err-ort',check:v=>v.length>0},{id:'geburtsdatum',err:'err-geburtsdatum',check:v=>v.length>0},{id:'eintrittsdatum',err:'err-eintrittsdatum',check:v=>v.length>0},{id:'email',err:'err-email',check:v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)},{id:'telefon',err:'err-telefon',check:v=>v.length>0}]
     .forEach(f=>{const valid=f.check(val(f.id));showErr(f.err,!valid);if(!valid)ok=false;});
     const anredeOk=!!document.querySelector('input[name="anrede"]:checked');
     showErr('err-anrede',!anredeOk); if(!anredeOk) ok=false;

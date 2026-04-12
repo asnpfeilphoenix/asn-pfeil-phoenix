@@ -1,0 +1,24 @@
+Betreff: Willkommen beim ASN Pfeil Phönix e.V.!
+
+Liebe(r) #anrede #vorname #nachname,
+
+wir freuen uns, dich als neues Mitglied beim ASN Pfeil Phönix e.V. begrüßen zu dürfen!
+
+Deine Mitgliedschaft ist ab #eintrittsdatum aktiv.
+
+Deine Mitgliedsdaten:
+- Abteilung:  #abteilung
+- Kategorie:  #mitgliedschaftstyp
+- Beitrag:    #beitrag € / Jahr
+
+#zahlungsinfo
+
+Bei Fragen stehen wir dir gerne zur Verfügung:
+E-Mail: info@asn-pfeil-phoenix.de
+
+Wir freuen uns auf dich!
+
+Mit sportlichen Grüßen
+Der Vorstand des ASN Pfeil Phönix e.V.
+Marienbergstraße 41, 90411 Nürnberg
+www.asn-pfeil-phoenix.de

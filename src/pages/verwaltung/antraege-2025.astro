@@ -141,6 +141,8 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
     .drawer-actions { display: flex; gap: .75rem; padding: 1.5rem; border-top: 1px solid var(--border); background: #fafafa; position: sticky; bottom: 0; }
     .btn-download { flex: 1; background: var(--navy); color: var(--white); border: none; border-radius: var(--radius); padding: .75rem; font-family: var(--fd); font-size: 1rem; letter-spacing: .04em; cursor: pointer; transition: background .15s; }
     .btn-download:hover { background: var(--navy-dark); }
+    .btn-welcome { flex: 1; background: var(--navy-pale); color: var(--navy); border: none; border-radius: var(--radius); padding: .75rem; font-family: var(--fd); font-size: 1rem; letter-spacing: .04em; cursor: pointer; transition: background .15s; }
+    .btn-welcome:hover { background: var(--navy-mid); color: var(--white); }
     .btn-process { flex: 1; background: var(--red); color: var(--white); border: none; border-radius: var(--radius); padding: .75rem; font-family: var(--fd); font-size: 1rem; letter-spacing: .04em; cursor: pointer; transition: background .15s; }
     .btn-process:hover { background: #b91c1c; }
 
@@ -246,8 +248,22 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
   </div>
   <div class="drawer-body" id="drawer-body"></div>
   <div class="drawer-actions">
-    <button class="btn-download" id="btn-download">⬇ JSON herunterladen</button>
-    <button class="btn-process" id="btn-process">🗑 Bearbeitet & löschen</button>
+    <button class="btn-download" id="btn-download">⬇ XLSX</button>
+    <button class="btn-welcome" id="btn-welcome">✉ Willkommensmail</button>
+    <button class="btn-process" id="btn-process">🗑 Löschen</button>
+  </div>
+</div>
+
+<!-- ── Welcome email modal ─────────────────────────────────── -->
+<div class="confirm-overlay" id="welcome-overlay">
+  <div class="confirm-box" style="max-width:580px">
+    <h3 style="color:var(--navy)">Willkommensmail</h3>
+    <p style="margin-bottom:1rem">Text kopieren und in dein E-Mail-Programm einfügen.</p>
+    <textarea id="welcome-text" style="width:100%;height:280px;font-family:monospace;font-size:.8rem;border:1px solid var(--border);border-radius:var(--radius);padding:.75rem;resize:vertical;color:var(--ink)"></textarea>
+    <div class="confirm-btns" style="margin-top:1rem">
+      <button class="btn-cancel" onclick="closeWelcome()">Schließen</button>
+      <button class="btn-confirm-delete" style="background:var(--navy)" onclick="copyWelcome()">📋 Kopieren</button>
+    </div>
   </div>
 </div>
 
@@ -457,18 +473,123 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
     currentAntrag = null;
   };
 
-  // ── Download JSON ─────────────────────────────────────────
+  // ── Download XLSX ─────────────────────────────────────────
   document.getElementById('btn-download').addEventListener('click', () => {
     if (!currentAntrag) return;
-    const blob = new Blob([JSON.stringify(currentAntrag, null, 2)], { type: 'application/json' });
+    const r = currentAntrag;
+
+    // Map to Vereinsmanager columns
+    const row = {
+      'Mitgliedsnummer': '',
+      'Organisation': 'ASN Pfeil Phönix e.V.',
+      'Anrede': r.anrede || '',
+      'Titel': '',
+      'Vorname': r.vorname || '',
+      'Nachname': r.nachname || '',
+      'Strasse': r.strasse || '',
+      'PLZ': r.plz || '',
+      'Ort': r.ort || '',
+      'E-Mail': r.email || '',
+      'Telefon privat': r.telefon || '',
+      'Telefon geschäftlich': '',
+      'Telefon mobil': '',
+      'Fax': '',
+      'Geburtsdatum': r.geburtsdatum || '',
+      'Adresszusatz': '',
+      'frei definierbar 1': '',
+      'Brief Anrede': `${r.anrede || ''} ${r.vorname || ''} ${r.nachname || ''}`.trim(),
+      'Geschlecht': r.anrede === 'Herr' ? 'm' : r.anrede === 'Frau' ? 'w' : '',
+      'Adresse in Serienbrief verwenden': 'ja',
+      'Eintrittsdatum': r.eintrittsdatum || '',
+      'aktives Mitglied': r.status === 'offen' ? 'ja' : '',
+      'passives Mitglied': r.kategorie === 'passiv' ? 'ja' : '',
+      'kein Mitglied': '',
+      'Ehrenmitglied': '',
+      'frei definierbar 6': '',
+      'frei definierbar 7': '',
+      'frei definierbar 8': r.abteilung_label || '',
+      'frei definierbar 18': r.kategorie_label || '',
+      'Gruppe 1': r.abteilung_label || '',
+      'Gruppe 2': '', 'Gruppe 3': '', 'Gruppe 4': '', 'Gruppe 5': '', 'Gruppe 6': '', 'Gruppe 7': '',
+      'Funktion 1': '', 'Anfangsdatum 1': '', 'Enddatum 1': '',
+      'Funktion 2': '', 'Anfangsdatum 2': '', 'Enddatum 2': '',
+      'Funktion 3': '', 'Anfangsdatum 3': '', 'Enddatum 3': '',
+      'Funktion 4': '', 'Anfangsdatum 4': '', 'Enddatum 4': '',
+      'Info zu Funktionen': '', 'Besonderheiten': '',
+      'Anmerkung 1': r.sonstiges || '',
+      'Anmerkung 2': `Antrag-ID: ${r.antrag_id}`,
+      'Mandatsstatus': r.but_gutschein ? '' : 'Erstlastschrift',
+      'Mandatsreferenz': r.antrag_id || '',
+      'Datum SEPA Mandat': r.eintrittsdatum || '',
+      'IBAN': r.iban || '',
+      'Kontoinhaber': r.kontoinhaber || '',
+      'Verwendungszweck': `Mitgliedsbeitrag ${r.abteilung_label}`,
+      'frei definierbar 17': '',
+      'Zahlungsart': r.but_gutschein ? 'BuT-Gutschein' : 'Lastschrift',
+      'Zahlungsperiode': 'jährlich',
+      'individueller Beitrag': r.betrag_jaehrlich || '',
+      'Beitragsart 1': r.kategorie_label || '',
+      'Beitragsart 2': '', 'Beitragsart 3': '', 'Beitragsart 4': '', 'Beitragsart 5': '', 'Beitragsart 6': '',
+    };
+
+    // Build CSV (fallback if no xlsx library available)
+    const headers = Object.keys(row);
+    const values = headers.map(h => {
+      const v = String(row[h] ?? '');
+      return v.includes(',') || v.includes('"') || v.includes('\n') ? `"${v.replace(/"/g, '""')}"` : v;
+    });
+    const csv = [headers.join(';'), values.join(';')].join('\n');
+    const bom = '\uFEFF'; // UTF-8 BOM for Excel
+    const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `antrag-${currentAntrag.antrag_id}.json`;
+    a.download = `mitglied-${r.nachname}-${r.vorname}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast('JSON heruntergeladen', 'success');
+    showToast('CSV heruntergeladen', 'success');
   });
+
+  // ── Welcome email ─────────────────────────────────────────
+  let welcomeTemplate = null;
+
+  async function loadWelcomeTemplate() {
+    if (welcomeTemplate) return welcomeTemplate;
+    const res = await fetch('/data/willkommen.txt');
+    welcomeTemplate = await res.text();
+    return welcomeTemplate;
+  }
+
+  document.getElementById('btn-welcome').addEventListener('click', async () => {
+    if (!currentAntrag) return;
+    const r = currentAntrag;
+    const template = await loadWelcomeTemplate();
+    const zahlungsinfo = r.but_gutschein
+      ? 'Zahlung: BuT-Gutschein (Bildungs- und Teilhabegutschein der Stadt Nürnberg)'
+      : `Zahlung: SEPA-Lastschrift\nIBAN: ${r.iban || '—'}\nKontoinhaber: ${r.kontoinhaber || '—'}`;
+    const text = template
+      .replace(/#anrede/g, r.anrede || '')
+      .replace(/#vorname/g, r.vorname || '')
+      .replace(/#nachname/g, r.nachname || '')
+      .replace(/#eintrittsdatum/g, r.eintrittsdatum || '—')
+      .replace(/#abteilung/g, r.abteilung_label || '—')
+      .replace(/#mitgliedschaftstyp/g, r.kategorie_label || '—')
+      .replace(/#beitrag/g, r.betrag_jaehrlich ? `${r.betrag_jaehrlich}` : '—')
+      .replace(/#zahlungsinfo/g, zahlungsinfo);
+    document.getElementById('welcome-text').value = text;
+    document.getElementById('welcome-overlay').classList.add('visible');
+  });
+
+  window.closeWelcome = function() {
+    document.getElementById('welcome-overlay').classList.remove('visible');
+  };
+
+  window.copyWelcome = function() {
+    const ta = document.getElementById('welcome-text');
+    ta.select();
+    document.execCommand('copy');
+    showToast('Text kopiert!', 'success');
+  };
 
   // ── Delete flow ───────────────────────────────────────────
   window.confirmDelete = function(id, name) {
