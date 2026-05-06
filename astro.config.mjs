@@ -7,6 +7,10 @@ export default defineConfig({
   output: 'hybrid',
   adapter: vercel(),
   integrations: [mdx()],
+  image: {
+    domains: ['images.pexels.com', 'upload.wikimedia.org', 'mzm.klubkasse.de'],
+    remotePatterns: [{ protocol: 'https' }],
+  },
   markdown: {
     shikiConfig: { theme: 'github-dark' },
     allowDangerousHTML: true,
