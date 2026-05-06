@@ -145,11 +145,17 @@ const related = all
 .article-hero-img {
   margin-top: -2px;
 }
+.article-hero-img {
+  margin-top: -2px;
+  display: flex;
+  justify-content: center;
+}
 .article-hero-img img {
   width: 100%;
+  max-width: 600px;
   max-height: 480px;
   object-fit: cover;
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  border-radius: var(--radius-lg);
 }
 
 .article-body {
