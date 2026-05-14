@@ -210,6 +210,7 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
     </div>
     <div class="header-right">
       <span class="header-badge">Intern</span>
+      <span class="header-badge" id="header-role-badge" style="display:none;background:rgba(15,41,114,.3);color:#a8c4e0;border-color:rgba(15,41,114,.4)"></span>
       <span class="header-user" id="header-user"></span>
       <button class="btn-logout" id="btn-logout">Ausloggen</button>
     </div>
@@ -330,10 +331,30 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
     setTimeout(() => t.classList.remove('visible'), 3000);
   }
 
-  function showAdmin(email) {
+  let userRole = null; // null = not loaded, [] = no role, ['all'] = all, ['tennis'] = tennis only etc.
+
+  async function loadUserRole(email) {
+    try {
+      const res = await supabaseFetch(`/rest/v1/admin_roles?email=eq.${encodeURIComponent(email)}&select=abteilungen,name`);
+      if (!res.ok) return null;
+      const rows = await res.json();
+      return rows[0] || null;
+    } catch { return null; }
+  }
+
+  async function showAdmin(email) {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-wrap').classList.add('visible');
     document.getElementById('header-user').textContent = email;
+    // Load role
+    const role = await loadUserRole(email);
+    userRole = role?.abteilungen || ['all'];
+    // Show role indicator
+    const badge = document.getElementById('header-role-badge');
+    if (badge) {
+      badge.textContent = userRole.includes('all') ? 'Alle Abteilungen' : userRole.join(', ');
+      badge.style.display = '';
+    }
     loadAntraege();
   }
 
@@ -354,7 +375,13 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
     const content = document.getElementById('table-content');
     content.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
     try {
-      const res = await supabaseFetch('/rest/v1/antraege?select=*&order=eingegangen_am.desc');
+      // Build filter based on role
+      let url = '/rest/v1/antraege?select=*&order=eingegangen_am.desc';
+      if (userRole && !userRole.includes('all')) {
+        const abtFilter = userRole.map(a => `abteilung.eq.${a}`).join(',');
+        url += `&or=(${abtFilter})`;
+      }
+      const res = await supabaseFetch(url);
       if (!res.ok) throw new Error('Fehler beim Laden');
       const rows = await res.json();
 
@@ -461,6 +488,23 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
         </div>
         ${r.sonstiges ? `<div style="margin-top:.75rem"><div class="detail-key">Sonstiges</div><div class="detail-val" style="margin-top:.25rem">${r.sonstiges}</div></div>` : ''}
       </div>
+      ${r.familie_gruppe_id ? `
+      <div class="drawer-section">
+        <div class="drawer-section-title">Familienmitgliedschaft</div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-key">Typ</div><div class="detail-val">${r.mitgliedschaftstyp || '—'}</div></div>
+          <div class="detail-item"><div class="detail-key">Familien-ID</div><div class="detail-val" style="font-size:.78rem;word-break:break-all">${r.familie_gruppe_id}</div></div>
+          <div class="detail-item"><div class="detail-key">Rolle</div><div class="detail-val">${r.familie_rolle || '—'}</div></div>
+        </div>
+      </div>` : ''}
+      ${r.nationalitaet || r.geschlecht ? `
+      <div class="drawer-section">
+        <div class="drawer-section-title">Weitere Angaben</div>
+        <div class="detail-grid">
+          ${r.geschlecht ? `<div class="detail-item"><div class="detail-key">Geschlecht</div><div class="detail-val">${r.geschlecht}</div></div>` : ''}
+          ${r.nationalitaet ? `<div class="detail-item"><div class="detail-key">Nationalität</div><div class="detail-val">${r.nationalitaet}</div></div>` : ''}
+        </div>
+      </div>` : ''}
     `;
 
     document.getElementById('drawer-overlay').classList.add('visible');

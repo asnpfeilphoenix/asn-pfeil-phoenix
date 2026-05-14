@@ -11,3 +11,14 @@ kegeln,jugendliche,Jugendliche / Kinder,108,0,jugend,0,17
 radsport,erwachsene,Erwachsene,156,0,erwachsene,18,999
 radsport,studenten,Studenten / Azubis,108,0,erwachsene,18,999
 radsport,jugendliche,Jugendliche / Kinder,108,0,jugend,0,17
+dart,erwachsene,Erwachsene,156,0,erwachsene,18,999
+dart,studenten,Studenten / Azubis,108,0,erwachsene,18,999
+dart,jugendliche,Jugendliche / Kinder,108,0,jugend,0,17
+tennis,einzel_erwachsene,Einzelmitglied Erwachsene,212,60,erwachsene,18,999
+tennis,ehepaar,Ehepaar / Partner,370,120,familie,18,999
+tennis,jugend_standard,Kinder / Jugendliche / Schueler / Studenten,106,60,jugend,0,27
+tennis,jugend_elternteil,Kinder / Jugendliche / Schueler / Studenten (Elternteil Mitglied),80,60,jugend,0,27
+tennis,jugend_zweitkind,2. Kind und mehr (Elternteil Mitglied),0,0,jugend,0,27
+tennis,passiv,Passives Mitglied,96,0,erwachsene,18,999
+tennis,zweitverein,Zweitverein,152,0,erwachsene,18,999
+tennis,ehren,Ehrenmitglied,0,0,alle,0,999
