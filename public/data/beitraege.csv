@@ -14,8 +14,8 @@ radsport,jugendliche,Jugendliche / Kinder,108,0,jugend,0,17
 dart,erwachsene,Erwachsene,156,0,erwachsene,18,999
 dart,studenten,Studenten / Azubis,108,0,erwachsene,18,999
 dart,jugendliche,Jugendliche / Kinder,108,0,jugend,0,17
-tennis,einzel_erwachsene,Einzelmitglied Erwachsene,212,60,erwachsene,18,999
-tennis,ehepaar,Ehepaar / Partner,370,120,familie,18,999
+tennis,einzel_erwachsene,Einzelmitglied Erwachsene,272,60,erwachsene,18,999
+tennis,ehepaar,Ehepaar / Partner,490,120,familie,18,999
 tennis,studenten_standard,Studenten (ohne Elternteil Mitglied),166,60,erwachsene,18,27
 tennis,jugend_standard,Kinder / Jugendliche / Schüler (ohne Elternteil Mitglied),106,0,jugend,0,17
 tennis,studenten_elternteil,Studenten bei denen mind. 1 Elternteil Mitglied ist,140,60,erwachsene,18,27
