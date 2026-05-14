@@ -34,12 +34,13 @@ function parseCSV(raw: string): BeitragRow[] {
 
 const beitraege = parseCSV(csvRaw);
 
-const abteilungen: Record<string, { label: string; image: string; beschreibung: string }> = {
-  allgemein: { label: 'Allgemein', image: null, beschreibung: 'Passiv oder Familienbeitrag' },
-  fussball:  { label: 'Fußball',  image: '/images/abteilungen/football.jpg',   beschreibung: 'Aktiv in der Fußballabteilung' },
-  kegeln:    { label: 'Kegeln',   image: '/images/abteilungen/kegeln.jpg',     beschreibung: 'Aktiv in der Kegelabteilung' },
-  radsport:  { label: 'Radsport', image: '/images/abteilungen/radsport.jpg',   beschreibung: 'Aktiv in der Radsportabteilung' },
-  dart:      { label: 'Dart',     image: '/images/abteilungen/dart.jpg',       beschreibung: 'Aktiv in der Dartabteilung' },
+const abteilungen: Record<string, { label: string; image: string | null; beschreibung: string }> = {
+  allgemein: { label: 'Allgemein', image: null,                                      beschreibung: 'Passiv oder Familienbeitrag' },
+  fussball:  { label: 'Fußball',  image: '/images/abteilungen/football.jpg',         beschreibung: 'Aktiv in der Fußballabteilung' },
+  kegeln:    { label: 'Kegeln',   image: '/images/abteilungen/kegeln.jpg',           beschreibung: 'Aktiv in der Kegelabteilung' },
+  radsport:  { label: 'Radsport', image: '/images/abteilungen/radsport.jpg',         beschreibung: 'Aktiv in der Radsportabteilung' },
+  dart:      { label: 'Dart',     image: '/images/abteilungen/dart.jpg',             beschreibung: 'Aktiv in der Dartabteilung' },
+  tennis:    { label: 'Tennis',   image: '/images/abteilungen/tennis.jpg',           beschreibung: 'Aktiv in der Tennisabteilung' },
 };
 
 const beitraegeJSON = JSON.stringify(beitraege);
@@ -70,7 +71,12 @@ const abteilungenJSON = JSON.stringify(abteilungen);
           <div class="stepper__circle"><span>2</span></div>
           <div class="stepper__label">Persönliches</div>
         </div>
-        <div class="stepper__connector"></div>
+        <div class="stepper__connector" id="connector-2-3"></div>
+        <div class="stepper__item" data-step="2.5" id="step-familie" style="display:none">
+          <div class="stepper__circle"><span>+</span></div>
+          <div class="stepper__label">Familie</div>
+        </div>
+        <div class="stepper__connector" id="connector-familie-3" style="display:none"></div>
         <div class="stepper__item" data-step="3">
           <div class="stepper__circle"><span>3</span></div>
           <div class="stepper__label">Zahlung</div>
@@ -223,6 +229,115 @@ const abteilungenJSON = JSON.stringify(abteilungen);
         </div>
       </div>
 
+      <!-- SCHRITT 2.5 — Tennis Familienmitglieder (nur Tennis) -->
+      <div class="step-panel" id="panel-2-5">
+        <div class="form-card">
+          <div class="form-card__head">
+            <h2>Familienmitglieder</h2>
+            <p>Bitte die weiteren Mitglieder der Familienmitgliedschaft eintragen.</p>
+          </div>
+          <div class="notice notice--info" style="margin-bottom:1.5rem">
+            <span class="notice__icon">ℹ</span>
+            <div>Adresse, E-Mail und Telefon werden vom Hauptantragsteller übernommen. Felder die nicht ausgefüllt werden, werden ignoriert.</div>
+          </div>
+
+          <!-- Familie Mitglied 1 -->
+          <div class="field-section-label">Familienmitglied 1</div>
+          <div class="field-grid">
+            <div class="field-group">
+              <label class="field-label" for="fm1-vorname">Vorname</label>
+              <input class="field-input" type="text" id="fm1-vorname" placeholder="Vorname" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="fm1-nachname">Nachname</label>
+              <input class="field-input" type="text" id="fm1-nachname" placeholder="Nachname" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="fm1-geburtsdatum">Geburtsdatum</label>
+              <input class="field-input" type="date" id="fm1-geburtsdatum" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="fm1-geschlecht">Geschlecht</label>
+              <select class="field-input" id="fm1-geschlecht">
+                <option value="">— bitte wählen —</option>
+                <option value="männlich">männlich</option>
+                <option value="weiblich">weiblich</option>
+                <option value="divers">divers</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="fm1-nationalitaet">Nationalität</label>
+              <input class="field-input" type="text" id="fm1-nationalitaet" placeholder="z.B. deutsch" />
+            </div>
+          </div>
+
+          <!-- Familie Mitglied 2 -->
+          <div class="field-section-label" style="margin-top:1.5rem">Familienmitglied 2</div>
+          <div class="field-grid">
+            <div class="field-group">
+              <label class="field-label" for="fm2-vorname">Vorname</label>
+              <input class="field-input" type="text" id="fm2-vorname" placeholder="Vorname" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="fm2-nachname">Nachname</label>
+              <input class="field-input" type="text" id="fm2-nachname" placeholder="Nachname" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="fm2-geburtsdatum">Geburtsdatum</label>
+              <input class="field-input" type="date" id="fm2-geburtsdatum" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="fm2-geschlecht">Geschlecht</label>
+              <select class="field-input" id="fm2-geschlecht">
+                <option value="">— bitte wählen —</option>
+                <option value="männlich">männlich</option>
+                <option value="weiblich">weiblich</option>
+                <option value="divers">divers</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="fm2-nationalitaet">Nationalität</label>
+              <input class="field-input" type="text" id="fm2-nationalitaet" placeholder="z.B. deutsch" />
+            </div>
+          </div>
+
+          <!-- Familie Mitglied 3 -->
+          <div class="field-section-label" style="margin-top:1.5rem">Familienmitglied 3</div>
+          <div class="field-grid">
+            <div class="field-group">
+              <label class="field-label" for="fm3-vorname">Vorname</label>
+              <input class="field-input" type="text" id="fm3-vorname" placeholder="Vorname" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="fm3-nachname">Nachname</label>
+              <input class="field-input" type="text" id="fm3-nachname" placeholder="Nachname" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="fm3-geburtsdatum">Geburtsdatum</label>
+              <input class="field-input" type="date" id="fm3-geburtsdatum" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="fm3-geschlecht">Geschlecht</label>
+              <select class="field-input" id="fm3-geschlecht">
+                <option value="">— bitte wählen —</option>
+                <option value="männlich">männlich</option>
+                <option value="weiblich">weiblich</option>
+                <option value="divers">divers</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="fm3-nationalitaet">Nationalität</label>
+              <input class="field-input" type="text" id="fm3-nationalitaet" placeholder="z.B. deutsch" />
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn--ghost" id="btn-25-zurück">← Zurück</button>
+            <button class="btn btn--primary btn--lg" id="btn-25-weiter">Weiter →</button>
+          </div>
+        </div>
+      </div>
+
       <!-- SCHRITT 3 -->
       <div class="step-panel" id="panel-3">
         <div class="form-card">
@@ -241,7 +356,7 @@ const abteilungenJSON = JSON.stringify(abteilungen);
           <div id="bank-section">
             <div class="notice notice--info" style="margin-bottom:1.25rem">
               <span class="notice__icon">✅</span>
-              <div>Ich bin bis auf Widerruf damit einverstanden, dass der Jahresbeitrag mittels <strong>SEPA-Lastschrift</strong> im Februar eingezogen wird.</div>
+              <div id="sepa-notice-text">Ich bin bis auf Widerruf damit einverstanden, dass der Jahresbeitrag mittels <strong>SEPA-Lastschrift</strong> im Februar eingezogen wird.</div>
             </div>
             <div class="field-grid">
               <div class="field-group full">
@@ -545,14 +660,19 @@ const abteilungenJSON = JSON.stringify(abteilungen);
 
   function goToStep(n) {
     document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));
-    if(n){ const p=$(`panel-${n}`); if(p){p.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'});} }
+    if(n){
+      // panel-2.5 has id "panel-2-5"
+      const panelId = n === 2.5 ? 'panel-2-5' : `panel-${n}`;
+      const p=$(panelId);
+      if(p){p.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'});}
+    }
     document.querySelectorAll('.stepper__item').forEach(item=>{
-      const s=+item.dataset.step;
+      const s=parseFloat(item.dataset.step);
       item.classList.remove('active','done');
       if(s===n) item.classList.add('active');
       else if(s<n) item.classList.add('done');
       const c=item.querySelector('.stepper__circle span');
-      if(c) c.textContent=s<n?'✓':String(s);
+      if(c) c.textContent=s<n?'✓':(s===2.5?'+':String(s));
     });
     state.step=n;
   }
@@ -619,6 +739,18 @@ const abteilungenJSON = JSON.stringify(abteilungen);
 
   $('btn-1-weiter').addEventListener('click',()=>{
     if(!state.beitragRow) return;
+    // Show/hide Tennis family stepper
+    const isTennisFamilie = state.abteilung==='tennis' &&
+      ['ehepaar','jugend_standard','jugend_elternteil','jugend_zweitkind'].includes(state.kategorie);
+    const stepFamilie=$('step-familie');
+    const connFamilie=$('connector-familie-3');
+    if(isTennisFamilie){stepFamilie.style.display='';connFamilie.style.display='';}
+    else{stepFamilie.style.display='none';connFamilie.style.display='none';}
+    // SEPA notice month
+    const sepaNotice=$('sepa-notice-text');
+    if(sepaNotice) sepaNotice.innerHTML=state.abteilung==='tennis'
+      ? 'Ich bin bis auf Widerruf damit einverstanden, dass der Jahresbeitrag mittels <strong>SEPA-Lastschrift</strong> zum <strong>01. März</strong> eingezogen wird.'
+      : 'Ich bin bis auf Widerruf damit einverstanden, dass der Jahresbeitrag mittels <strong>SEPA-Lastschrift</strong> im <strong>Februar</strong> eingezogen wird.';
     if(state.beitragRow.altersgruppe==='jugend') show('but-option');
     else{hide('but-option');if($('but-gutschein'))$('but-gutschein').checked=false;show('bank-section');}
     goToStep(2);
@@ -658,7 +790,16 @@ const abteilungenJSON = JSON.stringify(abteilungen);
   }
 
   $('btn-2-zurück').addEventListener('click',()=>goToStep(1));
-  $('btn-2-weiter').addEventListener('click',()=>{if(validateStep2()) goToStep(3);});
+  $('btn-2-weiter').addEventListener('click',()=>{
+    if(!validateStep2()) return;
+    const isTennisFamilie = state.abteilung==='tennis' &&
+      ['ehepaar','jugend_standard','jugend_elternteil','jugend_zweitkind'].includes(state.kategorie);
+    goToStep(isTennisFamilie ? 2.5 : 3);
+  });
+
+  // Tennis family navigation
+  $('btn-25-zurück').addEventListener('click',()=>goToStep(2));
+  $('btn-25-weiter').addEventListener('click',()=>goToStep(3));
 
   $('but-gutschein')?.addEventListener('change',function(){$('bank-section').style.display=this.checked?'none':'';});
 
@@ -672,7 +813,11 @@ const abteilungenJSON = JSON.stringify(abteilungen);
     return ok;
   }
 
-  $('btn-3-zurück').addEventListener('click',()=>goToStep(2));
+  $('btn-3-zurück').addEventListener('click',()=>{
+    const isTennisFamilie = state.abteilung==='tennis' &&
+      ['ehepaar','jugend_standard','jugend_elternteil','jugend_zweitkind'].includes(state.kategorie);
+    goToStep(isTennisFamilie ? 2.5 : 2);
+  });
   $('btn-3-weiter').addEventListener('click',()=>{if(validateStep3()){buildSummary();goToStep(4);}});
 
   function buildSummary(){
@@ -702,6 +847,20 @@ const abteilungenJSON = JSON.stringify(abteilungen);
     const btn=$('btn-submit');
     $('btn-submit-text').style.display='none'; $('btn-submit-spinner').style.display=''; btn.disabled=true;
     const but=$('but-gutschein')?.checked;
+    // Collect Tennis family members
+    const familienmitglieder = [];
+    for(let i=1;i<=3;i++){
+      const vorname=val(`fm${i}-vorname`);
+      const nachname=val(`fm${i}-nachname`);
+      if(vorname||nachname){
+        familienmitglieder.push({
+          vorname, nachname,
+          geburtsdatum:val(`fm${i}-geburtsdatum`)||null,
+          geschlecht:val(`fm${i}-geschlecht`)||null,
+          nationalitaet:val(`fm${i}-nationalitaet`)||null,
+        });
+      }
+    }
     const payload={
       anrede:document.querySelector('input[name="anrede"]:checked')?.value||'',
       vorname:val('vorname'),nachname:val('nachname'),strasse:val('strasse'),plz:val('plz'),ort:val('ort'),
@@ -713,6 +872,7 @@ const abteilungenJSON = JSON.stringify(abteilungen);
       kontoinhaber:but?'':val('kontoinhaber'),
       iban:but?'':val('iban').replace(/\s/g,'').toUpperCase(),
       recht_am_bild:$('recht-am-bild')?.checked||false,
+      familienmitglieder: familienmitglieder.length>0 ? familienmitglieder : undefined,
     };
     try{
       const res=await fetch('/api/submit-antrag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
