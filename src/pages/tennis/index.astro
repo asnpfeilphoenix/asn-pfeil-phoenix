@@ -38,6 +38,7 @@ const posts = (await getCollection('news', ({ data }) => !data.draft && data.spo
   <nav class="submenu" id="submenu" aria-label="Seitennavigation">
     <div class="container submenu__inner">
       <a href="#ueber-uns" class="submenu__link">Über uns</a>
+      <a href="#instagram" class="submenu__link">Folgt uns auf Instagram</a>
       <a href="#teams" class="submenu__link">Teams</a>
       <a href="#ansprechpartner" class="submenu__link">Ansprechpartner</a>
       <a href="#news" class="submenu__link">News</a>
@@ -63,26 +64,29 @@ const posts = (await getCollection('news', ({ data }) => !data.draft && data.spo
 
         <p>Für Erwachsene stehen Trainer für Einzel- oder Gruppentraining zur Verfügung. Mannschaftstraining findet während der Medenspiele 1x pro Woche statt und wird von den Mannschaften selbst organisiert. Für Kinder/Jugendliche wird über den Jugendwart Training angeboten. Kinder von 3–5 Jahre können an der Ballgewöhnung, auch ohne Mitgliedschaft, gegen einen Unkostenbeitrag teilnehmen. Kinder und Jugendliche haben die Möglichkeit, in Absprache mit dem Jugend- und Sportwart, unter den erwachsenen Spielern einen Paten auszusuchen, um mehr Spielpraxis oder sonstige Unterstützung zu erhalten. Jedes Kind ist herzlich willkommen!</p>
 
-        <p>Bleibt auf dem Laufenden und folgt uns auf Instagram:</p>
-
         <div class="cta-row">
-          <a href="https://www.instagram.com/asn_pfeil_phoenix_tennis/" target="_blank" rel="noopener" class="btn btn--primary">
-            📸 @asn_pfeil_phoenix_tennis
-          </a>
           <a href="/data/tennis-infomappe.pdf" target="_blank" class="btn btn--ghost">
             📄 Infomappe herunterladen
           </a>
         </div>
       </div>
+    </div>
+  </section>
 
-      <div class="ueber-aside">
-        <div class="instagram-card">
-          <p class="instagram-card__label">Folgt uns auf Instagram</p>
-          <a href="https://www.instagram.com/asn_pfeil_phoenix_tennis/" target="_blank" rel="noopener">
-            <img src="/images/tennis/instagram-qr.png" alt="Instagram QR Code @asn_pfeil_phoenix_tennis" class="instagram-card__qr" />
-          </a>
-          <p class="instagram-card__handle">@asn_pfeil_phoenix_tennis</p>
-        </div>
+  <!-- Instagram -->
+  <section class="section section--navy" id="instagram">
+    <div class="container instagram-section">
+      <div class="instagram-section__text">
+        <p class="section-eyebrow" style="color:rgba(255,255,255,.5)">Social Media</p>
+        <h2 style="color:var(--white)">Folgt uns auf Instagram</h2>
+        <p style="color:rgba(255,255,255,.65);line-height:1.75;margin-top:1rem">Aktuelle Bilder, Ergebnisse und Einblicke hinter die Kulissen — folgt uns auf Instagram und bleibt immer auf dem Laufenden.</p>
+        <a href="https://www.instagram.com/asn_pfeil_phoenix_tennis/" target="_blank" rel="noopener" class="btn btn--white" style="margin-top:1.5rem">
+          📸 @asn_pfeil_phoenix_tennis
+        </a>
+      </div>
+      <div class="instagram-section__qr">
+        <img src="/images/tennis/instagram-qr.png" alt="Instagram QR Code @asn_pfeil_phoenix_tennis" />
+        <p class="instagram-section__handle">@asn_pfeil_phoenix_tennis</p>
       </div>
     </div>
   </section>
@@ -137,7 +141,7 @@ const posts = (await getCollection('news', ({ data }) => !data.draft && data.spo
 </BaseLayout>
 
 <script>
-  const sections = ['ueber-uns', 'teams', 'ansprechpartner', 'news'];
+  const sections = ['ueber-uns', 'instagram', 'teams', 'ansprechpartner', 'news'];
   const links = document.querySelectorAll<HTMLAnchorElement>('.submenu__link');
 
   const observer = new IntersectionObserver(entries => {
@@ -184,39 +188,22 @@ const posts = (await getCollection('news', ({ data }) => !data.draft && data.spo
 .submenu__link:hover { color: var(--navy); }
 .submenu__link.is-active { color: var(--navy); border-bottom-color: var(--navy); }
 
-/* Über uns */
-.ueber-grid {
-  display: grid; grid-template-columns: 1fr 280px;
-  gap: 3rem; align-items: start;
-}
-@media (max-width: 860px) {
-  .ueber-grid { grid-template-columns: 1fr; }
-  .ueber-aside { order: -1; }
-}
+.ueber-grid { display: block; }
 .ueber-text p { color: var(--mid); line-height: 1.8; margin-top: 1rem; }
 .ueber-text h2 { margin-top: .75rem; }
 .cta-row { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1.75rem; }
 
-/* Instagram card */
-.instagram-card {
-  background: var(--white); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 1.5rem;
-  text-align: center; position: sticky; top: 130px;
+/* Instagram section */
+.instagram-section {
+  display: grid; grid-template-columns: 1fr auto;
+  gap: 3rem; align-items: center;
 }
-.instagram-card__label {
-  font-size: .72rem; font-weight: 700;
-  letter-spacing: .12em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 1rem;
-}
-.instagram-card__qr {
-  width: 100%; max-width: 200px;
-  border-radius: 8px; margin-inline: auto;
-  transition: transform .2s;
-}
-.instagram-card__qr:hover { transform: scale(1.03); }
-.instagram-card__handle {
+@media (max-width: 700px) { .instagram-section { grid-template-columns: 1fr; } }
+.instagram-section__qr { text-align: center; }
+.instagram-section__qr img { width: 200px; border-radius: 12px; margin-inline: auto; }
+.instagram-section__handle {
   font-size: .85rem; font-weight: 600;
-  color: var(--navy); margin-top: .75rem;
+  color: rgba(255,255,255,.7); margin-top: .75rem;
 }
 
 /* Teams */
