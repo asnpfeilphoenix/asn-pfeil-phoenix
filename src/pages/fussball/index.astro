@@ -73,8 +73,19 @@ const contacts = (kontakteRows as any[]).map(r => ({
     </div>
   </header>
 
+  <!-- Submenu -->
+  <nav class="submenu" aria-label="Seitennavigation">
+    <div class="container submenu__inner">
+      <a href="#mannschaften" class="submenu__link">Mannschaften</a>
+      <a href="#ansprechpartner" class="submenu__link">Ansprechpartner</a>
+      <a href="#philosophie" class="submenu__link">Philosophie</a>
+      <a href="#maedchen" class="submenu__link">Mädchenfußball</a>
+      <a href="#news" class="submenu__link">News</a>
+    </div>
+  </nav>
+
   <!-- ===== MANNSCHAFTEN ===== -->
-  <section class="section section--off">
+  <section class="section section--off" id="mannschaften">
     <div class="container">
       <p class="section-eyebrow">Unsere Teams</p>
       <h2>Mannschaften</h2>
@@ -149,7 +160,7 @@ const contacts = (kontakteRows as any[]).map(r => ({
   </section>
 
   <!-- ===== CONTACTS ===== -->
-  <section class="section">
+  <section class="section" id="ansprechpartner">
     <div class="container">
       <p class="section-eyebrow">Ansprechpartner</p>
       <h2>Abteilungsleitung</h2>
@@ -175,7 +186,7 @@ const contacts = (kontakteRows as any[]).map(r => ({
   </section>
 
   <!-- ===== JUGENDPHILOSOPHIE ===== -->
-  <section class="section section--off">
+  <section class="section section--off" id="philosophie">
     <div class="container">
       <div class="philosophy-layout">
         <div class="philosophy-text">
@@ -201,7 +212,7 @@ const contacts = (kontakteRows as any[]).map(r => ({
   </section>
 
   <!-- ===== MÄDCHENFUSSBALL ===== -->
-  <section class="section">
+  <section class="section" id="maedchen">
     <div class="container">
       <div class="girls-layout">
         <div>
@@ -230,7 +241,7 @@ const contacts = (kontakteRows as any[]).map(r => ({
 
   <!-- ===== NEWS ===== -->
   {posts.length > 0 && (
-    <section class="section section--off">
+    <section class="section section--off" id="news">
       <div class="container">
         <p class="section-eyebrow">Aktuelles</p>
         <h2>Fußball-News</h2>
@@ -256,6 +267,26 @@ const contacts = (kontakteRows as any[]).map(r => ({
 </BaseLayout>
 
 <style>
+/* Submenu */
+.submenu {
+  position: sticky; top: 70px; z-index: 90;
+  background: var(--white); border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(15,41,114,.06);
+}
+.submenu__inner {
+  display: flex; gap: 0; overflow-x: auto;
+  scrollbar-width: none;
+}
+.submenu__inner::-webkit-scrollbar { display: none; }
+.submenu__link {
+  font-size: .82rem; font-weight: 600;
+  color: var(--mid); padding: 1rem 1.25rem;
+  white-space: nowrap; border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.submenu__link:hover { color: var(--navy); }
+.submenu__link.is-active { color: var(--navy); border-bottom-color: var(--navy); }
+
 /* Header */
 .dept-header { padding: 4rem 0 3rem; background: var(--navy-dark); border-bottom: 4px solid var(--navy-mid); }
 .dept-header h1 { color: var(--white); font-size: clamp(2.5rem, 8vw, 6rem); }
@@ -368,3 +399,21 @@ const contacts = (kontakteRows as any[]).map(r => ({
   text-transform: uppercase; color: var(--muted); margin-top: .2rem;
 }
 </style>
+
+<script>
+  const sections = ['mannschaften', 'ansprechpartner', 'philosophie', 'maedchen', 'news'];
+  const links = document.querySelectorAll<HTMLAnchorElement>('.submenu__link');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('is-active'));
+        const active = document.querySelector(`.submenu__link[href="#${entry.target.id}"]`);
+        active?.classList.add('is-active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+</script>
