@@ -16,9 +16,11 @@ dart,studenten,Studenten / Azubis,108,0,erwachsene,18,999
 dart,jugendliche,Jugendliche / Kinder,108,0,jugend,0,17
 tennis,einzel_erwachsene,Einzelmitglied Erwachsene,212,60,erwachsene,18,999
 tennis,ehepaar,Ehepaar / Partner,370,120,familie,18,999
-tennis,jugend_standard,Kinder / Jugendliche / Schueler / Studenten,106,60,jugend,0,27
-tennis,jugend_elternteil,Kinder / Jugendliche / Schueler / Studenten (Elternteil Mitglied),80,60,jugend,0,27
+tennis,studenten_standard,Studenten (ohne Elternteil Mitglied),106,60,erwachsene,18,27
+tennis,jugend_standard,Kinder / Jugendliche / Schüler (ohne Elternteil Mitglied),106,0,jugend,0,17
+tennis,studenten_elternteil,Studenten bei denen mind. 1 Elternteil Mitglied ist,80,60,erwachsene,18,27
+tennis,jugend_elternteil,Kinder / Jugendliche / Schüler (Elternteil Mitglied),80,0,jugend,0,17
 tennis,jugend_zweitkind,2. Kind und mehr (Elternteil Mitglied),0,0,jugend,0,27
 tennis,passiv,Passives Mitglied,96,0,erwachsene,18,999
-tennis,zweitverein,Zweitverein,152,0,erwachsene,18,999
+tennis,zweitverein,Zweitverein,152,30,erwachsene,18,999
 tennis,ehren,Ehrenmitglied,0,0,alle,0,999

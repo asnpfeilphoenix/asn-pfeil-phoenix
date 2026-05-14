@@ -103,7 +103,7 @@ const abteilungenJSON = JSON.stringify(abteilungen);
             <div class="kategorie-list" id="kategorie-list"></div>
             <div class="notice notice--info" id="arbeitsdienst-info" style="display:none">
               <span class="notice__icon">⚒</span>
-              <div>Diese Kategorie enthält eine <strong>Arbeitsdienst-Pauschale von <span id="ad-betrag"></span> €/Jahr</strong>. Pro geleisteter Stunde bei einem offiziellen Arbeitsdienst der Fußballabteilung werden <strong>10 €</strong> erstattet.</div>
+              <div>Diese Kategorie enthält eine <strong>Arbeitsdienst-Pauschale von <span id="ad-betrag"></span> €/Jahr</strong>. Pro geleisteter Stunde bei einem offiziellen Arbeitsdienst der <span id="ad-abteilung">Abteilung</span> werden <strong>10 €</strong> erstattet.</div>
             </div>
           </div>
 
@@ -374,7 +374,7 @@ const abteilungenJSON = JSON.stringify(abteilungen);
           </div>
 
           <div class="field-section-label" style="margin-top:1.5rem">Hinweise</div>
-          <div class="notice notice--info"><span class="notice__icon">📋</span><div><strong>Kündigung:</strong> Schriftlich bis spätestens Ende September (3 Monate vor Jahresende) an die Vorstandschaft.</div></div>
+          <div class="notice notice--info" id="kuendigung-notice"><span class="notice__icon">📋</span><div id="kuendigung-text"><strong>Kündigung:</strong> Schriftlich bis spätestens Ende September (3 Monate vor Jahresende) an die Vorstandschaft.</div></div>
           <div class="notice notice--info" style="margin-top:.75rem"><span class="notice__icon">🔒</span><div><strong>Datenschutz:</strong> Deine Daten werden ausschließlich für Vereinsverwaltungszwecke verwendet.</div></div>
 
           <div class="field-group" style="margin-top:1.5rem">
@@ -718,7 +718,11 @@ const abteilungenJSON = JSON.stringify(abteilungen);
         item.classList.add('selected');
         state.kategorie=row.kategorie; state.beitragRow=row;
         updateCart();
-        if(row.arbeitsdienst>0){setText('ad-betrag',row.arbeitsdienst);show('arbeitsdienst-info');}
+        if(row.arbeitsdienst>0){
+          setText('ad-betrag',row.arbeitsdienst);
+          setText('ad-abteilung', abteilungen[state.abteilung]?.label + 'abteilung');
+          show('arbeitsdienst-info');
+        }
         else hide('arbeitsdienst-info');
         $('btn-1-weiter').disabled=false;
       });
@@ -746,7 +750,11 @@ const abteilungenJSON = JSON.stringify(abteilungen);
     const connFamilie=$('connector-familie-3');
     if(isTennisFamilie){stepFamilie.style.display='';connFamilie.style.display='';}
     else{stepFamilie.style.display='none';connFamilie.style.display='none';}
-    // SEPA notice month
+    // Kündigung notice
+    const kuendigungText=$('kuendigung-text');
+    if(kuendigungText) kuendigungText.innerHTML = state.abteilung==='tennis'
+      ? '<strong>Kündigung:</strong> Jederzeit zum Ende des Geschäftsjahres (31.12.) unter Einhaltung einer Frist von <strong>1 Monat</strong> in schriftlicher Form.'
+      : '<strong>Kündigung:</strong> Schriftlich bis spätestens Ende September (<strong>3 Monate</strong> vor Jahresende) an die Vorstandschaft.';
     const sepaNotice=$('sepa-notice-text');
     if(sepaNotice) sepaNotice.innerHTML=state.abteilung==='tennis'
       ? 'Ich bin bis auf Widerruf damit einverstanden, dass der Jahresbeitrag mittels <strong>SEPA-Lastschrift</strong> zum <strong>01. März</strong> eingezogen wird.'
