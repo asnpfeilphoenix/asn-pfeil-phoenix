@@ -23,34 +23,95 @@ const posts = (await getCollection('news', ({ data }) => !data.draft && data.spo
   .slice(0, 6);
 ---
 
-<BaseLayout title="Tennis" description="Die Tennisabteilung des ASN Pfeil Phönix e.V.">
+<BaseLayout title="Tennis" description="Die Tennisabteilung des ASN Pfeil Phönix e.V. — seit über 50 Jahren Tennis in Nürnberg-Ziegelstein.">
 
+  <!-- Header -->
   <header class="dept-header">
     <div class="container">
       <span class="section-eyebrow">Abteilung</span>
       <h1>Tennis</h1>
-      <p class="dept-sub">Vereinstennis für Mitglieder aller Spielstärken und Altersstufen.</p>
+      <p class="dept-sub">Seit über 50 Jahren Tennis beim ASN Pfeil Phönix.</p>
     </div>
   </header>
 
-  <section class="section">
-    <div class="container grid-2">
-      <div>
-        <h2>Unsere Anlage</h2>
-        <p style="color:var(--mid);line-height:1.75;margin-top:1rem">Die Tennisplätze des ASN Pfeil Phönix befinden sich auf dem Vereinsgelände an der Marienbergstraße 41 in Nürnberg-Ziegelstein. Wir verfügen über mehrere Sandplätze und eine vereinseigene Umkleide.</p>
+  <!-- Submenu -->
+  <nav class="submenu" id="submenu" aria-label="Seitennavigation">
+    <div class="container submenu__inner">
+      <a href="#ueber-uns" class="submenu__link">Über uns</a>
+      <a href="#teams" class="submenu__link">Teams</a>
+      <a href="#ansprechpartner" class="submenu__link">Ansprechpartner</a>
+      <a href="#news" class="submenu__link">News</a>
+    </div>
+  </nav>
+
+  <!-- Über uns -->
+  <section class="section" id="ueber-uns">
+    <div class="container ueber-grid">
+      <div class="ueber-text">
+        <p class="section-eyebrow">Wir über uns</p>
+        <h2>Herzlich Willkommen bei der Tennisabteilung</h2>
+
+        <p>Seit über 50 Jahren gibt es die Tennisabteilung beim ASN Pfeil Phönix. Wir freuen uns, wenn Sie als Besucher unseres Internet-Auftritts zu uns auf das Gelände kommen und mit uns Tennis spielen wollen.</p>
+
+        <p>Die Tennisabteilung hat zurzeit ca. 150 Mitglieder. Wir spielen auf sieben gepflegten Sandplätzen ohne Wartezeiten.</p>
+
+        <p>Für gesellige Stunden und Veranstaltungen steht unser Clubheim mit Terrasse und Garten zur Verfügung. Wir veranstalten Spaßturniere für Jedermann und richten LK-Turniere aus.</p>
+
+        <p>Die Mitglieder der Abteilung betreiben eine aktive Kinder- und Jugendarbeit mit professionellen Trainern und organisieren gemeinsame Tennisurlaube, Wanderaktivitäten und Besuche von Kulturevents. Unsere Mannschaften kämpfen für den Aufstieg oder gegen den Abstieg in Medenspielen für Damen und Herren sowie um Freizeitpokale. In der Tennisabteilung herrscht eine ungezwungene Atmosphäre und das gemeinsame Tennisspiel von Groß und Klein bereitet allen Beteiligten viel Spaß und Freude.</p>
+
+        <p>Jedes Jahr werden Schleifchen-/Doppel-Turniere angeboten. Diese stehen meistens unter einem bestimmten Motto, das sich nicht nur in der Deko, sondern auch in der Kleidung der Spieler und „im Essen" wiederfindet. In der Regel wird ein kleiner Unkostenbeitrag erhoben, von dem Kaffee und Kuchen etc. bestritten werden. Zu den Schleifchenturnieren ist Jeder herzlich eingeladen! Die Termine werden frühzeitig am Infobrett der Tennisabteilung und für die Mitglieder per E-Mail bekannt gegeben. Außerdem feiern wir gern gemeinsam z.B. Weihnachten oder auch einfach nur das schöne Wetter bei einem Grillfest.</p>
+
+        <p>Für Erwachsene stehen Trainer für Einzel- oder Gruppentraining zur Verfügung. Mannschaftstraining findet während der Medenspiele 1x pro Woche statt und wird von den Mannschaften selbst organisiert. Für Kinder/Jugendliche wird über den Jugendwart Training angeboten. Kinder von 3–5 Jahre können an der Ballgewöhnung, auch ohne Mitgliedschaft, gegen einen Unkostenbeitrag teilnehmen. Kinder und Jugendliche haben die Möglichkeit, in Absprache mit dem Jugend- und Sportwart, unter den erwachsenen Spielern einen Paten auszusuchen, um mehr Spielpraxis oder sonstige Unterstützung zu erhalten. Jedes Kind ist herzlich willkommen!</p>
+
+        <p>Bleibt auf dem Laufenden und folgt uns auf Instagram:</p>
+
+        <div class="cta-row">
+          <a href="https://www.instagram.com/asn_pfeil_phoenix_tennis/" target="_blank" rel="noopener" class="btn btn--primary">
+            📸 @asn_pfeil_phoenix_tennis
+          </a>
+          <a href="/data/tennis-infomappe.pdf" target="_blank" class="btn btn--ghost">
+            📄 Infomappe herunterladen
+          </a>
+        </div>
       </div>
-      <div>
-        <h2>Mitmachen</h2>
-        <p style="color:var(--mid);line-height:1.75;margin-top:1rem">Ob Anfänger oder erfahrener Spieler — bei uns ist jeder willkommen. Wir bieten Mannschaftsspielbetrieb, Clubmeisterschaften und gesellige Veranstaltungen.</p>
-        <a href="/verein#mitglied" class="btn btn--primary" style="margin-top:1.25rem">Mitglied werden →</a>
+
+      <div class="ueber-aside">
+        <div class="instagram-card">
+          <p class="instagram-card__label">Folgt uns auf Instagram</p>
+          <a href="https://www.instagram.com/asn_pfeil_phoenix_tennis/" target="_blank" rel="noopener">
+            <img src="/images/tennis/instagram-qr.png" alt="Instagram QR Code @asn_pfeil_phoenix_tennis" class="instagram-card__qr" />
+          </a>
+          <p class="instagram-card__handle">@asn_pfeil_phoenix_tennis</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <ContactsBar contacts={contacts} eyebrow="Tennisabteilung" title="Ansprechpartner" />
+  <!-- Teams -->
+  <section class="section section--off" id="teams">
+    <div class="container">
+      <p class="section-eyebrow">Spielbetrieb</p>
+      <h2>Unsere Mannschaften</h2>
+      <p class="teams-intro">Alle unsere Mannschaften — von den Damen über die Herren bis zur Jugend — sind beim Bayerischen Tennis-Verband registriert. Aktuelle Ergebnisse, Tabellen und Spielpläne findet ihr direkt auf der BTV-Seite.</p>
+      <a
+        href="https://www.btv.de/de/mein-verein/vereinsseite/asn-pfeil-phoenix.html#Mannschaften"
+        target="_blank"
+        rel="noopener"
+        class="btn btn--primary btv-btn"
+      >
+        Alle Mannschaften beim BTV →
+      </a>
+    </div>
+  </section>
 
+  <!-- Ansprechpartner -->
+  <div id="ansprechpartner">
+    <ContactsBar contacts={contacts} eyebrow="Tennisabteilung" title="Ansprechpartner" />
+  </div>
+
+  <!-- News -->
   {posts.length > 0 && (
-    <section class="section">
+    <section class="section" id="news">
       <div class="container">
         <p class="section-eyebrow">Aktuelles</p>
         <h2>Tennis-News</h2>
@@ -75,10 +136,90 @@ const posts = (await getCollection('news', ({ data }) => !data.draft && data.spo
 
 </BaseLayout>
 
+<script>
+  const sections = ['ueber-uns', 'teams', 'ansprechpartner', 'news'];
+  const links = document.querySelectorAll<HTMLAnchorElement>('.submenu__link');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('is-active'));
+        const active = document.querySelector(`.submenu__link[href="#${entry.target.id}"]`);
+        active?.classList.add('is-active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+</script>
+
 <style>
+/* Header */
 .dept-header { padding: 4rem 0 3rem; background: var(--navy-dark); border-bottom: 4px solid var(--navy-mid); }
 .dept-header h1 { color: var(--white); font-size: clamp(2.5rem, 8vw, 6rem); }
 .dept-header .section-eyebrow { color: rgba(255,255,255,.5); }
 .dept-header .section-eyebrow::before { background: var(--orange); }
 .dept-sub { color: rgba(255,255,255,.55); margin-top: .75rem; }
+
+/* Submenu */
+.submenu {
+  position: sticky; top: 70px; z-index: 90;
+  background: var(--white); border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(15,41,114,.06);
+}
+.submenu__inner {
+  display: flex; gap: 0; overflow-x: auto;
+  scrollbar-width: none;
+}
+.submenu__inner::-webkit-scrollbar { display: none; }
+.submenu__link {
+  font-size: .82rem; font-weight: 600;
+  color: var(--mid); padding: 1rem 1.25rem;
+  white-space: nowrap; border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.submenu__link:hover { color: var(--navy); }
+.submenu__link.is-active { color: var(--navy); border-bottom-color: var(--navy); }
+
+/* Über uns */
+.ueber-grid {
+  display: grid; grid-template-columns: 1fr 280px;
+  gap: 3rem; align-items: start;
+}
+@media (max-width: 860px) {
+  .ueber-grid { grid-template-columns: 1fr; }
+  .ueber-aside { order: -1; }
+}
+.ueber-text p { color: var(--mid); line-height: 1.8; margin-top: 1rem; }
+.ueber-text h2 { margin-top: .75rem; }
+.cta-row { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1.75rem; }
+
+/* Instagram card */
+.instagram-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.5rem;
+  text-align: center; position: sticky; top: 130px;
+}
+.instagram-card__label {
+  font-size: .72rem; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 1rem;
+}
+.instagram-card__qr {
+  width: 100%; max-width: 200px;
+  border-radius: 8px; margin-inline: auto;
+  transition: transform .2s;
+}
+.instagram-card__qr:hover { transform: scale(1.03); }
+.instagram-card__handle {
+  font-size: .85rem; font-weight: 600;
+  color: var(--navy); margin-top: .75rem;
+}
+
+/* Teams */
+.teams-intro { color: var(--mid); line-height: 1.75; margin-top: 1rem; max-width: 60ch; }
+.btv-btn { margin-top: 1.75rem; }
 </style>
