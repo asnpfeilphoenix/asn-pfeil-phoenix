@@ -173,17 +173,10 @@ export const prerender = false;
             </div>
 
             <div class="field-group">
-              <label class="field-label" for="email">E-Mail <span class="req">*</span></label>
+              <label class="field-label" for="email">E-Mail</label>
               <input class="field-input" type="email" id="email" autocomplete="email" placeholder="max@beispiel.de" />
-              <div class="field-hint">Für die Bestätigungs-E-Mail und Rechnung.</div>
-              <div class="field-err" id="err-email">Bitte gültige E-Mail-Adresse angeben.</div>
-            </div>
-
-            <div class="field-group full" id="erziehungsberechtigter-group" style="display:none">
-              <label class="field-label" for="erziehungsberechtigter">Erziehungsberechtigter (Name) <span class="req">*</span></label>
-              <input class="field-input" type="text" id="erziehungsberechtigter" placeholder="Vorname Nachname des Erziehungsberechtigten" />
-              <div class="field-hint">Da der Teilnehmer unter 18 Jahre alt ist, bitte den Namen des Erziehungsberechtigten angeben.</div>
-              <div class="field-err" id="err-erziehungsberechtigter">Pflichtfeld für Minderjährige.</div>
+              <div class="field-hint">Für die Bestätigungs-E-Mail (optional).</div>
+              <div class="field-err" id="err-email">Bitte gültige E-Mail-Adresse.</div>
             </div>
 
             <div class="field-group full">
@@ -401,27 +394,18 @@ export const prerender = false;
     }
   }
 
-  // Show/hide parent field based on age
-  $('geburtsdatum').addEventListener('change', () => {
-    const dob = new Date(val('geburtsdatum'));
-    const age = Math.floor((new Date() - dob) / (365.25 * 24 * 60 * 60 * 1000));
-    const group = $('erziehungsberechtigter-group');
-    if (group) group.style.display = age < 18 ? '' : 'none';
-  });
-
   function validate() {
     let ok = true;
     const fields = [
-      { id: 'vorname',      err: 'err-vorname',      check: v => v.length > 0 },
-      { id: 'nachname',     err: 'err-nachname',     check: v => v.length > 0 },
+      { id: 'vorname',    err: 'err-vorname',    check: v => v.length > 0 },
+      { id: 'nachname',   err: 'err-nachname',   check: v => v.length > 0 },
       { id: 'geburtsdatum', err: 'err-geburtsdatum', check: v => v.length > 0 },
-      { id: 'geschlecht',   err: 'err-geschlecht',   check: v => v.length > 0 },
-      { id: 'team',         err: 'err-team',         check: v => v.length > 0 },
-      { id: 'strasse',      err: 'err-strasse',      check: v => v.length > 0 },
-      { id: 'plz',          err: 'err-plz',          check: v => /^\d{5}$/.test(v) },
-      { id: 'ort',          err: 'err-ort',          check: v => v.length > 0 },
-      { id: 'telefon',      err: 'err-telefon',      check: v => v.length > 0 },
-      { id: 'email',        err: 'err-email',        check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+      { id: 'geschlecht', err: 'err-geschlecht', check: v => v.length > 0 },
+      { id: 'team',       err: 'err-team',       check: v => v.length > 0 },
+      { id: 'strasse',    err: 'err-strasse',    check: v => v.length > 0 },
+      { id: 'plz',        err: 'err-plz',        check: v => /^\d{5}$/.test(v) },
+      { id: 'ort',        err: 'err-ort',        check: v => v.length > 0 },
+      { id: 'telefon',    err: 'err-telefon',    check: v => v.length > 0 },
     ];
     fields.forEach(f => {
       const valid = f.check(val(f.id));
@@ -429,15 +413,17 @@ export const prerender = false;
       if (!valid) ok = false;
     });
     // Trikot
-    const trikotOk = ($('trikot-groesse')?.value || '').length > 0;
+    const trikotVal = $('trikot-groesse')?.value || '';
+    const trikotOk = trikotVal.length > 0;
     showErr('err-trikot', !trikotOk);
     if (!trikotOk) ok = false;
-    // Parent field — required if under 18
-    const erzGroup = $('erziehungsberechtigter-group');
-    if (erzGroup && erzGroup.style.display !== 'none') {
-      const erzOk = val('erziehungsberechtigter').length > 0;
-      showErr('err-erziehungsberechtigter', !erzOk);
-      if (!erzOk) ok = false;
+    // Email optional but validate format if provided
+    const emailVal = val('email');
+    if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      showErr('err-email', true);
+      ok = false;
+    } else {
+      showErr('err-email', false);
     }
     return ok;
   }
@@ -450,19 +436,18 @@ export const prerender = false;
     btn.disabled = true;
 
     const payload = {
-      vorname:                  val('vorname'),
-      nachname:                 val('nachname'),
-      geburtsdatum:             val('geburtsdatum'),
-      geschlecht:               $('geschlecht')?.value || '',
-      strasse:                  val('strasse'),
-      plz:                      val('plz'),
-      ort:                      val('ort'),
-      telefon:                  val('telefon'),
-      email:                    val('email'),
-      team:                     $('team')?.value || '',
-      trikot_groesse:           $('trikot-groesse')?.value || '',
-      sonstiges:                val('sonstiges'),
-      erziehungsberechtigter:   val('erziehungsberechtigter') || null,
+      vorname:        val('vorname'),
+      nachname:       val('nachname'),
+      geburtsdatum:   val('geburtsdatum'),
+      geschlecht:     $('geschlecht')?.value || '',
+      strasse:        val('strasse'),
+      plz:            val('plz'),
+      ort:            val('ort'),
+      telefon:        val('telefon'),
+      email:          val('email'),
+      team:           $('team')?.value || '',
+      trikot_groesse: $('trikot-groesse')?.value || '',
+      sonstiges:      val('sonstiges'),
     };
 
     try {
