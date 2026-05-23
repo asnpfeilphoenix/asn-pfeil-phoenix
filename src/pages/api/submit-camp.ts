@@ -1,15 +1,20 @@
 // src/pages/api/submit-camp.ts
-// Generates a PDF invoice (FS-2026-NNN) and sends it as email attachment
+// Generates a PDF invoice (FS-2026-NNN) using pdfmake and sends as attachment
 export const prerender = false;
 import type { APIRoute } from 'astro';
 import nodemailer from 'nodemailer';
+import PdfPrinter from 'pdfmake';
 
-// ── PDF generation using pure HTML→PDF via a simple SVG/HTML approach ────────
-// We build the invoice as an HTML string, then convert to PDF using
-// the 'html-to-pdfmake' + 'pdfmake' libraries (bundled, no browser needed)
-// Fallback: attach HTML invoice if PDF generation fails
+const fonts = {
+  Helvetica: {
+    normal: 'Helvetica',
+    bold: 'Helvetica-Bold',
+    italics: 'Helvetica-Oblique',
+    bolditalics: 'Helvetica-BoldOblique',
+  },
+};
 
-function generateInvoiceHTML(data: {
+function generateInvoicePDF(data: {
   rechnungNummer: string;
   rechnungDatum: string;
   vorname: string;
@@ -21,123 +26,150 @@ function generateInvoiceHTML(data: {
   team: string;
   trikotGroesse: string;
   anmeldungId: string;
-}): string {
-  const adressat = data.erziehungsberechtigter
-    ? `${data.erziehungsberechtigter}<br>${data.vorname} ${data.nachname} (Teilnehmer)`
-    : `${data.vorname} ${data.nachname}`;
+}): Buffer {
+  const printer = new PdfPrinter(fonts);
 
-  return `<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; font-size: 11pt; color: #111; background: white; padding: 40px; max-width: 800px; margin: 0 auto; }
-  .logo-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
-  .logo-box { border: 3px solid #0f2972; padding: 8px 16px; color: #0f2972; font-weight: bold; font-size: 14pt; letter-spacing: 1px; }
-  .absender { font-size: 9pt; color: #444; text-align: right; line-height: 1.6; }
-  .empfaenger { margin-bottom: 32px; line-height: 1.6; }
-  .meta-row { display: flex; justify-content: flex-end; margin-bottom: 32px; }
-  .meta-table td { padding: 2px 8px; font-size: 10pt; }
-  .meta-table td:first-child { color: #444; }
-  .meta-table td:last-child { font-weight: bold; }
-  h2 { font-size: 13pt; margin-bottom: 6px; }
-  .hinweis { font-size: 9pt; color: #555; margin-bottom: 24px; }
-  .intro { margin-bottom: 24px; line-height: 1.6; }
-  table.positionen { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-  table.positionen th { background: #0f2972; color: white; padding: 8px; text-align: left; font-size: 10pt; }
-  table.positionen th:last-child, table.positionen td:last-child { text-align: right; }
-  table.positionen td { padding: 8px; border-bottom: 1px solid #e4e6ee; font-size: 10pt; }
-  .totals { margin-left: auto; width: 280px; }
-  .totals table { width: 100%; border-collapse: collapse; }
-  .totals td { padding: 5px 8px; font-size: 10pt; }
-  .totals td:last-child { text-align: right; font-weight: bold; }
-  .totals .gesamt { background: #0f2972; color: white; font-size: 12pt; }
-  .totals .gesamt td { padding: 8px; }
-  .zahlungsinfo { margin-top: 32px; padding: 16px; background: #f0f3fc; border-left: 4px solid #0f2972; line-height: 1.8; font-size: 10pt; }
-  .zahlungsinfo strong { color: #0f2972; }
-  .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e4e6ee; font-size: 9pt; color: #888; text-align: center; }
-  .frist { margin-top: 20px; font-size: 10pt; }
-</style>
-</head>
-<body>
+  const empfaenger = data.erziehungsberechtigter
+    ? `${data.erziehungsberechtigter}\n${data.vorname} ${data.nachname} (Teilnehmer)\n${data.strasse}\n${data.plz} ${data.ort}`
+    : `${data.vorname} ${data.nachname}\n${data.strasse}\n${data.plz} ${data.ort}`;
 
-<div class="logo-row">
-  <div class="logo-box">ASN-PFEIL-PHÖNIX e.V.</div>
-  <div class="absender">
-    ASN Pfeil Phönix e.V.<br>
-    Marienbergstraße 41<br>
-    90411 Nürnberg
-  </div>
-</div>
+  const docDefinition: any = {
+    defaultStyle: { font: 'Helvetica', fontSize: 10 },
+    pageMargins: [50, 50, 50, 50],
+    content: [
+      // Header row
+      {
+        columns: [
+          {
+            stack: [
+              {
+                table: {
+                  body: [[{ text: 'ASN-PFEIL-PHÖNIX e.V.', bold: true, fontSize: 13, color: '#0f2972', margin: [6, 4, 6, 4] }]],
+                },
+                layout: { hLineColor: () => '#0f2972', vLineColor: () => '#0f2972', hLineWidth: () => 2, vLineWidth: () => 2 },
+              },
+            ],
+            width: '*',
+          },
+          {
+            text: 'ASN Pfeil Phönix e.V.\nMarienbergstraße 41\n90411 Nürnberg',
+            alignment: 'right', fontSize: 9, color: '#444',
+            width: 180,
+          },
+        ],
+        marginBottom: 30,
+      },
+      // Recipient
+      { text: empfaenger, marginBottom: 25, lineHeight: 1.4 },
+      // Meta table (right-aligned)
+      {
+        columns: [
+          { text: '', width: '*' },
+          {
+            width: 220,
+            table: {
+              widths: ['auto', '*'],
+              body: [
+                [{ text: 'Datum', color: '#444' }, { text: data.rechnungDatum, bold: true }],
+                [{ text: 'Rechnungs-Nr.', color: '#444' }, { text: data.rechnungNummer, bold: true }],
+                [{ text: 'Anmeldung-ID', color: '#444' }, { text: data.anmeldungId, bold: true, fontSize: 8 }],
+              ],
+            },
+            layout: 'noBorders',
+          },
+        ],
+        marginBottom: 20,
+      },
+      // Title
+      { text: `Rechnung Nr. ${data.rechnungNummer}`, fontSize: 13, bold: true, marginBottom: 4 },
+      { text: 'Bitte bewahren Sie diese Rechnung mindestens zwei Jahre in Ihren Unterlagen auf.', fontSize: 8, color: '#555', marginBottom: 16 },
+      { text: 'für die Anmeldung zum Sommer-Fußballcamp 2025 stellen wir Ihnen hiermit folgende Kosten in Rechnung:', marginBottom: 16, lineHeight: 1.4 },
+      // Line items table
+      {
+        table: {
+          widths: [40, '*', 70, 70],
+          headerRows: 1,
+          body: [
+            [
+              { text: 'Anzahl', bold: true, color: 'white', fillColor: '#0f2972', margin: [4, 6, 4, 6] },
+              { text: 'Bezeichnung', bold: true, color: 'white', fillColor: '#0f2972', margin: [4, 6, 4, 6] },
+              { text: 'Einzelpreis', bold: true, color: 'white', fillColor: '#0f2972', alignment: 'right', margin: [4, 6, 4, 6] },
+              { text: 'Gesamtpreis', bold: true, color: 'white', fillColor: '#0f2972', alignment: 'right', margin: [4, 6, 4, 6] },
+            ],
+            [
+              { text: '1', margin: [4, 6, 4, 6] },
+              {
+                stack: [
+                  { text: 'Sommer-Fußballcamp 2025', bold: true },
+                  { text: `3. – 7. August 2025, 9–12 Uhr täglich | Team: ${data.team} | Trikot: ${data.trikotGroesse}`, fontSize: 8, color: '#555' },
+                ],
+                margin: [4, 6, 4, 6],
+              },
+              { text: '99,00 €', alignment: 'right', margin: [4, 6, 4, 6] },
+              { text: '99,00 €', alignment: 'right', margin: [4, 6, 4, 6] },
+            ],
+          ],
+        },
+        layout: { hLineColor: () => '#e4e6ee', vLineColor: () => 'white' },
+        marginBottom: 16,
+      },
+      // Totals
+      {
+        columns: [
+          { text: '', width: '*' },
+          {
+            width: 220,
+            table: {
+              widths: ['*', 80],
+              body: [
+                [{ text: 'Nettobetrag', margin: [4, 4, 4, 4] }, { text: '99,00 €', alignment: 'right', margin: [4, 4, 4, 4] }],
+                [{ text: 'MwSt. (befreit)', margin: [4, 4, 4, 4] }, { text: '0,00 €', alignment: 'right', margin: [4, 4, 4, 4] }],
+                [
+                  { text: 'Rechnungsbetrag', bold: true, color: 'white', fillColor: '#0f2972', fontSize: 11, margin: [4, 6, 4, 6] },
+                  { text: '99,00 €', bold: true, color: 'white', fillColor: '#0f2972', fontSize: 11, alignment: 'right', margin: [4, 6, 4, 6] },
+                ],
+              ],
+            },
+            layout: { hLineColor: () => '#e4e6ee', vLineColor: () => '#e4e6ee' },
+          },
+        ],
+        marginBottom: 16,
+      },
+      { text: 'Der Rechnungsbetrag ist ohne Abzug bis zum 10. Juni 2025 zu begleichen.', marginBottom: 24 },
+      // Payment info box
+      {
+        table: {
+          widths: ['*'],
+          body: [[{
+            stack: [
+              { text: 'Bankverbindung', bold: true, color: '#0f2972', marginBottom: 6 },
+              { text: 'Kontoinhaber: ASN Pfeil Phönix e.V.', lineHeight: 1.6 },
+              { text: 'Bank: Stadtsparkasse Nürnberg', lineHeight: 1.6 },
+              { text: 'IBAN: DE12 7605 0101 0001 4302 77', lineHeight: 1.6 },
+              { text: `Verwendungszweck: ${data.rechnungNummer} – ${data.vorname} ${data.nachname}`, bold: true, lineHeight: 1.6 },
+            ],
+            fillColor: '#f0f3fc',
+            margin: [12, 12, 12, 12],
+          }]],
+        },
+        layout: { hLineColor: () => '#0f2972', vLineColor: () => '#0f2972', hLineWidth: (i: number, node: any) => (i === 0 || i === node.table.body.length) ? 0 : 0, vLineWidth: (i: number, node: any) => (i === 0) ? 3 : 0 },
+        marginBottom: 40,
+      },
+      // Footer
+      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 495, y2: 0, lineWidth: 0.5, lineColor: '#e4e6ee' }], marginBottom: 8 },
+      { text: 'ASN Pfeil Phönix e.V. · Marienbergstraße 41 · 90411 Nürnberg · www.asn-pfeil-phoenix.de', fontSize: 8, color: '#888', alignment: 'center' },
+    ],
+  };
 
-<div class="empfaenger">
-  ${adressat}<br>
-  ${data.strasse}<br>
-  ${data.plz} ${data.ort}
-</div>
-
-<div class="meta-row">
-  <table class="meta-table">
-    <tr><td>Datum</td><td>${data.rechnungDatum}</td></tr>
-    <tr><td>Rechnungs-Nr.</td><td>${data.rechnungNummer}</td></tr>
-    <tr><td>Anmeldung-ID</td><td>${data.anmeldungId}</td></tr>
-  </table>
-</div>
-
-<h2>Rechnung Nr. ${data.rechnungNummer}</h2>
-<p class="hinweis">Bitte bewahren Sie diese Rechnung mindestens zwei Jahre in Ihren Unterlagen auf.</p>
-
-<p class="intro">für die Anmeldung zum Sommer-Fußballcamp 2025 stellen wir Ihnen hiermit folgende Kosten in Rechnung:</p>
-
-<table class="positionen">
-  <thead>
-    <tr>
-      <th>Anzahl</th>
-      <th>Bezeichnung</th>
-      <th>Einzelpreis</th>
-      <th>Gesamtpreis</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>1</td>
-      <td>
-        Sommer-Fußballcamp 2025<br>
-        <span style="font-size:9pt;color:#555">3. – 7. August 2025, 9–12 Uhr täglich | Team: ${data.team} | Trikot: ${data.trikotGroesse}</span>
-      </td>
-      <td>99,00 €</td>
-      <td>99,00 €</td>
-    </tr>
-  </tbody>
-</table>
-
-<div class="totals">
-  <table>
-    <tr><td>Nettobetrag</td><td>99,00 €</td></tr>
-    <tr><td>MwSt. (befreit)</td><td>0,00 €</td></tr>
-    <tr class="gesamt"><td>Rechnungsbetrag</td><td>99,00 €</td></tr>
-  </table>
-</div>
-
-<p class="frist">Der Rechnungsbetrag ist ohne Abzug bis zum <strong>10. Juni 2025</strong> zu begleichen.</p>
-
-<div class="zahlungsinfo">
-  <strong>Bankverbindung:</strong><br>
-  Kontoinhaber: ASN Pfeil Phönix e.V.<br>
-  Bank: Stadtsparkasse Nürnberg<br>
-  IBAN: DE12 7605 0101 0001 4302 77<br>
-  Verwendungszweck: <strong>${data.rechnungNummer} – ${data.vorname} ${data.nachname}</strong>
-</div>
-
-<div class="footer">
-  ASN Pfeil Phönix e.V. · Marienbergstraße 41 · 90411 Nürnberg · www.asn-pfeil-phoenix.de
-</div>
-
-</body>
-</html>`;
+  const pdfDoc = printer.createPdfKitDocument(docDefinition);
+  return new Promise<Buffer>((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    pdfDoc.on('data', (chunk: Buffer) => chunks.push(chunk));
+    pdfDoc.on('end', () => resolve(Buffer.concat(chunks)));
+    pdfDoc.on('error', reject);
+    pdfDoc.end();
+  }) as unknown as Buffer;
 }
-
 export const POST: APIRoute = async ({ request }) => {
   const headers = { 'Content-Type': 'application/json' };
   try {
@@ -249,8 +281,8 @@ export const POST: APIRoute = async ({ request }) => {
       throw new Error(`Supabase Fehler: ${err}`);
     }
 
-    // ── Generate invoice HTML ─────────────────────────────────
-    const invoiceHTML = generateInvoiceHTML({
+    // ── Generate invoice PDF ──────────────────────────────────
+    const invoicePdf = await generateInvoicePDF({
       rechnungNummer,
       rechnungDatum,
       vorname:                data.vorname,
@@ -271,10 +303,6 @@ export const POST: APIRoute = async ({ request }) => {
         auth: { user: SMTP_USER, pass: SMTP_PASS },
       });
 
-      const rechnungsEmpfaenger = data.erziehungsberechtigter
-        ? `${data.erziehungsberechtigter} (für ${data.vorname} ${data.nachname})`
-        : `${data.vorname} ${data.nachname}`;
-
       const results = await Promise.allSettled([
         // Admin notification
         transporter.sendMail({
@@ -283,13 +311,17 @@ export const POST: APIRoute = async ({ request }) => {
           subject: `Neue Camp-Anmeldung: ${data.vorname} ${data.nachname} (${data.team}) — ${rechnungNummer}`,
           text: `Neue Camp-Anmeldung eingegangen.\n\nName: ${data.vorname} ${data.nachname}\nTeam: ${data.team}\nTrikot: ${data.trikot_groesse}\nEingegangen: ${eingegangen}\nRechnung-Nr.: ${rechnungNummer}\nAnmeldung-ID: ${anmeldungId}\n\nAlle Details im Verwaltungsportal:\n${ADMIN_URL}`,
         }),
-        // Confirmation + invoice to participant as inline HTML email
+        // Confirmation + PDF invoice to participant
         transporter.sendMail({
           from: `"ASN Pfeil Phoenix" <${FROM_EMAIL}>`,
           to: data.email,
           subject: `Anmeldung Sommer-Fussballcamp 2025 bestätigt — Rechnung ${rechnungNummer}`,
-          text: `Hallo ${data.vorname},\n\nvielen Dank für deine Anmeldung zum Sommer-Fußballcamp 2025!\n\nDeine Rechnung (${rechnungNummer}) findest du unten.\nBitte überweise 99 € bis zum 10. Juni 2025 an:\nIBAN: DE12 7605 0101 0001 4302 77\nVerwendungszweck: ${rechnungNummer} – ${data.vorname} ${data.nachname}\n\nMit sportlichen Grüßen\nASN Pfeil Phönix Fußballabteilung`,
-          html: invoiceHTML,
+          text: `Hallo ${data.vorname},\n\nvielen Dank fuer deine Anmeldung zum Sommer-Fussballcamp 2025!\n\nDeine Rechnung (${rechnungNummer}) ist als PDF im Anhang.\nBitte ueberweise 99 EUR bis zum 10. Juni 2025 an:\nIBAN: DE12 7605 0101 0001 4302 77\nVerwendungszweck: ${rechnungNummer} - ${data.vorname} ${data.nachname}\n\nDas Camp findet vom 3. bis 7. August 2025 statt (taeglich 9-12 Uhr).\n\nMit sportlichen Gruessen\nASN Pfeil Phoenix Fussballabteilung`,
+          attachments: [{
+            filename: `Rechnung-${rechnungNummer}.pdf`,
+            content: invoicePdf,
+            contentType: 'application/pdf',
+          }],
         }),
       ]);
 
