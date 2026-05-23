@@ -62,20 +62,19 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     if (SMTP_USER && SMTP_PASS) {
+      console.log('Sending emails via SMTP:', SMTP_HOST, SMTP_PORT, SMTP_USER);
       const transporter = nodemailer.createTransport({
         host: SMTP_HOST, port: SMTP_PORT, secure: false,
         auth: { user: SMTP_USER, pass: SMTP_PASS },
       });
 
-      await Promise.allSettled([
-        // Notify admin
+      const results = await Promise.allSettled([
         transporter.sendMail({
           from: `"ASN Pfeil Phoenix" <${FROM_EMAIL}>`,
           to: VEREIN_EMAIL,
           subject: `Neue Camp-Anmeldung: ${data.vorname} ${data.nachname} (${data.team})`,
           text: `Neue Camp-Anmeldung eingegangen.\n\nName: ${data.vorname} ${data.nachname}\nTeam: ${data.team}\nEingegangen: ${eingegangen}\nAnmeldung-ID: ${anmeldungId}\n\nAlle Details im Verwaltungsportal:\n${ADMIN_URL}`,
         }),
-        // Confirm to participant (if email provided)
         ...(data.email ? [transporter.sendMail({
           from: `"ASN Pfeil Phoenix" <${FROM_EMAIL}>`,
           to: data.email,
@@ -83,6 +82,12 @@ export const POST: APIRoute = async ({ request }) => {
           text: `Hallo ${data.vorname},\n\nvielen Dank fuer deine Anmeldung zum Sommer-Fussballcamp 2025!\n\nDeine Angaben:\n- Name: ${data.vorname} ${data.nachname}\n- Team: ${data.team}\n- Trikotgroesse: ${data.trikot_groesse || '—'}\n- Anmeldung-ID: ${anmeldungId}\n\nDas Camp findet vom 3. bis 7. August 2025 statt (9-12 Uhr).\nAnmeldeschluss: 10. Juni 2025.\n\nWir melden uns in Kuerze mit weiteren Informationen.\n\nMit sportlichen Gruessen\nASN Pfeil Phoenix Fussballabteilung`,
         })] : []),
       ]);
+      results.forEach((r, i) => {
+        if (r.status === 'rejected') console.error(`Email ${i} failed:`, r.reason);
+        else console.log(`Email ${i} sent:`, r.value?.messageId);
+      });
+    } else {
+      console.warn('SMTP not configured — SMTP_USER:', !!SMTP_USER, 'SMTP_PASS:', !!SMTP_PASS);
     }
 
     return new Response(JSON.stringify({ success: true, anmeldungId }), { status: 200, headers });
