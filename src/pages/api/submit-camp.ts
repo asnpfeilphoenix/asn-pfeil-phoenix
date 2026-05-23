@@ -3,7 +3,7 @@
 export const prerender = false;
 import type { APIRoute } from 'astro';
 import nodemailer from 'nodemailer';
-import PdfPrinter from 'pdfmake';
+import Printer from 'pdfmake/src/printer.js';
 
 const fonts = {
   Helvetica: {
@@ -27,7 +27,7 @@ function generateInvoicePDF(data: {
   trikotGroesse: string;
   anmeldungId: string;
 }): Buffer {
-  const printer = new PdfPrinter(fonts);
+  const printer = new Printer(fonts);
 
   const empfaenger = data.erziehungsberechtigter
     ? `${data.erziehungsberechtigter}\n${data.vorname} ${data.nachname} (Teilnehmer)\n${data.strasse}\n${data.plz} ${data.ort}`
