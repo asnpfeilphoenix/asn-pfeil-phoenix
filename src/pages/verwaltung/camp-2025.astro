@@ -293,12 +293,12 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
 
       content.innerHTML = `<div class="table-wrap"><table>
         <thead><tr>
-          <th>Name</th><th>Team</th><th>Geburtsdatum</th><th>Trikot</th><th>Eingegangen</th><th>Aktionen</th>
+          <th>Name</th><th>Team</th><th>Rechnung-Nr.</th><th>Trikot</th><th>Eingegangen</th><th>Aktionen</th>
         </tr></thead>
         <tbody>${rows.map(r => `<tr>
           <td class="td-name">${r.vorname} ${r.nachname}</td>
           <td>${teamBadge(r.team)}</td>
-          <td class="td-muted">${r.geburtsdatum || '—'}</td>
+          <td class="td-muted">${r.rechnung_nummer || '—'}</td>
           <td class="td-muted">${r.trikot_groesse || '—'}</td>
           <td class="td-muted">${formatDate(r.eingegangen_am)}</td>
           <td><div class="row-actions">
@@ -336,10 +336,16 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
         <div class="detail-grid">
           <div><div class="detail-key">Team</div><div class="detail-val">${r.team || '—'}</div></div>
           <div><div class="detail-key">Trikotgröße</div><div class="detail-val">${r.trikot_groesse || '—'}</div></div>
+          <div><div class="detail-key">Rechnung-Nr.</div><div class="detail-val">${r.rechnung_nummer || '—'}</div></div>
+          <div><div class="detail-key">Rechnungsdatum</div><div class="detail-val">${r.rechnung_datum || '—'}</div></div>
           <div><div class="detail-key">Eingegangen</div><div class="detail-val">${formatDate(r.eingegangen_am)}</div></div>
           <div><div class="detail-key">Anmeldung-ID</div><div class="detail-val" style="font-size:.78rem">${r.anmeldung_id}</div></div>
         </div>
       </div>
+      ${r.erziehungsberechtigter ? `<div class="drawer-section">
+        <div class="drawer-section-title">Erziehungsberechtigter</div>
+        <div class="detail-val">${r.erziehungsberechtigter}</div>
+      </div>` : ''}
       ${r.sonstiges ? `<div class="drawer-section">
         <div class="drawer-section-title">Sonstiges / Gesundheit</div>
         <div class="detail-val">${r.sonstiges}</div>
@@ -359,11 +365,13 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
   function buildCsvRow(r) {
     const fields = [
       ['Anmeldung-ID', r.anmeldung_id],
+      ['Rechnung-Nr.', r.rechnung_nummer || ''],
       ['Eingegangen', formatDate(r.eingegangen_am)],
       ['Vorname', r.vorname],
       ['Nachname', r.nachname],
       ['Geburtsdatum', r.geburtsdatum || ''],
       ['Geschlecht', r.geschlecht || ''],
+      ['Erziehungsberechtigter', r.erziehungsberechtigter || ''],
       ['Strasse', r.strasse || ''],
       ['PLZ', r.plz || ''],
       ['Ort', r.ort || ''],
