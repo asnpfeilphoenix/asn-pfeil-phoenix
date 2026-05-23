@@ -1,0 +1,486 @@
+---
+// src/pages/verwaltung/camp-2025.astro
+export const prerender = false;
+const SUPABASE_URL  = import.meta.env.SUPABASE_URL  || '';
+const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
+---
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Camp-Verwaltung 2025 — ASN Pfeil Phönix</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:#0f2972;--navy-dark:#091d52;--navy-pale:#e8edf8;--navy-tint:#f0f3fc;
+      --orange:#E8780A;--white:#fff;--ink:#111318;--mid:#4A4F5C;--muted:#8A8F9E;
+      --border:#E4E6EE;--red:#dc2626;--green:#16a34a;
+      --fd:'Bebas Neue',sans-serif;--fb:'DM Sans',sans-serif;
+      --radius:6px;--radius-lg:12px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{-webkit-font-smoothing:antialiased;}
+    body{font-family:var(--fb);background:var(--navy-dark);color:var(--ink);min-height:100vh;}
+
+    .header{background:var(--navy);border-bottom:3px solid var(--orange);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;}
+    .header-brand{display:flex;align-items:center;gap:.75rem;}
+    .header-brand img{width:40px;height:40px;}
+    .header-brand-text strong{display:block;font-family:var(--fd);font-size:1.2rem;color:var(--white);letter-spacing:.04em;}
+    .header-brand-text span{font-size:.72rem;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase;}
+    .header-right{display:flex;align-items:center;gap:1rem;}
+    .header-badge{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(232,120,10,.2);color:var(--orange);border:1px solid rgba(232,120,10,.3);padding:.3em .8em;border-radius:99px;}
+    .header-user{font-size:.82rem;color:rgba(255,255,255,.5);}
+    .btn-logout{font-family:var(--fb);font-size:.82rem;font-weight:600;background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);padding:.4em 1em;border-radius:var(--radius);cursor:pointer;transition:all .15s;}
+    .btn-logout:hover{border-color:rgba(255,255,255,.5);color:var(--white);}
+
+    .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;}
+    .login-card{background:var(--white);border-radius:var(--radius-lg);padding:2.5rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+    .login-logo{display:flex;align-items:center;gap:.75rem;margin-bottom:2rem;}
+    .login-logo img{width:48px;height:48px;}
+    .login-logo-text strong{display:block;font-family:var(--fd);font-size:1.3rem;color:var(--navy);}
+    .login-logo-text span{font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+    .login-title{font-family:var(--fd);font-size:1.8rem;color:var(--navy);margin-bottom:.4rem;}
+    .login-sub{font-size:.85rem;color:var(--muted);margin-bottom:1.75rem;}
+    .field{display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem;}
+    .field label{font-size:.8rem;font-weight:600;color:var(--mid);}
+    .field input{border:2px solid var(--border);border-radius:var(--radius);padding:.65rem .85rem;font-family:var(--fb);font-size:.95rem;color:var(--ink);width:100%;transition:border-color .15s;}
+    .field input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(15,41,114,.1);}
+    .btn-login{width:100%;background:var(--navy);color:var(--white);border:none;border-radius:var(--radius);padding:.8rem;font-family:var(--fd);font-size:1.1rem;letter-spacing:.04em;cursor:pointer;transition:background .15s;margin-top:.5rem;display:flex;align-items:center;justify-content:center;gap:.5rem;}
+    .btn-login:hover{background:var(--navy-dark);}
+    .btn-login:disabled{opacity:.6;cursor:not-allowed;}
+    .login-error{background:#fef2f2;border:1px solid #fecaca;color:var(--red);border-radius:var(--radius);padding:.75rem 1rem;font-size:.85rem;margin-top:1rem;display:none;}
+    .login-error.visible{display:block;}
+
+    .admin-wrap{display:none;min-height:calc(100vh - 67px);}
+    .admin-wrap.visible{display:block;}
+    .admin-main{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;}
+
+    .stats-bar{display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap;}
+    .stat-card{background:var(--white);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;flex:1;min-width:160px;border:1px solid var(--border);}
+    .stat-card__val{font-family:var(--fd);font-size:2.5rem;color:var(--navy);line-height:1;}
+    .stat-card__label{font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:.3rem;}
+
+    .table-card{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;}
+    .table-card__head{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+    .table-card__title{font-family:var(--fd);font-size:1.4rem;color:var(--navy);}
+    .table-wrap{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;font-size:.875rem;}
+    th{text-align:left;padding:.75rem 1rem;font-size:.67rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--border);white-space:nowrap;background:#fafafa;}
+    td{padding:.85rem 1rem;border-bottom:1px solid var(--border);color:var(--ink);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:var(--navy-tint);}
+    .td-name{font-weight:600;}
+    .td-muted{color:var(--muted);font-size:.82rem;}
+    .badge{display:inline-block;font-size:.67rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.25em .7em;border-radius:99px;}
+    .badge--a{background:#fef3c7;color:#92400e;}
+    .badge--b{background:var(--navy-pale);color:var(--navy);}
+    .badge--c{background:#eef3fb;color:#2b4d8f;}
+    .badge--d{background:#f5eef8;color:#6b1a8a;}
+
+    .row-actions{display:flex;gap:.5rem;}
+    .btn-view{background:var(--navy);color:var(--white);border:none;border-radius:var(--radius);padding:.4em .9em;font-family:var(--fb);font-size:.8rem;font-weight:600;cursor:pointer;transition:background .15s;white-space:nowrap;}
+    .btn-view:hover{background:var(--navy-dark);}
+    .btn-delete{background:transparent;color:var(--red);border:1px solid #fecaca;border-radius:var(--radius);padding:.4em .9em;font-family:var(--fb);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;}
+    .btn-delete:hover{background:#fef2f2;border-color:var(--red);}
+
+    .empty-state{text-align:center;padding:4rem 2rem;color:var(--muted);}
+    .empty-state__icon{font-size:2.5rem;margin-bottom:1rem;}
+    .loading-state{text-align:center;padding:3rem;color:var(--muted);}
+    .spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;backdrop-filter:blur(2px);}
+    .drawer-overlay.visible{display:block;}
+    .drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);background:var(--white);z-index:101;overflow-y:auto;transform:translateX(100%);transition:transform .3s ease;box-shadow:-8px 0 40px rgba(0,0,0,.2);}
+    .drawer.visible{transform:translateX(0);}
+    .drawer-header{background:var(--navy);padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1;}
+    .drawer-header h2{font-family:var(--fd);font-size:1.4rem;color:var(--white);letter-spacing:.03em;}
+    .drawer-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:1.5rem;cursor:pointer;line-height:1;padding:.25rem;transition:color .15s;}
+    .drawer-close:hover{color:var(--white);}
+    .drawer-body{padding:1.5rem;}
+    .drawer-section{margin-bottom:1.5rem;}
+    .drawer-section-title{font-size:.67rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);margin-bottom:.75rem;padding-bottom:.4rem;border-bottom:2px solid var(--orange);}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem 1.5rem;}
+    .detail-key{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+    .detail-val{font-size:.92rem;color:var(--ink);font-weight:500;margin-top:.1rem;}
+    .drawer-actions{display:flex;gap:.75rem;padding:1.5rem;border-top:1px solid var(--border);background:#fafafa;position:sticky;bottom:0;}
+    .btn-download{flex:1;background:var(--navy);color:var(--white);border:none;border-radius:var(--radius);padding:.75rem;font-family:var(--fd);font-size:1rem;letter-spacing:.04em;cursor:pointer;transition:background .15s;}
+    .btn-download:hover{background:var(--navy-dark);}
+    .btn-download-all{background:var(--navy-tint);color:var(--navy);border:1px solid var(--navy-pale);border-radius:var(--radius);padding:.6em 1.2em;font-family:var(--fd);font-size:.95rem;cursor:pointer;letter-spacing:.03em;white-space:nowrap;}
+    .btn-download-all:hover{background:var(--navy-pale);}
+    .btn-process{flex:1;background:var(--red);color:var(--white);border:none;border-radius:var(--radius);padding:.75rem;font-family:var(--fd);font-size:1rem;letter-spacing:.04em;cursor:pointer;transition:background .15s;}
+    .btn-process:hover{background:#b91c1c;}
+
+    .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;}
+    .confirm-overlay.visible{display:flex;}
+    .confirm-box{background:var(--white);border-radius:var(--radius-lg);padding:2rem;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+    .confirm-box h3{font-family:var(--fd);font-size:1.5rem;color:var(--red);margin-bottom:.75rem;}
+    .confirm-box p{font-size:.9rem;color:var(--mid);line-height:1.6;margin-bottom:1.5rem;}
+    .confirm-btns{display:flex;gap:.75rem;}
+    .btn-cancel{flex:1;background:transparent;border:2px solid var(--border);color:var(--mid);border-radius:var(--radius);padding:.7rem;font-family:var(--fb);font-size:.9rem;font-weight:600;cursor:pointer;}
+    .btn-confirm-delete{flex:1;background:var(--red);color:var(--white);border:none;border-radius:var(--radius);padding:.7rem;font-family:var(--fb);font-size:.9rem;font-weight:600;cursor:pointer;}
+
+    .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--white);padding:.75rem 1.5rem;border-radius:99px;font-size:.875rem;font-weight:500;z-index:300;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;}
+    .toast.visible{opacity:1;transform:translateX(-50%) translateY(0);}
+    .toast.toast--success{background:var(--green);}
+    .toast.toast--error{background:var(--red);}
+  </style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login-wrap" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="/images/asn-logo.svg" alt="" />
+      <div class="login-logo-text">
+        <strong>ASN Pfeil Phönix</strong>
+        <span>Camp-Verwaltung 2025</span>
+      </div>
+    </div>
+    <h1 class="login-title">Anmelden</h1>
+    <p class="login-sub">Nur für autorisierte Administratoren.</p>
+    <div class="field">
+      <label for="login-email">E-Mail</label>
+      <input type="email" id="login-email" autocomplete="email" />
+    </div>
+    <div class="field">
+      <label for="login-password">Passwort</label>
+      <input type="password" id="login-password" autocomplete="current-password" />
+    </div>
+    <button class="btn-login" id="btn-login">
+      <span id="login-btn-text">Einloggen</span>
+      <span id="login-spinner" style="display:none;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:none"></span>
+    </button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- Admin -->
+<div id="admin-wrap" class="admin-wrap">
+  <header class="header">
+    <div class="header-brand">
+      <img src="/images/asn-logo.svg" alt="" />
+      <div class="header-brand-text">
+        <strong>Sommer-Fußballcamp 2025</strong>
+        <span>Anmeldungsverwaltung</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="header-badge">⚽ Fußball</span>
+      <span class="header-user" id="header-user"></span>
+      <button class="btn-logout" id="btn-logout">Ausloggen</button>
+    </div>
+  </header>
+
+  <div class="admin-main">
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-card__val" id="stat-total">—</div><div class="stat-card__label">Anmeldungen gesamt</div></div>
+      <div class="stat-card"><div class="stat-card__val" id="stat-today">—</div><div class="stat-card__label">Heute</div></div>
+      <div class="stat-card"><div class="stat-card__val" id="stat-a">—</div><div class="stat-card__label">A-Jugend</div></div>
+      <div class="stat-card"><div class="stat-card__val" id="stat-b">—</div><div class="stat-card__label">B-Jugend</div></div>
+      <div class="stat-card"><div class="stat-card__val" id="stat-c">—</div><div class="stat-card__label">C-Jugend</div></div>
+      <div class="stat-card"><div class="stat-card__val" id="stat-d">—</div><div class="stat-card__label">D-Jugend</div></div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-card__head">
+        <div class="table-card__title">Camp-Anmeldungen</div>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+          <button class="btn-download-all" id="btn-download-all">⬇ Alle als CSV</button>
+          <button class="btn-view" onclick="loadAnmeldungen()">↻ Aktualisieren</button>
+        </div>
+      </div>
+      <div id="table-content">
+        <div class="loading-state"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Drawer -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <h2 id="drawer-title">Anmeldung</h2>
+    <button class="drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+  <div class="drawer-actions">
+    <button class="btn-download" id="btn-download-single">⬇ CSV</button>
+    <button class="btn-process" id="btn-process">🗑 Löschen</button>
+  </div>
+</div>
+
+<!-- Confirm -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <h3>Anmeldung löschen?</h3>
+    <p>Die Anmeldung von <strong id="confirm-name"></strong> wird unwiderruflich gelöscht.</p>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Abbrechen</button>
+      <button class="btn-confirm-delete" id="btn-confirm-delete">Endgültig löschen</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script is:inline set:html={`window.__SB_URL__=${JSON.stringify(SUPABASE_URL)};window.__SB_KEY__=${JSON.stringify(SUPABASE_ANON)};`}></script>
+
+<script>
+  const SUPABASE_URL = window.__SB_URL__;
+  const SUPABASE_KEY = window.__SB_KEY__;
+  let accessToken = null;
+  let currentAnmeldung = null;
+  let deleteId = null;
+
+  async function supabaseFetch(path, options = {}) {
+    const res = await fetch(`${SUPABASE_URL}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${accessToken || SUPABASE_KEY}`,
+        ...options.headers,
+      },
+    });
+    return res;
+  }
+
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast visible${type ? ' toast--' + type : ''}`;
+    setTimeout(() => t.classList.remove('visible'), 3000);
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString('de-DE', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin'
+    });
+  }
+
+  function teamBadge(team) {
+    const cls = team ? 'badge--' + team[0].toLowerCase() : '';
+    return `<span class="badge ${cls}">${team || '—'}</span>`;
+  }
+
+  async function loadAnmeldungen() {
+    const content = document.getElementById('table-content');
+    content.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+    try {
+      const res = await supabaseFetch('/rest/v1/camp_anmeldungen?select=*&order=eingegangen_am.desc');
+      if (!res.ok) throw new Error('Fehler beim Laden');
+      const rows = await res.json();
+      window.__anmeldungen__ = rows;
+
+      const today = new Date().toDateString();
+      document.getElementById('stat-total').textContent = rows.length;
+      document.getElementById('stat-today').textContent = rows.filter(r => new Date(r.eingegangen_am).toDateString() === today).length;
+      ['A','B','C','D'].forEach(t => {
+        document.getElementById(`stat-${t.toLowerCase()}`).textContent = rows.filter(r => r.team === `${t}-Jugend`).length;
+      });
+
+      if (rows.length === 0) {
+        content.innerHTML = '<div class="empty-state"><div class="empty-state__icon">📭</div><div>Noch keine Anmeldungen.</div></div>';
+        return;
+      }
+
+      content.innerHTML = `<div class="table-wrap"><table>
+        <thead><tr>
+          <th>Name</th><th>Team</th><th>Geburtsdatum</th><th>Trikot</th><th>Eingegangen</th><th>Aktionen</th>
+        </tr></thead>
+        <tbody>${rows.map(r => `<tr>
+          <td class="td-name">${r.vorname} ${r.nachname}</td>
+          <td>${teamBadge(r.team)}</td>
+          <td class="td-muted">${r.geburtsdatum || '—'}</td>
+          <td class="td-muted">${r.trikot_groesse || '—'}</td>
+          <td class="td-muted">${formatDate(r.eingegangen_am)}</td>
+          <td><div class="row-actions">
+            <button class="btn-view" onclick="openDrawer('${r.id}')">Details</button>
+            <button class="btn-delete" onclick="confirmDelete('${r.id}','${r.vorname} ${r.nachname}')">Löschen</button>
+          </div></td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
+    } catch (err) {
+      content.innerHTML = `<div class="empty-state">Fehler: ${err.message}</div>`;
+    }
+  }
+  window.loadAnmeldungen = loadAnmeldungen;
+
+  window.openDrawer = function(id) {
+    const r = (window.__anmeldungen__ || []).find(a => String(a.id) === String(id));
+    if (!r) return;
+    currentAnmeldung = r;
+    document.getElementById('drawer-title').textContent = `${r.vorname} ${r.nachname}`;
+    document.getElementById('drawer-body').innerHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-title">Persönliche Daten</div>
+        <div class="detail-grid">
+          <div><div class="detail-key">Vorname</div><div class="detail-val">${r.vorname}</div></div>
+          <div><div class="detail-key">Nachname</div><div class="detail-val">${r.nachname}</div></div>
+          <div><div class="detail-key">Geburtsdatum</div><div class="detail-val">${r.geburtsdatum || '—'}</div></div>
+          <div><div class="detail-key">Geschlecht</div><div class="detail-val">${r.geschlecht || '—'}</div></div>
+          <div style="grid-column:1/-1"><div class="detail-key">Adresse</div><div class="detail-val">${r.strasse || '—'}, ${r.plz || ''} ${r.ort || ''}</div></div>
+          <div><div class="detail-key">Telefon</div><div class="detail-val">${r.telefon || '—'}</div></div>
+          <div><div class="detail-key">E-Mail</div><div class="detail-val">${r.email || '—'}</div></div>
+        </div>
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">Camp-Details</div>
+        <div class="detail-grid">
+          <div><div class="detail-key">Team</div><div class="detail-val">${r.team || '—'}</div></div>
+          <div><div class="detail-key">Trikotgröße</div><div class="detail-val">${r.trikot_groesse || '—'}</div></div>
+          <div><div class="detail-key">Eingegangen</div><div class="detail-val">${formatDate(r.eingegangen_am)}</div></div>
+          <div><div class="detail-key">Anmeldung-ID</div><div class="detail-val" style="font-size:.78rem">${r.anmeldung_id}</div></div>
+        </div>
+      </div>
+      ${r.sonstiges ? `<div class="drawer-section">
+        <div class="drawer-section-title">Sonstiges / Gesundheit</div>
+        <div class="detail-val">${r.sonstiges}</div>
+      </div>` : ''}
+    `;
+    document.getElementById('drawer-overlay').classList.add('visible');
+    document.getElementById('drawer').classList.add('visible');
+  };
+
+  window.closeDrawer = function() {
+    document.getElementById('drawer-overlay').classList.remove('visible');
+    document.getElementById('drawer').classList.remove('visible');
+    currentAnmeldung = null;
+  };
+
+  // CSV helpers
+  function buildCsvRow(r) {
+    const fields = [
+      ['Anmeldung-ID', r.anmeldung_id],
+      ['Eingegangen', formatDate(r.eingegangen_am)],
+      ['Vorname', r.vorname],
+      ['Nachname', r.nachname],
+      ['Geburtsdatum', r.geburtsdatum || ''],
+      ['Geschlecht', r.geschlecht || ''],
+      ['Strasse', r.strasse || ''],
+      ['PLZ', r.plz || ''],
+      ['Ort', r.ort || ''],
+      ['Telefon', r.telefon || ''],
+      ['E-Mail', r.email || ''],
+      ['Team', r.team || ''],
+      ['Trikotgroesse', r.trikot_groesse || ''],
+      ['Sonstiges', r.sonstiges || ''],
+    ];
+    return fields;
+  }
+
+  function toCsv(rows) {
+    const escape = v => { const s = String(v ?? ''); return s.includes(';') || s.includes('"') ? `"${s.replace(/"/g,'""')}"` : s; };
+    const fields = buildCsvRow(rows[0]);
+    const header = fields.map(([h]) => escape(h)).join(';');
+    const body = rows.map(r => buildCsvRow(r).map(([,v]) => escape(v)).join(';')).join('\n');
+    return '\uFEFF' + header + '\n' + body;
+  }
+
+  function downloadCsv(content, filename) {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('btn-download-single').addEventListener('click', () => {
+    if (!currentAnmeldung) return;
+    downloadCsv(toCsv([currentAnmeldung]), `camp-${currentAnmeldung.nachname}-${currentAnmeldung.vorname}.csv`);
+    showToast('CSV heruntergeladen', 'success');
+  });
+
+  document.getElementById('btn-download-all').addEventListener('click', () => {
+    const rows = window.__anmeldungen__;
+    if (!rows || rows.length === 0) { showToast('Keine Anmeldungen', 'error'); return; }
+    downloadCsv(toCsv(rows), 'camp-anmeldungen-2025.csv');
+    showToast(`${rows.length} Anmeldungen exportiert`, 'success');
+  });
+
+  document.getElementById('btn-process').addEventListener('click', () => {
+    if (!currentAnmeldung) return;
+    confirmDelete(currentAnmeldung.id, `${currentAnmeldung.vorname} ${currentAnmeldung.nachname}`);
+  });
+
+  window.confirmDelete = function(id, name) {
+    deleteId = id;
+    document.getElementById('confirm-name').textContent = name;
+    document.getElementById('confirm-overlay').classList.add('visible');
+  };
+  window.closeConfirm = function() {
+    document.getElementById('confirm-overlay').classList.remove('visible');
+    deleteId = null;
+  };
+
+  document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
+    if (!deleteId) return;
+    const btn = document.getElementById('btn-confirm-delete');
+    btn.textContent = 'Wird gelöscht…'; btn.disabled = true;
+    try {
+      const res = await supabaseFetch(`/rest/v1/camp_anmeldungen?id=eq.${deleteId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Löschen fehlgeschlagen');
+      closeConfirm(); closeDrawer();
+      showToast('Anmeldung gelöscht', 'success');
+      loadAnmeldungen();
+    } catch (err) {
+      showToast('Fehler: ' + err.message, 'error');
+    } finally { btn.textContent = 'Endgültig löschen'; btn.disabled = false; }
+  });
+
+  // Login
+  async function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const btn = document.getElementById('btn-login');
+    const errEl = document.getElementById('login-error');
+    errEl.classList.remove('visible');
+    document.getElementById('login-btn-text').style.display = 'none';
+    document.getElementById('login-spinner').style.display = 'inline-block';
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error_description || data.msg || 'Login fehlgeschlagen');
+      accessToken = data.access_token;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-wrap').classList.add('visible');
+      document.getElementById('header-user').textContent = email;
+      loadAnmeldungen();
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.classList.add('visible');
+    } finally {
+      document.getElementById('login-btn-text').style.display = '';
+      document.getElementById('login-spinner').style.display = 'none';
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById('btn-login').addEventListener('click', doLogin);
+  document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('btn-logout').addEventListener('click', async () => {
+    await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${accessToken}` },
+    });
+    accessToken = null;
+    document.getElementById('admin-wrap').classList.remove('visible');
+    document.getElementById('login-screen').style.display = '';
+    document.getElementById('login-password').value = '';
+    showToast('Ausgeloggt');
+  });
+</script>
+</body>
+</html>

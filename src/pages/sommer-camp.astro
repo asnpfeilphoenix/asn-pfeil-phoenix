@@ -1,0 +1,476 @@
+---
+// src/pages/sommer-camp.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+export const prerender = false;
+---
+
+<BaseLayout title="Sommer-Fußballcamp 2025" description="Anmeldung zum Sommer-Fußballcamp 2025 des ASN Pfeil Phönix e.V.">
+
+  <!-- Hero -->
+  <section class="camp-hero">
+    <div class="container">
+      <p class="section-eyebrow">Fußballabteilung</p>
+      <h1>Sommer-Fußball<em>camp</em> 2025</h1>
+      <div class="camp-meta">
+        <span class="camp-meta-item">📅 3. – 7. August 2025</span>
+        <span class="camp-meta-item">🕘 9 – 12 Uhr täglich</span>
+        <span class="camp-meta-item">💶 99 € inkl. Trikot</span>
+        <span class="camp-meta-item">📍 ASN Pfeil Phönix, Nürnberg</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Info section -->
+  <section class="section">
+    <div class="container camp-container">
+
+      <!-- Alert banner -->
+      <div class="camp-alert">
+        <span class="camp-alert-icon">⚽</span>
+        <div>
+          <strong>Anmeldeschluss: 10. Juni 2025</strong> — damit die Trikots rechtzeitig geliefert werden können. Noch <span id="days-left"></span> — jetzt anmelden!
+        </div>
+      </div>
+
+      <!-- Info grid -->
+      <div class="camp-info-grid">
+        <div class="camp-info-card">
+          <div class="camp-info-icon">🎯</div>
+          <h3>Ziel & Inhalt</h3>
+          <p>In kleinen Gruppen von 8–10 Spieler*innen arbeiten wir intensiv an der Verbesserung technischer und taktischer Fähigkeiten — und haben dabei jede Menge Spaß.</p>
+        </div>
+        <div class="camp-info-card">
+          <div class="camp-info-icon">👥</div>
+          <h3>Zielgruppe</h3>
+          <p>Offen für alle Großfeldspieler*innen der <strong>A- bis D-Jugend</strong>. Wir haben <strong>40 Plätze</strong> — also schnell sein!</p>
+        </div>
+        <div class="camp-info-card">
+          <div class="camp-info-icon">🏆</div>
+          <h3>Abschluss-BBQ</h3>
+          <p>Am letzten Tag (7. August) organisieren wir ein großes <strong>BBQ für alle</strong> Teilnehmer*innen — der perfekte Abschluss einer tollen Woche.</p>
+        </div>
+        <div class="camp-info-card">
+          <div class="camp-info-icon">👕</div>
+          <h3>Trikot inklusive</h3>
+          <p>Der Preis von <strong>99 €</strong> beinhaltet ein Trikot. Damit die Trikots rechtzeitig fertig sind, ist der Anmeldeschluss der <strong>10. Juni</strong>.</p>
+        </div>
+      </div>
+
+      <!-- Photo grid placeholder -->
+      <div class="section-eyebrow" style="margin-top:3rem; margin-bottom:1rem">Impressionen vom letzten Camp</div>
+      <div class="camp-photo-grid">
+        <div class="camp-photo-placeholder">
+          <span>⚽</span>
+          <div>Foto folgt</div>
+        </div>
+        <div class="camp-photo-placeholder camp-photo-placeholder--tall">
+          <span>🏃</span>
+          <div>Foto folgt</div>
+        </div>
+        <div class="camp-photo-placeholder">
+          <span>🎯</span>
+          <div>Foto folgt</div>
+        </div>
+        <div class="camp-photo-placeholder">
+          <span>🔥</span>
+          <div>Foto folgt</div>
+        </div>
+        <div class="camp-photo-placeholder camp-photo-placeholder--wide">
+          <span>👥</span>
+          <div>Foto folgt</div>
+        </div>
+      </div>
+
+      <!-- Sign-up form -->
+      <div class="camp-form-wrap" id="anmeldung">
+        <div class="camp-form-head">
+          <h2>Jetzt anmelden</h2>
+          <p>Füll das Formular aus und wir melden uns bei dir.</p>
+        </div>
+
+        <div class="camp-form-body" id="form-body">
+          <div class="field-grid">
+
+            <div class="field-group">
+              <label class="field-label" for="vorname">Vorname <span class="req">*</span></label>
+              <input class="field-input" type="text" id="vorname" autocomplete="given-name" placeholder="Max" />
+              <div class="field-err" id="err-vorname">Pflichtfeld.</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="nachname">Nachname <span class="req">*</span></label>
+              <input class="field-input" type="text" id="nachname" autocomplete="family-name" placeholder="Mustermann" />
+              <div class="field-err" id="err-nachname">Pflichtfeld.</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="geburtsdatum">Geburtsdatum <span class="req">*</span></label>
+              <input class="field-input" type="date" id="geburtsdatum" autocomplete="bday" />
+              <div class="field-err" id="err-geburtsdatum">Pflichtfeld.</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="geschlecht">Geschlecht <span class="req">*</span></label>
+              <select class="field-input" id="geschlecht">
+                <option value="">— bitte wählen —</option>
+                <option value="männlich">männlich</option>
+                <option value="weiblich">weiblich</option>
+                <option value="divers">divers</option>
+              </select>
+              <div class="field-err" id="err-geschlecht">Bitte wählen.</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="team">Team <span class="req">*</span></label>
+              <select class="field-input" id="team">
+                <option value="">— bitte wählen —</option>
+                <option value="A-Jugend">A-Jugend</option>
+                <option value="B-Jugend">B-Jugend</option>
+                <option value="C-Jugend">C-Jugend</option>
+                <option value="D-Jugend">D-Jugend</option>
+              </select>
+              <div class="field-err" id="err-team">Bitte wählen.</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="trikot-groesse">Trikotgröße <span class="req">*</span></label>
+              <select class="field-input" id="trikot-groesse">
+                <option value="">— bitte wählen —</option>
+                <option value="XS (128)">XS (128)</option>
+                <option value="S (140)">S (140)</option>
+                <option value="M (152)">M (152)</option>
+                <option value="L (164)">L (164)</option>
+                <option value="XL (176)">XL (176)</option>
+                <option value="XXL (Erw. S)">XXL (Erw. S)</option>
+                <option value="XXXL (Erw. M)">XXXL (Erw. M)</option>
+              </select>
+              <div class="field-err" id="err-trikot">Bitte wählen.</div>
+            </div>
+
+            <div class="field-group full">
+              <label class="field-label" for="strasse">Straße, Haus-Nr. <span class="req">*</span></label>
+              <input class="field-input" type="text" id="strasse" autocomplete="street-address" placeholder="Musterstraße 12" />
+              <div class="field-err" id="err-strasse">Pflichtfeld.</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="plz">PLZ <span class="req">*</span></label>
+              <input class="field-input" type="text" id="plz" autocomplete="postal-code" placeholder="90411" maxlength="5" />
+              <div class="field-err" id="err-plz">Bitte 5-stellige PLZ.</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="ort">Ort <span class="req">*</span></label>
+              <input class="field-input" type="text" id="ort" autocomplete="address-level2" placeholder="Nürnberg" />
+              <div class="field-err" id="err-ort">Pflichtfeld.</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="telefon">Telefon <span class="req">*</span></label>
+              <input class="field-input" type="tel" id="telefon" autocomplete="tel" placeholder="+49 911 …" />
+              <div class="field-err" id="err-telefon">Pflichtfeld.</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="email">E-Mail</label>
+              <input class="field-input" type="email" id="email" autocomplete="email" placeholder="max@beispiel.de" />
+              <div class="field-hint">Für die Bestätigungs-E-Mail (optional).</div>
+              <div class="field-err" id="err-email">Bitte gültige E-Mail-Adresse.</div>
+            </div>
+
+            <div class="field-group full">
+              <label class="field-label" for="sonstiges">Sonstiges</label>
+              <textarea class="field-input" id="sonstiges" rows="3" placeholder="Gesundheitliche Hinweise, Besonderheiten, Fragen…"></textarea>
+              <div class="field-hint">z.B. Allergien, gesundheitliche Einschränkungen oder sonstige Informationen für uns.</div>
+            </div>
+
+          </div><!-- /field-grid -->
+
+          <div class="camp-form-notice">
+            🔒 Deine Daten werden ausschließlich für die Organisation des Sommercamps verwendet und anschließend gelöscht.
+          </div>
+
+          <button class="btn-camp-submit" id="btn-submit">
+            <span id="btn-text">Jetzt verbindlich anmelden →</span>
+            <span id="btn-spinner" class="spinner" style="display:none"></span>
+          </button>
+
+        </div><!-- /form-body -->
+
+        <!-- Success state -->
+        <div class="camp-success" id="form-success" style="display:none">
+          <div class="camp-success-icon">🎉</div>
+          <h3>Anmeldung eingereicht!</h3>
+          <p>Vielen Dank, <strong id="success-name"></strong>! Wir haben deine Anmeldung erhalten.</p>
+          <div class="success-id" id="success-id"></div>
+          <p style="color:var(--muted);font-size:.88rem;margin-top:.5rem">Du erhältst in Kürze eine Bestätigungs-E-Mail.</p>
+        </div>
+
+      </div><!-- /camp-form-wrap -->
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style is:global>
+  .camp-hero {
+    background: var(--navy);
+    padding-block: clamp(2.5rem, 5vw, 4rem);
+  }
+  .camp-hero h1 { color: var(--white); }
+  .camp-hero h1 em { color: var(--orange); font-style: normal; }
+  .camp-hero .section-eyebrow { color: rgba(255,255,255,.5); }
+  .camp-hero .section-eyebrow::before { background: var(--orange); }
+
+  .camp-meta {
+    display: flex; flex-wrap: wrap; gap: .75rem 1.5rem;
+    margin-top: 1rem;
+  }
+  .camp-meta-item {
+    font-size: .95rem; color: rgba(255,255,255,.75);
+    display: flex; align-items: center; gap: .4rem;
+  }
+
+  .camp-container { max-width: 860px; }
+
+  /* Alert */
+  .camp-alert {
+    background: var(--orange);
+    color: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
+    font-size: .95rem; font-weight: 500;
+    margin-bottom: 2.5rem;
+  }
+  .camp-alert-icon { font-size: 1.5rem; flex-shrink: 0; }
+  .camp-alert strong { font-weight: 700; }
+
+  /* Info cards */
+  .camp-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .camp-info-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.25rem;
+    transition: box-shadow .2s, transform .2s;
+  }
+  .camp-info-card:hover { box-shadow: var(--shadow-md, 0 4px 20px rgba(15,41,114,.1)); transform: translateY(-2px); }
+  .camp-info-icon { font-size: 2rem; margin-bottom: .75rem; }
+  .camp-info-card h3 { font-size: 1.1rem; color: var(--navy); margin-bottom: .5rem; }
+  .camp-info-card p { font-size: .875rem; color: var(--mid); line-height: 1.6; }
+
+  /* Photo grid */
+  .camp-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 180px 180px;
+    gap: .75rem;
+    margin-bottom: 3rem;
+  }
+  .camp-photo-placeholder {
+    background: var(--navy-pale);
+    border-radius: var(--radius-lg);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: .5rem; color: var(--navy-mid);
+    font-size: .8rem; font-weight: 600;
+    letter-spacing: .05em; text-transform: uppercase;
+  }
+  .camp-photo-placeholder span { font-size: 2rem; opacity: .4; }
+  .camp-photo-placeholder--tall { grid-row: span 2; }
+  .camp-photo-placeholder--wide { grid-column: span 2; }
+
+  /* Form wrap */
+  .camp-form-wrap {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(15,41,114,.07);
+    margin-bottom: 3rem;
+  }
+  .camp-form-head {
+    background: var(--navy);
+    padding: 1.5rem 2rem;
+    border-bottom: 3px solid var(--orange);
+  }
+  .camp-form-head h2 { font-family: var(--fd); font-size: 1.8rem; color: var(--white); }
+  .camp-form-head p { color: rgba(255,255,255,.6); font-size: .9rem; margin-top: .3rem; }
+  .camp-form-body { padding: 2rem; }
+
+  /* Reuse field styles from membership form */
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .field-grid .full { grid-column: 1 / -1; }
+  .field-group { display: flex; flex-direction: column; gap: .35rem; }
+  .field-label { font-size: .8rem; font-weight: 600; color: var(--mid); }
+  .req { color: #dc2626; }
+  .field-input { border: 2px solid var(--border); border-radius: var(--radius); padding: .6rem .85rem; font-family: var(--fb); font-size: .95rem; color: var(--ink); background: var(--white); transition: border-color .15s; width: 100%; }
+  .field-input:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(15,41,114,.1); }
+  .field-input.error { border-color: #dc2626; }
+  textarea.field-input { resize: vertical; }
+  .field-err { font-size: .75rem; color: #dc2626; font-weight: 500; display: none; }
+  .field-err.visible { display: block; }
+  .field-hint { font-size: .74rem; color: var(--muted); }
+
+  .camp-form-notice {
+    background: var(--navy-tint);
+    border-radius: var(--radius);
+    padding: .75rem 1rem;
+    font-size: .82rem;
+    color: var(--navy);
+    margin-top: 1.5rem;
+  }
+
+  .btn-camp-submit {
+    display: flex; align-items: center; justify-content: center; gap: .5rem;
+    width: 100%; margin-top: 1.25rem;
+    background: var(--orange); color: var(--white);
+    border: none; border-radius: var(--radius);
+    padding: 1rem; font-family: var(--fd);
+    font-size: 1.2rem; letter-spacing: .04em;
+    cursor: pointer; transition: background .15s;
+  }
+  .btn-camp-submit:hover { background: #c96508; }
+  .btn-camp-submit:disabled { opacity: .6; cursor: not-allowed; }
+
+  /* Success */
+  .camp-success { text-align: center; padding: 3rem 2rem; }
+  .camp-success-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .camp-success h3 { font-family: var(--fd); font-size: 2rem; color: var(--navy); margin-bottom: .5rem; }
+  .camp-success p { color: var(--mid); }
+  .success-id {
+    display: inline-block; background: var(--navy); color: var(--orange);
+    font-family: var(--fd); font-size: 1.2rem; letter-spacing: .08em;
+    padding: .4rem 1.25rem; border-radius: var(--radius); margin: .75rem 0;
+  }
+
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.3); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 600px) {
+    .field-grid { grid-template-columns: 1fr; }
+    .field-grid .full { grid-column: 1; }
+    .camp-photo-grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+    .camp-photo-placeholder--tall { grid-row: span 1; }
+    .camp-photo-placeholder--wide { grid-column: span 2; }
+    .camp-info-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+
+<script>
+(() => {
+  // Days remaining countdown
+  const deadline = new Date('2025-06-10');
+  const today = new Date();
+  const diff = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+  const el = document.getElementById('days-left');
+  if (el) {
+    if (diff > 0) el.textContent = `noch ${diff} Tage`;
+    else if (diff === 0) el.textContent = 'letzter Tag';
+    else el.textContent = 'Anmeldeschluss abgelaufen';
+  }
+
+  const $ = id => document.getElementById(id);
+  const val = id => { const e = $(id); return e ? e.value.trim() : ''; };
+
+  function showErr(errId, visible) {
+    const e = $(errId);
+    if (e) e.classList.toggle('visible', visible);
+    const inputId = errId.replace('err-', '');
+    const inp = $(inputId) || $('trikot-groesse');
+    if (inputId === 'trikot') {
+      const el = $('trikot-groesse');
+      if (el) el.classList.toggle('error', visible);
+    } else {
+      const inp2 = $(inputId);
+      if (inp2) inp2.classList.toggle('error', visible);
+    }
+  }
+
+  function validate() {
+    let ok = true;
+    const fields = [
+      { id: 'vorname',    err: 'err-vorname',    check: v => v.length > 0 },
+      { id: 'nachname',   err: 'err-nachname',   check: v => v.length > 0 },
+      { id: 'geburtsdatum', err: 'err-geburtsdatum', check: v => v.length > 0 },
+      { id: 'geschlecht', err: 'err-geschlecht', check: v => v.length > 0 },
+      { id: 'team',       err: 'err-team',       check: v => v.length > 0 },
+      { id: 'strasse',    err: 'err-strasse',    check: v => v.length > 0 },
+      { id: 'plz',        err: 'err-plz',        check: v => /^\d{5}$/.test(v) },
+      { id: 'ort',        err: 'err-ort',        check: v => v.length > 0 },
+      { id: 'telefon',    err: 'err-telefon',    check: v => v.length > 0 },
+    ];
+    fields.forEach(f => {
+      const valid = f.check(val(f.id));
+      showErr(f.err, !valid);
+      if (!valid) ok = false;
+    });
+    // Trikot
+    const trikotVal = $('trikot-groesse')?.value || '';
+    const trikotOk = trikotVal.length > 0;
+    showErr('err-trikot', !trikotOk);
+    if (!trikotOk) ok = false;
+    // Email optional but validate format if provided
+    const emailVal = val('email');
+    if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      showErr('err-email', true);
+      ok = false;
+    } else {
+      showErr('err-email', false);
+    }
+    return ok;
+  }
+
+  $('btn-submit').addEventListener('click', async () => {
+    if (!validate()) return;
+    const btn = $('btn-submit');
+    $('btn-text').style.display = 'none';
+    $('btn-spinner').style.display = '';
+    btn.disabled = true;
+
+    const payload = {
+      vorname:        val('vorname'),
+      nachname:       val('nachname'),
+      geburtsdatum:   val('geburtsdatum'),
+      geschlecht:     $('geschlecht')?.value || '',
+      strasse:        val('strasse'),
+      plz:            val('plz'),
+      ort:            val('ort'),
+      telefon:        val('telefon'),
+      email:          val('email'),
+      team:           $('team')?.value || '',
+      trikot_groesse: $('trikot-groesse')?.value || '',
+      sonstiges:      val('sonstiges'),
+    };
+
+    try {
+      const res = await fetch('/api/submit-camp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        $('form-body').style.display = 'none';
+        $('form-success').style.display = '';
+        $('success-name').textContent = `${payload.vorname} ${payload.nachname}`;
+        $('success-id').textContent = `Anmeldung-ID: ${data.anmeldungId}`;
+        window.scrollTo({ top: document.getElementById('anmeldung').offsetTop - 80, behavior: 'smooth' });
+      } else {
+        throw new Error(data.error || 'Unbekannter Fehler');
+      }
+    } catch (err) {
+      alert(`Fehler: ${err.message}\n\nBitte erneut versuchen oder den Verein kontaktieren.`);
+      $('btn-text').style.display = '';
+      $('btn-spinner').style.display = 'none';
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
