@@ -9,7 +9,7 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Camp-Verwaltung 2025 — ASN Pfeil Phönix</title>
+  <title>Camp-Verwaltung 2026 — ASN Pfeil Phönix</title>
   <meta name="robots" content="noindex, nofollow" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
@@ -137,7 +137,7 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
       <img src="/images/asn-logo.svg" alt="" />
       <div class="login-logo-text">
         <strong>ASN Pfeil Phönix</strong>
-        <span>Camp-Verwaltung 2025</span>
+        <span>Camp-Verwaltung 2026</span>
       </div>
     </div>
     <h1 class="login-title">Anmelden</h1>
@@ -164,7 +164,7 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
     <div class="header-brand">
       <img src="/images/asn-logo.svg" alt="" />
       <div class="header-brand-text">
-        <strong>Sommer-Fußballcamp 2025</strong>
+        <strong>Sommer-Fußballcamp 2026</strong>
         <span>Anmeldungsverwaltung</span>
       </div>
     </div>
@@ -409,7 +409,7 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
   document.getElementById('btn-download-all').addEventListener('click', () => {
     const rows = window.__anmeldungen__;
     if (!rows || rows.length === 0) { showToast('Keine Anmeldungen', 'error'); return; }
-    downloadCsv(toCsv(rows), 'camp-anmeldungen-2025.csv');
+    downloadCsv(toCsv(rows), 'camp-anmeldungen-2026.csv');
     showToast(`${rows.length} Anmeldungen exportiert`, 'success');
   });
 

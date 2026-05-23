@@ -68,7 +68,7 @@ function generateInvoicePDF(data: {
       .text('Bitte bewahren Sie diese Rechnung mindestens zwei Jahre in Ihren Unterlagen auf.');
     doc.moveDown(0.5);
     doc.fontSize(10).fillColor('black')
-      .text('für die Anmeldung zum Sommer-Fußballcamp 2025 stellen wir Ihnen hiermit folgende Kosten in Rechnung:');
+      .text('für die Anmeldung zum Sommer-Fußballcamp 2026 stellen wir Ihnen hiermit folgende Kosten in Rechnung:');
 
     // ── Line items table ─────────────────────────────────────
     const tableY = doc.y + 12;
@@ -84,9 +84,9 @@ function generateInvoicePDF(data: {
     const rowY = tableY + 22;
     doc.fillColor('black').font('Helvetica').fontSize(9);
     doc.text('1', 54, rowY + 8, { width: 40 });
-    doc.font('Helvetica-Bold').text('Sommer-Fußballcamp 2025', 100, rowY + 5, { width: 230 });
+    doc.font('Helvetica-Bold').text('Sommer-Fußballcamp 2026', 100, rowY + 5, { width: 230 });
     doc.font('Helvetica').fontSize(8).fillColor(mid)
-      .text(`3.–7. Aug. 2025, 9–12 Uhr | Team: ${data.team} | Trikot: ${data.trikotGroesse}`, 100, rowY + 17, { width: 230 });
+      .text(`3.–7. Aug. 2026, 9–12 Uhr | Team: ${data.team} | Trikot: ${data.trikotGroesse}`, 100, rowY + 17, { width: 230 });
     doc.fillColor('black').fontSize(9)
       .text('99,00 €', 335, rowY + 8, { width: 90, align: 'right' })
       .text('99,00 €', 430, rowY + 8, { width: 115, align: 'right' });
@@ -111,7 +111,7 @@ function generateInvoicePDF(data: {
     // ── Due date ─────────────────────────────────────────────
     doc.fillColor('black').font('Helvetica').fontSize(10)
       .text('Der Rechnungsbetrag ist ohne Abzug bis zum ', 50, totRowY + 36, { continued: true })
-      .font('Helvetica-Bold').text('10. Juni 2025', { continued: true })
+      .font('Helvetica-Bold').text('10. Juni 2026', { continued: true })
       .font('Helvetica').text(' zu begleichen.');
 
     // ── Payment info box ─────────────────────────────────────
@@ -283,8 +283,8 @@ export const POST: APIRoute = async ({ request }) => {
         transporter.sendMail({
           from: `"ASN Pfeil Phoenix" <${FROM_EMAIL}>`,
           to: data.email,
-          subject: `Anmeldung Sommer-Fussballcamp 2025 bestätigt — Rechnung ${rechnungNummer}`,
-          text: `Hallo ${data.vorname},\n\nvielen Dank fuer deine Anmeldung zum Sommer-Fussballcamp 2025!\n\nDeine Rechnung (${rechnungNummer}) ist als PDF im Anhang.\nBitte ueberweise 99 EUR bis zum 10. Juni 2025 an:\nIBAN: DE12 7605 0101 0001 4302 77\nVerwendungszweck: ${rechnungNummer} - ${data.vorname} ${data.nachname}\n\nDas Camp findet vom 3. bis 7. August 2025 statt (taeglich 9-12 Uhr).\n\nMit sportlichen Gruessen\nASN Pfeil Phoenix Fussballabteilung`,
+          subject: `Anmeldung Sommer-Fussballcamp 2026 bestätigt — Rechnung ${rechnungNummer}`,
+          text: `Hallo ${data.vorname},\n\nvielen Dank fuer deine Anmeldung zum Sommer-Fussballcamp 2026!\n\nDeine Rechnung (${rechnungNummer}) ist als PDF im Anhang.\nBitte ueberweise 99 EUR bis zum 10. Juni 2026 an:\nIBAN: DE12 7605 0101 0001 4302 77\nVerwendungszweck: ${rechnungNummer} - ${data.vorname} ${data.nachname}\n\nDas Camp findet vom 3. bis 7. August 2026 statt (taeglich 9-12 Uhr).\n\nMit sportlichen Gruessen\nASN Pfeil Phoenix Fussballabteilung`,
           attachments: [{
             filename: `Rechnung-${rechnungNummer}.pdf`,
             content: invoicePdf,
