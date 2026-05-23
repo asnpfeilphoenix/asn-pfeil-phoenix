@@ -13,10 +13,11 @@
     "astro": "^4.0.0",
     "nodemailer": "^8.0.7",
     "papaparse": "^5.4.1",
-    "pdfmake": "^0.3.9"
+    "pdfkit": "^0.18.0"
   },
   "devDependencies": {
     "@types/nodemailer": "^8.0.0",
+    "@types/pdfkit": "^0.17.6",
     "@types/pdfmake": "^0.3.3",
     "typescript": "^5.0.0"
   },

@@ -3,16 +3,7 @@
 export const prerender = false;
 import type { APIRoute } from 'astro';
 import nodemailer from 'nodemailer';
-import Printer from 'pdfmake/src/printer.js';
-
-const fonts = {
-  Helvetica: {
-    normal: 'Helvetica',
-    bold: 'Helvetica-Bold',
-    italics: 'Helvetica-Oblique',
-    bolditalics: 'Helvetica-BoldOblique',
-  },
-};
+import PDFDocument from 'pdfkit';
 
 function generateInvoicePDF(data: {
   rechnungNummer: string;
@@ -26,150 +17,127 @@ function generateInvoicePDF(data: {
   team: string;
   trikotGroesse: string;
   anmeldungId: string;
-}): Buffer {
-  const printer = new Printer(fonts);
-
-  const empfaenger = data.erziehungsberechtigter
-    ? `${data.erziehungsberechtigter}\n${data.vorname} ${data.nachname} (Teilnehmer)\n${data.strasse}\n${data.plz} ${data.ort}`
-    : `${data.vorname} ${data.nachname}\n${data.strasse}\n${data.plz} ${data.ort}`;
-
-  const docDefinition: any = {
-    defaultStyle: { font: 'Helvetica', fontSize: 10 },
-    pageMargins: [50, 50, 50, 50],
-    content: [
-      // Header row
-      {
-        columns: [
-          {
-            stack: [
-              {
-                table: {
-                  body: [[{ text: 'ASN-PFEIL-PHÖNIX e.V.', bold: true, fontSize: 13, color: '#0f2972', margin: [6, 4, 6, 4] }]],
-                },
-                layout: { hLineColor: () => '#0f2972', vLineColor: () => '#0f2972', hLineWidth: () => 2, vLineWidth: () => 2 },
-              },
-            ],
-            width: '*',
-          },
-          {
-            text: 'ASN Pfeil Phönix e.V.\nMarienbergstraße 41\n90411 Nürnberg',
-            alignment: 'right', fontSize: 9, color: '#444',
-            width: 180,
-          },
-        ],
-        marginBottom: 30,
-      },
-      // Recipient
-      { text: empfaenger, marginBottom: 25, lineHeight: 1.4 },
-      // Meta table (right-aligned)
-      {
-        columns: [
-          { text: '', width: '*' },
-          {
-            width: 220,
-            table: {
-              widths: ['auto', '*'],
-              body: [
-                [{ text: 'Datum', color: '#444' }, { text: data.rechnungDatum, bold: true }],
-                [{ text: 'Rechnungs-Nr.', color: '#444' }, { text: data.rechnungNummer, bold: true }],
-                [{ text: 'Anmeldung-ID', color: '#444' }, { text: data.anmeldungId, bold: true, fontSize: 8 }],
-              ],
-            },
-            layout: 'noBorders',
-          },
-        ],
-        marginBottom: 20,
-      },
-      // Title
-      { text: `Rechnung Nr. ${data.rechnungNummer}`, fontSize: 13, bold: true, marginBottom: 4 },
-      { text: 'Bitte bewahren Sie diese Rechnung mindestens zwei Jahre in Ihren Unterlagen auf.', fontSize: 8, color: '#555', marginBottom: 16 },
-      { text: 'für die Anmeldung zum Sommer-Fußballcamp 2025 stellen wir Ihnen hiermit folgende Kosten in Rechnung:', marginBottom: 16, lineHeight: 1.4 },
-      // Line items table
-      {
-        table: {
-          widths: [40, '*', 70, 70],
-          headerRows: 1,
-          body: [
-            [
-              { text: 'Anzahl', bold: true, color: 'white', fillColor: '#0f2972', margin: [4, 6, 4, 6] },
-              { text: 'Bezeichnung', bold: true, color: 'white', fillColor: '#0f2972', margin: [4, 6, 4, 6] },
-              { text: 'Einzelpreis', bold: true, color: 'white', fillColor: '#0f2972', alignment: 'right', margin: [4, 6, 4, 6] },
-              { text: 'Gesamtpreis', bold: true, color: 'white', fillColor: '#0f2972', alignment: 'right', margin: [4, 6, 4, 6] },
-            ],
-            [
-              { text: '1', margin: [4, 6, 4, 6] },
-              {
-                stack: [
-                  { text: 'Sommer-Fußballcamp 2025', bold: true },
-                  { text: `3. – 7. August 2025, 9–12 Uhr täglich | Team: ${data.team} | Trikot: ${data.trikotGroesse}`, fontSize: 8, color: '#555' },
-                ],
-                margin: [4, 6, 4, 6],
-              },
-              { text: '99,00 €', alignment: 'right', margin: [4, 6, 4, 6] },
-              { text: '99,00 €', alignment: 'right', margin: [4, 6, 4, 6] },
-            ],
-          ],
-        },
-        layout: { hLineColor: () => '#e4e6ee', vLineColor: () => 'white' },
-        marginBottom: 16,
-      },
-      // Totals
-      {
-        columns: [
-          { text: '', width: '*' },
-          {
-            width: 220,
-            table: {
-              widths: ['*', 80],
-              body: [
-                [{ text: 'Nettobetrag', margin: [4, 4, 4, 4] }, { text: '99,00 €', alignment: 'right', margin: [4, 4, 4, 4] }],
-                [{ text: 'MwSt. (befreit)', margin: [4, 4, 4, 4] }, { text: '0,00 €', alignment: 'right', margin: [4, 4, 4, 4] }],
-                [
-                  { text: 'Rechnungsbetrag', bold: true, color: 'white', fillColor: '#0f2972', fontSize: 11, margin: [4, 6, 4, 6] },
-                  { text: '99,00 €', bold: true, color: 'white', fillColor: '#0f2972', fontSize: 11, alignment: 'right', margin: [4, 6, 4, 6] },
-                ],
-              ],
-            },
-            layout: { hLineColor: () => '#e4e6ee', vLineColor: () => '#e4e6ee' },
-          },
-        ],
-        marginBottom: 16,
-      },
-      { text: 'Der Rechnungsbetrag ist ohne Abzug bis zum 10. Juni 2025 zu begleichen.', marginBottom: 24 },
-      // Payment info box
-      {
-        table: {
-          widths: ['*'],
-          body: [[{
-            stack: [
-              { text: 'Bankverbindung', bold: true, color: '#0f2972', marginBottom: 6 },
-              { text: 'Kontoinhaber: ASN Pfeil Phönix e.V.', lineHeight: 1.6 },
-              { text: 'Bank: Stadtsparkasse Nürnberg', lineHeight: 1.6 },
-              { text: 'IBAN: DE12 7605 0101 0001 4302 77', lineHeight: 1.6 },
-              { text: `Verwendungszweck: ${data.rechnungNummer} – ${data.vorname} ${data.nachname}`, bold: true, lineHeight: 1.6 },
-            ],
-            fillColor: '#f0f3fc',
-            margin: [12, 12, 12, 12],
-          }]],
-        },
-        layout: { hLineColor: () => '#0f2972', vLineColor: () => '#0f2972', hLineWidth: (i: number, node: any) => (i === 0 || i === node.table.body.length) ? 0 : 0, vLineWidth: (i: number, node: any) => (i === 0) ? 3 : 0 },
-        marginBottom: 40,
-      },
-      // Footer
-      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 495, y2: 0, lineWidth: 0.5, lineColor: '#e4e6ee' }], marginBottom: 8 },
-      { text: 'ASN Pfeil Phönix e.V. · Marienbergstraße 41 · 90411 Nürnberg · www.asn-pfeil-phoenix.de', fontSize: 8, color: '#888', alignment: 'center' },
-    ],
-  };
-
-  const pdfDoc = printer.createPdfKitDocument(docDefinition);
-  return new Promise<Buffer>((resolve, reject) => {
+}): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
     const chunks: Buffer[] = [];
-    pdfDoc.on('data', (chunk: Buffer) => chunks.push(chunk));
-    pdfDoc.on('end', () => resolve(Buffer.concat(chunks)));
-    pdfDoc.on('error', reject);
-    pdfDoc.end();
-  }) as unknown as Buffer;
+    doc.on('data', (chunk: Buffer) => chunks.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
+
+    const navy = '#0f2972';
+    const mid = '#4a4f5c';
+    const light = '#e4e6ee';
+    const pageW = 495; // usable width at margin 50
+
+    // ── Header ──────────────────────────────────────────────
+    doc.rect(50, 50, 180, 28).stroke(navy);
+    doc.fillColor(navy).font('Helvetica-Bold').fontSize(12)
+      .text('ASN-PFEIL-PHÖNIX e.V.', 58, 58);
+
+    doc.fillColor(mid).font('Helvetica').fontSize(8)
+      .text('ASN Pfeil Phönix e.V.', 350, 50, { width: 195, align: 'right' })
+      .text('Marienbergstraße 41', { width: 195, align: 'right' })
+      .text('90411 Nürnberg', { width: 195, align: 'right' });
+
+    // ── Recipient ────────────────────────────────────────────
+    doc.moveDown(3);
+    doc.fillColor('black').font('Helvetica').fontSize(10);
+    if (data.erziehungsberechtigter) {
+      doc.text(data.erziehungsberechtigter);
+      doc.text(`${data.vorname} ${data.nachname} (Teilnehmer)`);
+    } else {
+      doc.text(`${data.vorname} ${data.nachname}`);
+    }
+    doc.text(data.strasse).text(`${data.plz} ${data.ort}`);
+
+    // ── Meta table ───────────────────────────────────────────
+    const metaY = doc.y + 20;
+    doc.fontSize(9).fillColor(mid).text('Datum', 350, metaY, { width: 80 });
+    doc.fillColor('black').font('Helvetica-Bold').text(data.rechnungDatum, 430, metaY, { width: 115 });
+    doc.font('Helvetica').fillColor(mid).text('Rechnungs-Nr.', 350, metaY + 14, { width: 80 });
+    doc.fillColor('black').font('Helvetica-Bold').text(data.rechnungNummer, 430, metaY + 14, { width: 115 });
+    doc.font('Helvetica').fillColor(mid).text('Anmeldung-ID', 350, metaY + 28, { width: 80 });
+    doc.fillColor('black').font('Helvetica').fontSize(7).text(data.anmeldungId, 430, metaY + 30, { width: 115 });
+
+    // ── Title ────────────────────────────────────────────────
+    doc.moveDown(4);
+    doc.font('Helvetica-Bold').fontSize(13).fillColor('black')
+      .text(`Rechnung Nr. ${data.rechnungNummer}`);
+    doc.font('Helvetica').fontSize(8).fillColor(mid)
+      .text('Bitte bewahren Sie diese Rechnung mindestens zwei Jahre in Ihren Unterlagen auf.');
+    doc.moveDown(0.5);
+    doc.fontSize(10).fillColor('black')
+      .text('für die Anmeldung zum Sommer-Fußballcamp 2025 stellen wir Ihnen hiermit folgende Kosten in Rechnung:');
+
+    // ── Line items table ─────────────────────────────────────
+    const tableY = doc.y + 12;
+    // Header row
+    doc.rect(50, tableY, pageW, 22).fill(navy);
+    doc.fillColor('white').font('Helvetica-Bold').fontSize(9);
+    doc.text('Anzahl', 54, tableY + 7, { width: 40 });
+    doc.text('Bezeichnung', 100, tableY + 7, { width: 230 });
+    doc.text('Einzelpreis', 335, tableY + 7, { width: 90, align: 'right' });
+    doc.text('Gesamtpreis', 430, tableY + 7, { width: 115, align: 'right' });
+
+    // Data row
+    const rowY = tableY + 22;
+    doc.fillColor('black').font('Helvetica').fontSize(9);
+    doc.text('1', 54, rowY + 8, { width: 40 });
+    doc.font('Helvetica-Bold').text('Sommer-Fußballcamp 2025', 100, rowY + 5, { width: 230 });
+    doc.font('Helvetica').fontSize(8).fillColor(mid)
+      .text(`3.–7. Aug. 2025, 9–12 Uhr | Team: ${data.team} | Trikot: ${data.trikotGroesse}`, 100, rowY + 17, { width: 230 });
+    doc.fillColor('black').fontSize(9)
+      .text('99,00 €', 335, rowY + 8, { width: 90, align: 'right' })
+      .text('99,00 €', 430, rowY + 8, { width: 115, align: 'right' });
+    doc.moveTo(50, rowY + 36).lineTo(545, rowY + 36).strokeColor(light).stroke();
+
+    // ── Totals ───────────────────────────────────────────────
+    const totY = rowY + 46;
+    doc.fillColor(mid).fontSize(9)
+      .text('Nettobetrag', 350, totY, { width: 80 })
+      .text('MwSt. (befreit)', 350, totY + 14, { width: 80 });
+    doc.fillColor('black')
+      .text('99,00 €', 430, totY, { width: 115, align: 'right' })
+      .text('0,00 €', 430, totY + 14, { width: 115, align: 'right' });
+
+    // Total row
+    const totRowY = totY + 32;
+    doc.rect(350, totRowY, 195, 22).fill(navy);
+    doc.fillColor('white').font('Helvetica-Bold').fontSize(10)
+      .text('Rechnungsbetrag', 354, totRowY + 6, { width: 100 })
+      .text('99,00 €', 354, totRowY + 6, { width: 187, align: 'right' });
+
+    // ── Due date ─────────────────────────────────────────────
+    doc.fillColor('black').font('Helvetica').fontSize(10)
+      .text('Der Rechnungsbetrag ist ohne Abzug bis zum ', 50, totRowY + 36, { continued: true })
+      .font('Helvetica-Bold').text('10. Juni 2025', { continued: true })
+      .font('Helvetica').text(' zu begleichen.');
+
+    // ── Payment info box ─────────────────────────────────────
+    const payY = doc.y + 16;
+    doc.rect(50, payY, pageW, 80).fill('#f0f3fc');
+    doc.moveTo(50, payY).lineTo(50, payY + 80).strokeColor(navy).lineWidth(3).stroke();
+    doc.lineWidth(1);
+    doc.fillColor(navy).font('Helvetica-Bold').fontSize(10)
+      .text('Bankverbindung', 62, payY + 10);
+    doc.fillColor('black').font('Helvetica').fontSize(9)
+      .text('Kontoinhaber: ASN Pfeil Phönix e.V.', 62, payY + 24)
+      .text('Bank: Stadtsparkasse Nürnberg', 62, payY + 36)
+      .text('IBAN: DE12 7605 0101 0001 4302 77', 62, payY + 48)
+      .font('Helvetica-Bold')
+      .text(`Verwendungszweck: ${data.rechnungNummer} – ${data.vorname} ${data.nachname}`, 62, payY + 60);
+
+    // ── Footer ───────────────────────────────────────────────
+    doc.moveTo(50, 760).lineTo(545, 760).strokeColor(light).stroke();
+    doc.fillColor(mid).font('Helvetica').fontSize(8)
+      .text('ASN Pfeil Phönix e.V. · Marienbergstraße 41 · 90411 Nürnberg · www.asn-pfeil-phoenix.de',
+        50, 765, { align: 'center', width: pageW });
+
+    doc.end();
+  });
 }
+
 export const POST: APIRoute = async ({ request }) => {
   const headers = { 'Content-Type': 'application/json' };
   try {
