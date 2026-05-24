@@ -64,7 +64,7 @@ function generatePDF(r: any): Promise<Buffer> {
     doc.text('Gesamtpreis', 430, tableY + 7, { width: 115, align: 'right' });
 
     const rowY = tableY + 22;
-    const preis = parseFloat(r.preis) || 99;
+    const preis = r.preis != null ? parseFloat(r.preis) : 99;
     const preisStr = preis === 0 ? 'Kostenlos' : `${preis.toFixed(2).replace('.', ',')} €`;
     doc.fillColor('black').font('Helvetica').fontSize(9);
     doc.text('1', 54, rowY + 8, { width: 40 });
