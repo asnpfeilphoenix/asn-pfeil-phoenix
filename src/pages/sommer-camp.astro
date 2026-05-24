@@ -4,15 +4,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 export const prerender = false;
 ---
 
-<BaseLayout title="Sommer-Fußballcamp 2025" description="Anmeldung zum Sommer-Fußballcamp 2025 des ASN Pfeil Phönix e.V.">
+<BaseLayout title="Sommer-Fußballcamp 2026" description="Anmeldung zum Sommer-Fußballcamp 2026 des ASN Pfeil Phönix e.V.">
 
   <!-- Hero -->
   <section class="camp-hero">
     <div class="container">
       <p class="section-eyebrow">Fußballabteilung</p>
-      <h1>Sommer-Fußball<em>camp</em> 2025</h1>
+      <h1>Sommer-Fußball<em>camp</em> 2026</h1>
       <div class="camp-meta">
-        <span class="camp-meta-item">📅 3. – 7. August 2025</span>
+        <span class="camp-meta-item">📅 3. – 7. August 2026</span>
         <span class="camp-meta-item">🕘 9 – 12 Uhr täglich</span>
         <span class="camp-meta-item">💶 99 € inkl. Trikot</span>
         <span class="camp-meta-item">📍 ASN Pfeil Phönix, Nürnberg</span>
@@ -28,31 +28,32 @@ export const prerender = false;
       <div class="camp-alert">
         <span class="camp-alert-icon">⚽</span>
         <div>
-          <strong>Anmeldeschluss: 10. Juni 2025</strong> — damit die Trikots rechtzeitig geliefert werden können. Noch <span id="days-left"></span> — jetzt anmelden!
+          <strong>Anmeldeschluss: 10. Juni 2026</strong> — damit die Trikots rechtzeitig geliefert werden können. Noch <span id="days-left"></span> — jetzt anmelden!
         </div>
       </div>
 
       <!-- Info grid -->
       <div class="camp-info-grid">
         <div class="camp-info-card">
-          <div class="camp-info-icon">🎯</div>
+          
           <h3>Ziel & Inhalt</h3>
           <p>In kleinen Gruppen von 8–10 Spieler*innen arbeiten wir intensiv an der Verbesserung technischer und taktischer Fähigkeiten — und haben dabei jede Menge Spaß.</p>
         </div>
         <div class="camp-info-card">
-          <div class="camp-info-icon">👥</div>
+          
           <h3>Zielgruppe</h3>
           <p>Offen für alle Großfeldspieler*innen der <strong>A- bis D-Jugend</strong>. Wir haben <strong>40 Plätze</strong> — also schnell sein!</p>
         </div>
         <div class="camp-info-card">
-          <div class="camp-info-icon">🏆</div>
+          
           <h3>Abschluss-BBQ</h3>
-          <p>Am letzten Tag (7. August) organisieren wir ein großes <strong>BBQ für alle</strong> Teilnehmer*innen — der perfekte Abschluss einer tollen Woche.</p>
+          <p>Am letzten Tag (7. August 2026) organisieren wir ein großes <strong>BBQ für alle</strong> Teilnehmer*innen — der perfekte Abschluss einer tollen Woche.</p>
         </div>
         <div class="camp-info-card">
-          <div class="camp-info-icon">👕</div>
+          
           <h3>Trikot inklusive</h3>
           <p>Der Preis von <strong>99 €</strong> beinhaltet ein Trikot. Damit die Trikots rechtzeitig fertig sind, ist der Anmeldeschluss der <strong>10. Juni</strong>.</p>
+	  <p>Der gesamte Erlös fließt in die Förderung unserer Jugendarbeit.</p>
         </div>
       </div>
 
@@ -60,24 +61,19 @@ export const prerender = false;
       <div class="section-eyebrow" style="margin-top:3rem; margin-bottom:1rem">Impressionen vom letzten Camp</div>
       <div class="camp-photo-grid">
         <div class="camp-photo-placeholder">
-          <span>⚽</span>
-          <div>Foto folgt</div>
+          <img src="/images/camp/camp1.jpg" alt="Camp Impression" class="camp-photo-img" />
         </div>
         <div class="camp-photo-placeholder camp-photo-placeholder--tall">
-          <span>🏃</span>
-          <div>Foto folgt</div>
+          <img src="/images/camp/camp2.jpg" alt="Camp Impression" class="camp-photo-img" />
         </div>
         <div class="camp-photo-placeholder">
-          <span>🎯</span>
-          <div>Foto folgt</div>
+          <img src="/images/camp/camp3.jpg" alt="Camp Impression" class="camp-photo-img" />
         </div>
         <div class="camp-photo-placeholder">
-          <span>🔥</span>
-          <div>Foto folgt</div>
+          <img src="/images/camp/camp4.jpg" alt="Camp Impression" class="camp-photo-img" />
         </div>
         <div class="camp-photo-placeholder camp-photo-placeholder--wide">
-          <span>👥</span>
-          <div>Foto folgt</div>
+          <img src="/images/camp/camp5.jpg" alt="Camp Impression" class="camp-photo-img" />
         </div>
       </div>
 
@@ -89,103 +85,61 @@ export const prerender = false;
         </div>
 
         <div class="camp-form-body" id="form-body">
+
+          <!-- Contact details (shared for all players) -->
+          <div class="field-section-label">Kontaktdaten</div>
           <div class="field-grid">
-
-            <div class="field-group">
-              <label class="field-label" for="vorname">Vorname <span class="req">*</span></label>
-              <input class="field-input" type="text" id="vorname" autocomplete="given-name" placeholder="Max" />
-              <div class="field-err" id="err-vorname">Pflichtfeld.</div>
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="nachname">Nachname <span class="req">*</span></label>
-              <input class="field-input" type="text" id="nachname" autocomplete="family-name" placeholder="Mustermann" />
-              <div class="field-err" id="err-nachname">Pflichtfeld.</div>
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="geburtsdatum">Geburtsdatum <span class="req">*</span></label>
-              <input class="field-input" type="date" id="geburtsdatum" autocomplete="bday" />
-              <div class="field-err" id="err-geburtsdatum">Pflichtfeld.</div>
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="geschlecht">Geschlecht <span class="req">*</span></label>
-              <select class="field-input" id="geschlecht">
-                <option value="">— bitte wählen —</option>
-                <option value="männlich">männlich</option>
-                <option value="weiblich">weiblich</option>
-                <option value="divers">divers</option>
-              </select>
-              <div class="field-err" id="err-geschlecht">Bitte wählen.</div>
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="team">Team <span class="req">*</span></label>
-              <select class="field-input" id="team">
-                <option value="">— bitte wählen —</option>
-                <option value="A-Jugend">A-Jugend</option>
-                <option value="B-Jugend">B-Jugend</option>
-                <option value="C-Jugend">C-Jugend</option>
-                <option value="D-Jugend">D-Jugend</option>
-              </select>
-              <div class="field-err" id="err-team">Bitte wählen.</div>
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="trikot-groesse">Trikotgröße <span class="req">*</span></label>
-              <select class="field-input" id="trikot-groesse">
-                <option value="">— bitte wählen —</option>
-                <option value="164 (Junior)">164 (Junior)</option>
-                <option value="XS (Erw.)">XS (Erw.)</option>
-                <option value="S (Erw.)">S (Erw.)</option>
-                <option value="M (Erw.)">M (Erw.)</option>
-                <option value="L (Erw.)">L (Erw.)</option>
-                <option value="XL (Erw.)">XL (Erw.)</option>
-                <option value="XXL (Erw.)">XXL (Erw.)</option>
-                <option value="XXXL (Erw.)">XXXL (Erw.)</option>
-              </select>
-              <div class="field-err" id="err-trikot">Bitte wählen.</div>
-            </div>
-
             <div class="field-group full">
               <label class="field-label" for="strasse">Straße, Haus-Nr. <span class="req">*</span></label>
               <input class="field-input" type="text" id="strasse" autocomplete="street-address" placeholder="Musterstraße 12" />
               <div class="field-err" id="err-strasse">Pflichtfeld.</div>
             </div>
-
             <div class="field-group">
               <label class="field-label" for="plz">PLZ <span class="req">*</span></label>
               <input class="field-input" type="text" id="plz" autocomplete="postal-code" placeholder="90411" maxlength="5" />
               <div class="field-err" id="err-plz">Bitte 5-stellige PLZ.</div>
             </div>
-
             <div class="field-group">
               <label class="field-label" for="ort">Ort <span class="req">*</span></label>
               <input class="field-input" type="text" id="ort" autocomplete="address-level2" placeholder="Nürnberg" />
               <div class="field-err" id="err-ort">Pflichtfeld.</div>
             </div>
-
             <div class="field-group">
               <label class="field-label" for="telefon">Telefon <span class="req">*</span></label>
               <input class="field-input" type="tel" id="telefon" autocomplete="tel" placeholder="+49 911 …" />
               <div class="field-err" id="err-telefon">Pflichtfeld.</div>
             </div>
-
             <div class="field-group">
-              <label class="field-label" for="email">E-Mail</label>
+              <label class="field-label" for="email">E-Mail <span class="req">*</span></label>
               <input class="field-input" type="email" id="email" autocomplete="email" placeholder="max@beispiel.de" />
-              <div class="field-hint">Für die Bestätigungs-E-Mail (optional).</div>
-              <div class="field-err" id="err-email">Bitte gültige E-Mail-Adresse.</div>
+              <div class="field-hint">Für die Bestätigungs-E-Mail und Rechnung.</div>
+              <div class="field-err" id="err-email">Bitte gültige E-Mail-Adresse angeben.</div>
             </div>
+          </div>
 
-            <div class="field-group full">
-              <label class="field-label" for="sonstiges">Sonstiges</label>
-              <textarea class="field-input" id="sonstiges" rows="3" placeholder="Gesundheitliche Hinweise, Besonderheiten, Fragen…"></textarea>
-              <div class="field-hint">z.B. Allergien, gesundheitliche Einschränkungen oder sonstige Informationen für uns.</div>
+          <!-- Players container -->
+          <div id="players-container"></div>
+
+          <!-- Add player button -->
+          <button type="button" class="btn-add-player" id="btn-add-player">
+            + Weiteren Spieler hinzufügen
+          </button>
+
+          <!-- Price summary -->
+          <div class="price-summary" id="price-summary">
+            <div class="price-summary-title">Kostenübersicht</div>
+            <div id="price-rows"></div>
+            <div class="price-total-row">
+              <span>Gesamt</span>
+              <span id="price-total">99,00 €</span>
             </div>
+          </div>
 
-          </div><!-- /field-grid -->
+          <div class="field-group full" style="margin-top:1rem">
+            <label class="field-label" for="sonstiges">Sonstiges</label>
+            <textarea class="field-input" id="sonstiges" rows="3" placeholder="Gesundheitliche Hinweise, Besonderheiten, Fragen…"></textarea>
+            <div class="field-hint">z.B. Allergien, gesundheitliche Einschränkungen oder sonstige Informationen für uns.</div>
+          </div>
 
           <div class="camp-form-notice">
             🔒 Deine Daten werden ausschließlich für die Organisation des Sommercamps verwendet und anschließend gelöscht.
@@ -284,6 +238,7 @@ export const prerender = false;
     letter-spacing: .05em; text-transform: uppercase;
   }
   .camp-photo-placeholder span { font-size: 2rem; opacity: .4; }
+  .camp-photo-img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-lg); display: block; }
   .camp-photo-placeholder--tall { grid-row: span 2; }
   .camp-photo-placeholder--wide { grid-column: span 2; }
 
@@ -354,6 +309,42 @@ export const prerender = false;
   .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.3); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* Section label */
+  .field-section-label { font-size: .67rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--navy); margin-bottom: .75rem; margin-top: 1.5rem; display: flex; align-items: center; gap: .6rem; }
+  .field-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* Player card */
+  .player-card { border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-top: 1.5rem; position: relative; }
+  .player-card.player-card--primary { border-color: var(--navy); }
+  .player-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .player-card-title { font-family: var(--fd); font-size: 1.1rem; color: var(--navy); letter-spacing: .03em; }
+  .btn-remove-player { background: transparent; border: 1px solid #fecaca; color: var(--red, #dc2626); border-radius: var(--radius); padding: .3em .8em; font-size: .78rem; font-weight: 600; cursor: pointer; font-family: var(--fb); }
+  .btn-remove-player:hover { background: #fef2f2; }
+
+  /* Voucher */
+  .voucher-row { display: flex; gap: .5rem; align-items: flex-start; }
+  .voucher-row .field-input { flex: 1; text-transform: uppercase; letter-spacing: .05em; }
+  .btn-voucher { background: var(--navy); color: var(--white); border: none; border-radius: var(--radius); padding: .6rem 1rem; font-family: var(--fb); font-size: .85rem; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  .btn-voucher:hover { background: var(--navy-dark); }
+  .voucher-ok { font-size: .78rem; color: var(--green, #16a34a); font-weight: 600; margin-top: .3rem; display: none; }
+  .voucher-ok.visible { display: block; }
+  .voucher-err { font-size: .78rem; color: #dc2626; font-weight: 600; margin-top: .3rem; display: none; }
+  .voucher-err.visible { display: block; }
+
+  /* Add player button */
+  .btn-add-player { display: flex; align-items: center; gap: .5rem; margin-top: 1.25rem; background: var(--navy-tint); color: var(--navy); border: 2px dashed var(--navy-pale); border-radius: var(--radius-lg); padding: .85rem 1.25rem; font-family: var(--fb); font-size: .9rem; font-weight: 600; cursor: pointer; width: 100%; justify-content: center; transition: all .15s; }
+  .btn-add-player:hover { background: var(--navy-pale); border-color: var(--navy); }
+
+  /* Price summary */
+  .price-summary { background: var(--navy); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-top: 1.5rem; }
+  .price-summary-title { font-family: var(--fd); font-size: 1rem; color: rgba(255,255,255,.5); letter-spacing: .06em; text-transform: uppercase; margin-bottom: .75rem; }
+  .price-row { display: flex; justify-content: space-between; align-items: center; font-size: .9rem; color: rgba(255,255,255,.7); padding: .3rem 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .price-row span:last-child { font-weight: 600; color: var(--white); }
+  .price-row .discount { color: #86efac; font-size: .78rem; }
+  .price-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: .75rem; }
+  .price-total-row span:first-child { font-family: var(--fd); font-size: 1.1rem; color: rgba(255,255,255,.6); letter-spacing: .04em; }
+  .price-total-row span:last-child { font-family: var(--fd); font-size: 2rem; color: var(--orange); line-height: 1; }
+
   @media (max-width: 600px) {
     .field-grid { grid-template-columns: 1fr; }
     .field-grid .full { grid-column: 1; }
@@ -366,88 +357,278 @@ export const prerender = false;
 
 <script>
 (() => {
-  // Days remaining countdown
-  const deadline = new Date('2025-06-10');
-  const today = new Date();
-  const diff = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+  // ── Countdown ─────────────────────────────────────────────
+  const deadline = new Date("2026-06-10");
+  const diff = Math.ceil((deadline - new Date()) / (1000 * 60 * 60 * 24));
   const el = document.getElementById('days-left');
-  if (el) {
-    if (diff > 0) el.textContent = `noch ${diff} Tage`;
-    else if (diff === 0) el.textContent = 'letzter Tag';
-    else el.textContent = 'Anmeldeschluss abgelaufen';
-  }
+  if (el) el.textContent = diff > 0 ? `noch ${diff} Tage` : diff === 0 ? 'letzter Tag' : 'Anmeldeschluss abgelaufen';
 
   const $ = id => document.getElementById(id);
   const val = id => { const e = $(id); return e ? e.value.trim() : ''; };
 
+  const BASE_PRICE = 99;
+  const SIBLING_DISCOUNT = 0.10;
+  const TRAINER_CODE = 'ASN-TRAINER-BONUS';
+
+  // ── Player state ──────────────────────────────────────────
+  let players = []; // { id, voucher, voucherValid, voucherApplied }
+  let playerCount = 0;
+
+  function trikotOptions() {
+    return ['164 (Junior)','XS (Erw.)','S (Erw.)','M (Erw.)','L (Erw.)','XL (Erw.)','XXL (Erw.)','XXXL (Erw.)']
+      .map(o => `<option value="${o}">${o}</option>`).join('');
+  }
+
+  function createPlayerCard(idx) {
+    const id = ++playerCount;
+    const isPrimary = idx === 0;
+    const label = isPrimary ? 'Spieler 1 (Hauptanmelder)' : `Spieler ${idx + 1}`;
+    players.push({ id, voucher: '', voucherValid: false });
+
+    const card = document.createElement('div');
+    card.className = `player-card ${isPrimary ? 'player-card--primary' : ''}`;
+    card.dataset.playerId = id;
+    card.innerHTML = `
+      <div class="player-card-header">
+        <div class="player-card-title">${label}</div>
+        ${!isPrimary ? `<button type="button" class="btn-remove-player" onclick="removePlayer(${id})">✕ Entfernen</button>` : ''}
+      </div>
+      <div class="field-grid">
+        <div class="field-group">
+          <label class="field-label">Vorname <span class="req">*</span></label>
+          <input class="field-input" type="text" id="p${id}-vorname" placeholder="Max" />
+          <div class="field-err" id="p${id}-err-vorname">Pflichtfeld.</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Nachname <span class="req">*</span></label>
+          <input class="field-input" type="text" id="p${id}-nachname" placeholder="Mustermann" />
+          <div class="field-err" id="p${id}-err-nachname">Pflichtfeld.</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Geburtsdatum <span class="req">*</span></label>
+          <input class="field-input" type="date" id="p${id}-geburtsdatum" onchange="checkAge(${id})" />
+          <div class="field-err" id="p${id}-err-geburtsdatum">Pflichtfeld.</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Geschlecht <span class="req">*</span></label>
+          <select class="field-input" id="p${id}-geschlecht">
+            <option value="">— bitte wählen —</option>
+            <option value="männlich">männlich</option>
+            <option value="weiblich">weiblich</option>
+            <option value="divers">divers</option>
+          </select>
+          <div class="field-err" id="p${id}-err-geschlecht">Bitte wählen.</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Team <span class="req">*</span></label>
+          <select class="field-input" id="p${id}-team">
+            <option value="">— bitte wählen —</option>
+            <option>A-Jugend</option><option>B-Jugend</option>
+            <option>C-Jugend</option><option>D-Jugend</option>
+          </select>
+          <div class="field-err" id="p${id}-err-team">Bitte wählen.</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Trikotgröße <span class="req">*</span></label>
+          <select class="field-input" id="p${id}-trikot">
+            <option value="">— bitte wählen —</option>
+            ${trikotOptions()}
+          </select>
+          <div class="field-err" id="p${id}-err-trikot">Bitte wählen.</div>
+        </div>
+        <div class="field-group full" id="p${id}-erz-group" style="display:none">
+          <label class="field-label">Erziehungsberechtigter <span class="req">*</span></label>
+          <input class="field-input" type="text" id="p${id}-erziehungsberechtigter" placeholder="Vorname Nachname" />
+          <div class="field-err" id="p${id}-err-erziehungsberechtigter">Pflichtfeld für Minderjährige.</div>
+        </div>
+        <div class="field-group full">
+          <label class="field-label">Gutscheincode</label>
+          <div class="voucher-row">
+            <input class="field-input" type="text" id="p${id}-voucher" placeholder="z.B. ASN-TRAINER-BONUS" style="text-transform:uppercase" />
+            <button type="button" class="btn-voucher" onclick="applyVoucher(${id})">Einlösen</button>
+          </div>
+          <div class="voucher-ok" id="p${id}-voucher-ok">✓ Gutschein eingelöst — kostenlose Teilnahme</div>
+          <div class="voucher-err" id="p${id}-voucher-err">Ungültiger Gutscheincode.</div>
+        </div>
+      </div>
+    `;
+    $('players-container').appendChild(card);
+    updatePriceSummary();
+  }
+
+  window.removePlayer = function(id) {
+    players = players.filter(p => p.id !== id);
+    const card = document.querySelector(`[data-player-id="${id}"]`);
+    if (card) card.remove();
+    // Renumber labels
+    document.querySelectorAll('.player-card').forEach((c, i) => {
+      const title = c.querySelector('.player-card-title');
+      if (title) title.textContent = i === 0 ? 'Spieler 1 (Hauptanmelder)' : `Spieler ${i + 1}`;
+    });
+    updatePriceSummary();
+  };
+
+  window.checkAge = function(id) {
+    const dob = new Date(document.getElementById(`p${id}-geburtsdatum`)?.value || '');
+    const age = Math.floor((new Date() - dob) / (365.25 * 24 * 60 * 60 * 1000));
+    const group = $(`p${id}-erz-group`);
+    if (group) group.style.display = age < 18 ? '' : 'none';
+  };
+
+  window.applyVoucher = function(id) {
+    const input = $(`p${id}-voucher`);
+    const code = (input?.value || '').trim().toUpperCase();
+    const player = players.find(p => p.id === id);
+    const okEl = $(`p${id}-voucher-ok`);
+    const errEl = $(`p${id}-voucher-err`);
+    if (!player) return;
+    if (code === TRAINER_CODE) {
+      player.voucher = code;
+      player.voucherValid = true;
+      okEl?.classList.add('visible');
+      errEl?.classList.remove('visible');
+      if (input) input.classList.remove('error');
+    } else {
+      player.voucher = '';
+      player.voucherValid = false;
+      okEl?.classList.remove('visible');
+      errEl?.classList.add('visible');
+      if (input) input.classList.add('error');
+    }
+    updatePriceSummary();
+  };
+
+  function calcPrice(playerIdx, voucherValid) {
+    if (voucherValid) return 0;
+    if (playerIdx === 0) return BASE_PRICE;
+    return Math.round(BASE_PRICE * (1 - SIBLING_DISCOUNT) * 100) / 100;
+  }
+
+  function updatePriceSummary() {
+    const rowsEl = $('price-rows');
+    const totalEl = $('price-total');
+    if (!rowsEl || !totalEl) return;
+    let total = 0;
+    rowsEl.innerHTML = players.map((p, i) => {
+      const nameEl = document.getElementById(`p${p.id}-vorname`);
+      const name = nameEl?.value.trim() || `Spieler ${i + 1}`;
+      const price = calcPrice(i, p.voucherValid);
+      total += price;
+      const discount = i > 0 && !p.voucherValid ? ' <span class="discount">(−10% Geschwisterrabatt)</span>' : '';
+      const priceStr = p.voucherValid ? 'Kostenlos' : `${price.toFixed(2).replace('.', ',')} €`;
+      return `<div class="price-row"><span>${name}${discount}</span><span>${priceStr}</span></div>`;
+    }).join('');
+    totalEl.textContent = `${total.toFixed(2).replace('.', ',')} €`;
+  }
+
+  // Update price summary when names change
+  $('players-container').addEventListener('input', e => {
+    if (e.target.id?.endsWith('-vorname')) updatePriceSummary();
+  });
+
+  // Add player button — max 4
+  $('btn-add-player').addEventListener('click', () => {
+    if (players.length >= 4) {
+      alert('Maximal 4 Spieler pro Anmeldung.');
+      return;
+    }
+    createPlayerCard(players.length);
+  });
+
+  // ── Validation ────────────────────────────────────────────
   function showErr(errId, visible) {
     const e = $(errId);
     if (e) e.classList.toggle('visible', visible);
-    const inputId = errId.replace('err-', '');
-    const inp = $(inputId) || $('trikot-groesse');
-    if (inputId === 'trikot') {
-      const el = $('trikot-groesse');
-      if (el) el.classList.toggle('error', visible);
-    } else {
-      const inp2 = $(inputId);
-      if (inp2) inp2.classList.toggle('error', visible);
-    }
+    const inp = document.getElementById(errId.replace('err-', ''));
+    if (inp) inp.classList.toggle('error', visible);
   }
 
-  function validate() {
+  function validateContact() {
     let ok = true;
-    const fields = [
-      { id: 'vorname',    err: 'err-vorname',    check: v => v.length > 0 },
-      { id: 'nachname',   err: 'err-nachname',   check: v => v.length > 0 },
-      { id: 'geburtsdatum', err: 'err-geburtsdatum', check: v => v.length > 0 },
-      { id: 'geschlecht', err: 'err-geschlecht', check: v => v.length > 0 },
-      { id: 'team',       err: 'err-team',       check: v => v.length > 0 },
-      { id: 'strasse',    err: 'err-strasse',    check: v => v.length > 0 },
-      { id: 'plz',        err: 'err-plz',        check: v => /^\d{5}$/.test(v) },
-      { id: 'ort',        err: 'err-ort',        check: v => v.length > 0 },
-      { id: 'telefon',    err: 'err-telefon',    check: v => v.length > 0 },
-    ];
-    fields.forEach(f => {
+    [
+      { id: 'strasse', check: v => v.length > 0 },
+      { id: 'plz',     check: v => /^\d{5}$/.test(v) },
+      { id: 'ort',     check: v => v.length > 0 },
+      { id: 'telefon', check: v => v.length > 0 },
+      { id: 'email',   check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+    ].forEach(f => {
       const valid = f.check(val(f.id));
-      showErr(f.err, !valid);
+      showErr(`err-${f.id}`, !valid);
       if (!valid) ok = false;
     });
-    // Trikot
-    const trikotVal = $('trikot-groesse')?.value || '';
-    const trikotOk = trikotVal.length > 0;
-    showErr('err-trikot', !trikotOk);
-    if (!trikotOk) ok = false;
-    // Email optional but validate format if provided
-    const emailVal = val('email');
-    if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
-      showErr('err-email', true);
-      ok = false;
-    } else {
-      showErr('err-email', false);
-    }
     return ok;
   }
 
+  function validatePlayers() {
+    let ok = true;
+    players.forEach((p, i) => {
+      const pid = `p${p.id}`;
+      [
+        { field: 'vorname',    check: v => v.length > 0 },
+        { field: 'nachname',   check: v => v.length > 0 },
+        { field: 'geburtsdatum', check: v => v.length > 0 },
+        { field: 'geschlecht', check: v => v.length > 0 },
+        { field: 'team',       check: v => v.length > 0 },
+        { field: 'trikot',     check: v => v.length > 0 },
+      ].forEach(f => {
+        const el = $(`${pid}-${f.field}`);
+        const v = el ? el.value.trim() : '';
+        const valid = f.check(v);
+        const errEl = $(`${pid}-err-${f.field}`);
+        if (errEl) errEl.classList.toggle('visible', !valid);
+        if (el) el.classList.toggle('error', !valid);
+        if (!valid) ok = false;
+      });
+      // Parent field
+      const erzGroup = $(`${pid}-erz-group`);
+      if (erzGroup && erzGroup.style.display !== 'none') {
+        const erzEl = $(`${pid}-erziehungsberechtigter`);
+        const erzOk = (erzEl?.value.trim() || '').length > 0;
+        const erzErr = $(`${pid}-err-erziehungsberechtigter`);
+        if (erzErr) erzErr.classList.toggle('visible', !erzOk);
+        if (erzEl) erzEl.classList.toggle('error', !erzOk);
+        if (!erzOk) ok = false;
+      }
+    });
+    return ok;
+  }
+
+  // ── Submit ────────────────────────────────────────────────
   $('btn-submit').addEventListener('click', async () => {
-    if (!validate()) return;
+    const contactOk = validateContact();
+    const playersOk = validatePlayers();
+    if (!contactOk || !playersOk) return;
+
     const btn = $('btn-submit');
     $('btn-text').style.display = 'none';
     $('btn-spinner').style.display = '';
     btn.disabled = true;
 
+    const spielerData = players.map((p, i) => {
+      const pid = `p${p.id}`;
+      const get = field => document.getElementById(`${pid}-${field}`)?.value.trim() || '';
+      return {
+        vorname:               get('vorname'),
+        nachname:              get('nachname'),
+        geburtsdatum:          get('geburtsdatum'),
+        geschlecht:            get('geschlecht'),
+        team:                  get('team'),
+        trikot_groesse:        get('trikot'),
+        erziehungsberechtigter: get('erziehungsberechtigter') || null,
+        voucher_code:          p.voucherValid ? p.voucher : null,
+        preis:                 calcPrice(i, p.voucherValid),
+        spieler_nr:            i + 1,
+      };
+    });
+
     const payload = {
-      vorname:        val('vorname'),
-      nachname:       val('nachname'),
-      geburtsdatum:   val('geburtsdatum'),
-      geschlecht:     $('geschlecht')?.value || '',
-      strasse:        val('strasse'),
-      plz:            val('plz'),
-      ort:            val('ort'),
-      telefon:        val('telefon'),
-      email:          val('email'),
-      team:           $('team')?.value || '',
-      trikot_groesse: $('trikot-groesse')?.value || '',
-      sonstiges:      val('sonstiges'),
+      strasse:    val('strasse'),
+      plz:        val('plz'),
+      ort:        val('ort'),
+      telefon:    val('telefon'),
+      email:      val('email'),
+      sonstiges:  val('sonstiges'),
+      spieler:    spielerData,
     };
 
     try {
@@ -460,7 +641,7 @@ export const prerender = false;
       if (res.ok && data.success) {
         $('form-body').style.display = 'none';
         $('form-success').style.display = '';
-        $('success-name').textContent = `${payload.vorname} ${payload.nachname}`;
+        $('success-name').textContent = spielerData[0] ? `${spielerData[0].vorname} ${spielerData[0].nachname}` : '';
         $('success-id').textContent = `Anmeldung-ID: ${data.anmeldungId}`;
         window.scrollTo({ top: document.getElementById('anmeldung').offsetTop - 80, behavior: 'smooth' });
       } else {
@@ -473,5 +654,8 @@ export const prerender = false;
       btn.disabled = false;
     }
   });
+
+  // ── Init: create first player card ───────────────────────
+  createPlayerCard(0);
 })();
 </script>
