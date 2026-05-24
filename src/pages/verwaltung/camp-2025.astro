@@ -110,6 +110,15 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
     .btn-download:hover{background:var(--navy-dark);}
     .btn-download-all{background:var(--navy-tint);color:var(--navy);border:1px solid var(--navy-pale);border-radius:var(--radius);padding:.6em 1.2em;font-family:var(--fd);font-size:.95rem;cursor:pointer;letter-spacing:.03em;white-space:nowrap;}
     .btn-download-all:hover{background:var(--navy-pale);}
+
+    /* Filter bar */
+    .filter-bar { display:flex; gap:.75rem; padding:1rem 1.5rem; flex-wrap:wrap; align-items:center; border-bottom:1px solid var(--border); background:#fafafa; }
+    .filter-input { flex:1; min-width:200px; border:1px solid var(--border); border-radius:var(--radius); padding:.5rem .85rem; font-family:var(--fb); font-size:.875rem; color:var(--ink); }
+    .filter-input:focus { outline:none; border-color:var(--navy); }
+    .filter-select { border:1px solid var(--border); border-radius:var(--radius); padding:.5rem .85rem; font-family:var(--fb); font-size:.875rem; color:var(--ink); background:white; cursor:pointer; }
+    .filter-reset { background:transparent; border:1px solid var(--border); border-radius:var(--radius); padding:.5rem .85rem; font-size:.8rem; color:var(--muted); cursor:pointer; font-family:var(--fb); }
+    .filter-reset:hover { background:var(--border); }
+    .filter-count { font-size:.8rem; color:var(--muted); white-space:nowrap; margin-left:auto; }
     .btn-process{flex:1;background:var(--red);color:var(--white);border:none;border-radius:var(--radius);padding:.75rem;font-family:var(--fd);font-size:1rem;letter-spacing:.04em;cursor:pointer;transition:background .15s;}
     .btn-process:hover{background:#b91c1c;}
 
@@ -189,10 +198,31 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
       <div class="table-card__head">
         <div class="table-card__title">Camp-Anmeldungen</div>
         <div style="display:flex;gap:.75rem;flex-wrap:wrap">
-          <button class="btn-download-all" id="btn-download-all">⬇ Alle als CSV</button>
+          <button class="btn-download-all" id="btn-download-all">⬇ CSV (gefiltert)</button>
+          <button class="btn-download-all" id="btn-download-invoices" style="background:var(--orange);color:white;border-color:var(--orange)">⬇ Rechnungen ZIP</button>
           <button class="btn-view" onclick="loadAnmeldungen()">↻ Aktualisieren</button>
         </div>
       </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <input class="filter-input" type="text" id="filter-search" placeholder="🔍 Name, Rechnung-Nr. suchen…" oninput="applyFilters()" />
+        <select class="filter-select" id="filter-team" onchange="applyFilters()">
+          <option value="">Alle Teams</option>
+          <option>A-Jugend</option><option>B-Jugend</option>
+          <option>C-Jugend</option><option>D-Jugend</option>
+        </select>
+        <select class="filter-select" id="filter-trikot" onchange="applyFilters()">
+          <option value="">Alle Trikotgrößen</option>
+          <option>164 (Junior)</option>
+          <option>XS (Erw.)</option><option>S (Erw.)</option>
+          <option>M (Erw.)</option><option>L (Erw.)</option>
+          <option>XL (Erw.)</option><option>XXL (Erw.)</option><option>XXXL (Erw.)</option>
+        </select>
+        <button class="filter-reset" onclick="resetFilters()">✕ Reset</button>
+        <span class="filter-count" id="filter-count"></span>
+      </div>
+
       <div id="table-content">
         <div class="loading-state"><div class="spinner"></div></div>
       </div>
@@ -209,8 +239,23 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
   </div>
   <div class="drawer-body" id="drawer-body"></div>
   <div class="drawer-actions">
-    <button class="btn-download" id="btn-download-single">⬇ CSV</button>
+    <button class="btn-download" id="btn-view-invoice">👁 Rechnung ansehen</button>
+    <button class="btn-download" id="btn-download-single" style="background:var(--navy-mid)">⬇ CSV</button>
     <button class="btn-process" id="btn-process">🗑 Löschen</button>
+  </div>
+</div>
+
+<!-- Invoice preview modal -->
+<div class="confirm-overlay" id="invoice-overlay" style="z-index:300">
+  <div class="confirm-box" style="max-width:900px;width:95vw;max-height:90vh;display:flex;flex-direction:column;padding:0;overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;background:var(--navy);flex-shrink:0">
+      <span style="font-family:var(--fd);font-size:1.2rem;color:white;letter-spacing:.04em" id="invoice-modal-title">Rechnung</span>
+      <div style="display:flex;gap:.75rem;align-items:center">
+        <button id="btn-download-invoice-pdf" style="background:var(--orange);color:white;border:none;border-radius:var(--radius);padding:.5em 1.2em;font-family:var(--fd);font-size:.95rem;cursor:pointer;letter-spacing:.03em">⬇ PDF herunterladen</button>
+        <button onclick="closeInvoice()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.5rem;cursor:pointer;line-height:1">×</button>
+      </div>
+    </div>
+    <iframe id="invoice-frame" style="flex:1;border:none;min-height:600px" src="about:blank"></iframe>
   </div>
 </div>
 
@@ -228,6 +273,7 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script is:inline set:html={`window.__SB_URL__=${JSON.stringify(SUPABASE_URL)};window.__SB_KEY__=${JSON.stringify(SUPABASE_ANON)};`}></script>
 
 <script>
@@ -270,6 +316,61 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
     return `<span class="badge ${cls}">${team || '—'}</span>`;
   }
 
+  // ── Filters ───────────────────────────────────────────────
+  function getVisibleRows() {
+    const search = (document.getElementById('filter-search')?.value || '').toLowerCase();
+    const team   = document.getElementById('filter-team')?.value || '';
+    const trikot = document.getElementById('filter-trikot')?.value || '';
+    return (window.__anmeldungen__ || []).filter(r => {
+      const matchSearch = !search ||
+        `${r.vorname} ${r.nachname}`.toLowerCase().includes(search) ||
+        (r.rechnung_nummer || '').toLowerCase().includes(search) ||
+        (r.team || '').toLowerCase().includes(search) ||
+        (r.email || '').toLowerCase().includes(search);
+      const matchTeam   = !team   || r.team === team;
+      const matchTrikot = !trikot || r.trikot_groesse === trikot;
+      return matchSearch && matchTeam && matchTrikot;
+    });
+  }
+
+  function renderTable(rows) {
+    const content = document.getElementById('table-content');
+    const countEl = document.getElementById('filter-count');
+    const total = (window.__anmeldungen__ || []).length;
+    if (countEl) countEl.textContent = rows.length < total ? `${rows.length} von ${total} angezeigt` : `${total} Einträge`;
+
+    if (rows.length === 0) {
+      content.innerHTML = '<div class="empty-state"><div class="empty-state__icon">🔍</div><div>Keine Treffer für diesen Filter.</div></div>';
+      return;
+    }
+
+    content.innerHTML = `<div class="table-wrap"><table>
+      <thead><tr>
+        <th>Name</th><th>Team</th><th>Rechnung-Nr.</th><th>Preis</th><th>Trikot</th><th>Eingegangen</th><th>Aktionen</th>
+      </tr></thead>
+      <tbody>${rows.map(r => `<tr>
+        <td class="td-name">${r.vorname} ${r.nachname}</td>
+        <td>${teamBadge(r.team)}</td>
+        <td class="td-muted">${r.rechnung_nummer || '—'}</td>
+        <td class="td-muted">${r.preis != null ? (r.preis == 0 ? '<span style="color:#16a34a;font-weight:600">Kostenlos</span>' : r.preis + ' €') : '99 €'}</td>
+        <td class="td-muted">${r.trikot_groesse || '—'}</td>
+        <td class="td-muted">${formatDate(r.eingegangen_am)}</td>
+        <td><div class="row-actions">
+          <button class="btn-view" onclick="openDrawer('${r.id}')">Details</button>
+          <button class="btn-delete" onclick="confirmDelete('${r.id}','${r.vorname} ${r.nachname}')">Löschen</button>
+        </div></td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+  }
+
+  window.applyFilters = function() { renderTable(getVisibleRows()); };
+  window.resetFilters = function() {
+    document.getElementById('filter-search').value = '';
+    document.getElementById('filter-team').value = '';
+    document.getElementById('filter-trikot').value = '';
+    applyFilters();
+  };
+
   async function loadAnmeldungen() {
     const content = document.getElementById('table-content');
     content.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
@@ -290,29 +391,14 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
         content.innerHTML = '<div class="empty-state"><div class="empty-state__icon">📭</div><div>Noch keine Anmeldungen.</div></div>';
         return;
       }
-
-      content.innerHTML = `<div class="table-wrap"><table>
-        <thead><tr>
-          <th>Name</th><th>Team</th><th>Rechnung-Nr.</th><th>Trikot</th><th>Eingegangen</th><th>Aktionen</th>
-        </tr></thead>
-        <tbody>${rows.map(r => `<tr>
-          <td class="td-name">${r.vorname} ${r.nachname}</td>
-          <td>${teamBadge(r.team)}</td>
-          <td class="td-muted">${r.rechnung_nummer || '—'}</td>
-          <td class="td-muted">${r.trikot_groesse || '—'}</td>
-          <td class="td-muted">${formatDate(r.eingegangen_am)}</td>
-          <td><div class="row-actions">
-            <button class="btn-view" onclick="openDrawer('${r.id}')">Details</button>
-            <button class="btn-delete" onclick="confirmDelete('${r.id}','${r.vorname} ${r.nachname}')">Löschen</button>
-          </div></td>
-        </tr>`).join('')}</tbody>
-      </table></div>`;
+      renderTable(rows);
     } catch (err) {
       content.innerHTML = `<div class="empty-state">Fehler: ${err.message}</div>`;
     }
   }
   window.loadAnmeldungen = loadAnmeldungen;
 
+  // ── Drawer ────────────────────────────────────────────────
   window.openDrawer = function(id) {
     const r = (window.__anmeldungen__ || []).find(a => String(a.id) === String(id));
     if (!r) return;
@@ -336,20 +422,15 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
         <div class="detail-grid">
           <div><div class="detail-key">Team</div><div class="detail-val">${r.team || '—'}</div></div>
           <div><div class="detail-key">Trikotgröße</div><div class="detail-val">${r.trikot_groesse || '—'}</div></div>
+          <div><div class="detail-key">Preis</div><div class="detail-val">${r.preis == 0 ? 'Kostenlos' : (r.preis || 99) + ' €'}${r.voucher_code ? ` (${r.voucher_code})` : ''}</div></div>
           <div><div class="detail-key">Rechnung-Nr.</div><div class="detail-val">${r.rechnung_nummer || '—'}</div></div>
           <div><div class="detail-key">Rechnungsdatum</div><div class="detail-val">${r.rechnung_datum || '—'}</div></div>
           <div><div class="detail-key">Eingegangen</div><div class="detail-val">${formatDate(r.eingegangen_am)}</div></div>
           <div><div class="detail-key">Anmeldung-ID</div><div class="detail-val" style="font-size:.78rem">${r.anmeldung_id}</div></div>
         </div>
       </div>
-      ${r.erziehungsberechtigter ? `<div class="drawer-section">
-        <div class="drawer-section-title">Erziehungsberechtigter</div>
-        <div class="detail-val">${r.erziehungsberechtigter}</div>
-      </div>` : ''}
-      ${r.sonstiges ? `<div class="drawer-section">
-        <div class="drawer-section-title">Sonstiges / Gesundheit</div>
-        <div class="detail-val">${r.sonstiges}</div>
-      </div>` : ''}
+      ${r.erziehungsberechtigter ? `<div class="drawer-section"><div class="drawer-section-title">Erziehungsberechtigter</div><div class="detail-val">${r.erziehungsberechtigter}</div></div>` : ''}
+      ${r.sonstiges ? `<div class="drawer-section"><div class="drawer-section-title">Sonstiges / Gesundheit</div><div class="detail-val">${r.sonstiges}</div></div>` : ''}
     `;
     document.getElementById('drawer-overlay').classList.add('visible');
     document.getElementById('drawer').classList.add('visible');
@@ -361,11 +442,59 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
     currentAnmeldung = null;
   };
 
-  // CSV helpers
+  // ── Invoice preview ───────────────────────────────────────
+  async function fetchInvoicePdf(anmeldungId) {
+    const res = await fetch(`/api/generate-invoice?id=${encodeURIComponent(anmeldungId)}`, {
+      headers: { 'Authorization': `Bearer ${accessToken}` },
+    });
+    if (!res.ok) throw new Error('Rechnung konnte nicht geladen werden');
+    return await res.arrayBuffer();
+  }
+
+  document.getElementById('btn-view-invoice').addEventListener('click', async () => {
+    if (!currentAnmeldung) return;
+    const btn = document.getElementById('btn-view-invoice');
+    btn.textContent = '⏳ Lädt…'; btn.disabled = true;
+    try {
+      const pdfBuf = await fetchInvoicePdf(currentAnmeldung.anmeldung_id);
+      const blob = new Blob([pdfBuf], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      document.getElementById('invoice-frame').src = url;
+      document.getElementById('invoice-modal-title').textContent = `Rechnung ${currentAnmeldung.rechnung_nummer || ''}`;
+      document.getElementById('invoice-overlay').classList.add('visible');
+      // Store url for download
+      document.getElementById('btn-download-invoice-pdf').dataset.url = url;
+      document.getElementById('btn-download-invoice-pdf').dataset.filename = `Rechnung-${currentAnmeldung.rechnung_nummer}.pdf`;
+    } catch (err) {
+      showToast('Fehler: ' + err.message, 'error');
+    } finally {
+      btn.textContent = '👁 Rechnung ansehen'; btn.disabled = false;
+    }
+  });
+
+  document.getElementById('btn-download-invoice-pdf').addEventListener('click', () => {
+    const btn = document.getElementById('btn-download-invoice-pdf');
+    const url = btn.dataset.url;
+    const filename = btn.dataset.filename || 'Rechnung.pdf';
+    if (!url) return;
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+  });
+
+  window.closeInvoice = function() {
+    document.getElementById('invoice-overlay').classList.remove('visible');
+    const frame = document.getElementById('invoice-frame');
+    URL.revokeObjectURL(frame.src);
+    frame.src = 'about:blank';
+  };
+
+  // ── CSV helpers ───────────────────────────────────────────
   function buildCsvRow(r) {
-    const fields = [
+    return [
       ['Anmeldung-ID', r.anmeldung_id],
       ['Rechnung-Nr.', r.rechnung_nummer || ''],
+      ['Preis (EUR)', r.preis != null ? r.preis : 99],
+      ['Voucher', r.voucher_code || ''],
       ['Eingegangen', formatDate(r.eingegangen_am)],
       ['Vorname', r.vorname],
       ['Nachname', r.nachname],
@@ -381,13 +510,11 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
       ['Trikotgroesse', r.trikot_groesse || ''],
       ['Sonstiges', r.sonstiges || ''],
     ];
-    return fields;
   }
 
   function toCsv(rows) {
     const escape = v => { const s = String(v ?? ''); return s.includes(';') || s.includes('"') ? `"${s.replace(/"/g,'""')}"` : s; };
-    const fields = buildCsvRow(rows[0]);
-    const header = fields.map(([h]) => escape(h)).join(';');
+    const header = buildCsvRow(rows[0]).map(([h]) => escape(h)).join(';');
     const body = rows.map(r => buildCsvRow(r).map(([,v]) => escape(v)).join(';')).join('\n');
     return '\uFEFF' + header + '\n' + body;
   }
@@ -407,12 +534,46 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
   });
 
   document.getElementById('btn-download-all').addEventListener('click', () => {
-    const rows = window.__anmeldungen__;
-    if (!rows || rows.length === 0) { showToast('Keine Anmeldungen', 'error'); return; }
+    const rows = getVisibleRows();
+    if (!rows.length) { showToast('Keine Anmeldungen', 'error'); return; }
     downloadCsv(toCsv(rows), 'camp-anmeldungen-2026.csv');
     showToast(`${rows.length} Anmeldungen exportiert`, 'success');
   });
 
+  // ── Download all invoices as ZIP ──────────────────────────
+  document.getElementById('btn-download-invoices').addEventListener('click', async () => {
+    const rows = getVisibleRows();
+    if (!rows.length) { showToast('Keine Anmeldungen', 'error'); return; }
+    const btn = document.getElementById('btn-download-invoices');
+    btn.textContent = `⏳ Generiere ${rows.length} Rechnungen…`; btn.disabled = true;
+    try {
+      const zip = new JSZip();
+      const folder = zip.folder('Rechnungen-Camp-2026');
+      let done = 0;
+      await Promise.all(rows.map(async r => {
+        try {
+          const pdfBuf = await fetchInvoicePdf(r.anmeldung_id);
+          folder.file(`Rechnung-${r.rechnung_nummer || r.anmeldung_id}-${r.nachname}.pdf`, pdfBuf);
+        } catch (e) {
+          console.warn(`PDF for ${r.anmeldung_id} failed:`, e);
+        }
+        done++;
+        btn.textContent = `⏳ ${done}/${rows.length} Rechnungen…`;
+      }));
+      const content = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(content);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'Rechnungen-Camp-2026.zip'; a.click();
+      URL.revokeObjectURL(url);
+      showToast(`${rows.length} Rechnungen als ZIP heruntergeladen`, 'success');
+    } catch (err) {
+      showToast('Fehler: ' + err.message, 'error');
+    } finally {
+      btn.textContent = '⬇ Rechnungen ZIP'; btn.disabled = false;
+    }
+  });
+
+  // ── Delete ────────────────────────────────────────────────
   document.getElementById('btn-process').addEventListener('click', () => {
     if (!currentAnmeldung) return;
     confirmDelete(currentAnmeldung.id, `${currentAnmeldung.vorname} ${currentAnmeldung.nachname}`);
@@ -443,7 +604,7 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
     } finally { btn.textContent = 'Endgültig löschen'; btn.disabled = false; }
   });
 
-  // Login
+  // ── Login ─────────────────────────────────────────────────
   async function doLogin() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
