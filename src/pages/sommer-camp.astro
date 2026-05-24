@@ -55,6 +55,10 @@ export const prerender = false;
           <p>Der Preis von <strong>99 €</strong> beinhaltet ein Trikot. Damit die Trikots rechtzeitig fertig sind, ist der Anmeldeschluss der <strong>10. Juni</strong>.</p>
 	  <p>Der gesamte Erlös fließt in die Förderung unserer Jugendarbeit.</p>
         </div>
+        <div class="camp-info-card">
+          <h3>Rabatte</h3>
+          <p>Bei Anmeldung mehrerer Geschwister erhält jedes weitere Kind <strong>10% Geschwisterrabatt</strong>. ASN-Trainer können ihre Kinder <strong>kostenfrei</strong> anmelden — Gutscheincode beim Trainer erfragen.</p>
+        </div>
       </div>
 
       <!-- Photo grid placeholder -->
@@ -121,6 +125,9 @@ export const prerender = false;
           <div id="players-container"></div>
 
           <!-- Add player button -->
+          <div class="discount-hint">
+            💡 Melden sich mehrere Geschwister an? Jedes weitere Kind erhält automatisch <strong>10% Geschwisterrabatt</strong>.
+          </div>
           <button type="button" class="btn-add-player" id="btn-add-player">
             + Weiteren Spieler hinzufügen
           </button>
@@ -332,6 +339,8 @@ export const prerender = false;
   .voucher-err.visible { display: block; }
 
   /* Add player button */
+  .discount-hint { background: var(--navy-tint); border: 1px solid var(--navy-pale); border-radius: var(--radius); padding: .75rem 1rem; font-size: .85rem; color: var(--navy); margin-top: 1.5rem; line-height: 1.5; }
+  .discount-hint strong { font-weight: 700; }
   .btn-add-player { display: flex; align-items: center; gap: .5rem; margin-top: 1.25rem; background: var(--navy-tint); color: var(--navy); border: 2px dashed var(--navy-pale); border-radius: var(--radius-lg); padding: .85rem 1.25rem; font-family: var(--fb); font-size: .9rem; font-weight: 600; cursor: pointer; width: 100%; justify-content: center; transition: all .15s; }
   .btn-add-player:hover { background: var(--navy-pale); border-color: var(--navy); }
 
@@ -444,7 +453,7 @@ export const prerender = false;
         <div class="field-group full">
           <label class="field-label">Gutscheincode</label>
           <div class="voucher-row">
-            <input class="field-input" type="text" id="p${id}-voucher" placeholder="" style="text-transform:uppercase" />
+            <input class="field-input" type="text" id="p${id}-voucher" placeholder="z.B. ASN-TRAINER-BONUS" style="text-transform:uppercase" />
             <button type="button" class="btn-voucher" onclick="applyVoucher(${id})">Einlösen</button>
           </div>
           <div class="voucher-ok" id="p${id}-voucher-ok">✓ Gutschein eingelöst — kostenlose Teilnahme</div>
