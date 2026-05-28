@@ -1,6 +1,6 @@
 ---
 title: ASSEN-TV (Highlights des Relegationspiels)
-excerpt: Seht euch alle Höhepunkte unseres spannenden Relegationsspiels gegen Burgfarrnbach an. Von einer Zitterpartie bis zum Kantersieg. Vom letzten Spiel einer Legende bis zu den Debüts der nächsten Generation. Dieses Spiel hatte einfach alles!
+excerpt: Seht euch alle Höhepunkte unseres spannenden Relegationsspiels gegen Burgfarrnbach II an. Von einer Zitterpartie bis zum Kantersieg. Vom letzten Spiel einer Legende bis zu den Debüts der nächsten Generation. Dieses Spiel hatte einfach alles!
 date: 2026-05-29
 sport: fussball
 author: David
