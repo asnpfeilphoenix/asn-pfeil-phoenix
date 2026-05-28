@@ -9,3 +9,7 @@ draft: false
 ---
 
 Mein Geschenk an die erste Mannschaft (Assen-TV): [https://insta360-analysis.vercel.app/share/8da39f48b8fb7c715a77c5556d6d48fc](https://insta360-analysis.vercel.app/share/8da39f48b8fb7c715a77c5556d6d48fc)
+
+Das war kein leichtes Spiel. Burgfarrnbach II war ein starker und technisch versierter Gegner, der im Laufe der Saison viele Tore erzielt hatte. Der Gegner dominierte die erste Halbzeit!
+
+Bericht von [fussballn.de ](https://www.fussballn.de/mobile/sites/cms/relegation.aspx?SK=4&Btr=127091&Rub=152&Sais=127&Alter=1&mw=m&Men=2176)
