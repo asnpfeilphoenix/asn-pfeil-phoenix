@@ -49,4 +49,4 @@ Was für ein Verein wollen wir sein? Das entscheiden wir alle gemeinsam.
 
 David Elsweiler (2. Vorstand)
 
-P.S. Diese Fotos sind nur eine Auswahl von meinem Handy. Mir ist sehr wohl bewusst, dass viele andere nicht dabei sind: Tennis und Kegeln haben ihre Helden, die, die die Terrasse am A-Platz bauen, sind damit und mit vielen anderen Dingen beschäftigt, und die Radabteilung existiert nur dank viel Handarbeit und dem Fahren von Baggern!  Ganz zu schweigen von all den Trainern, den ehrenamtlichen Helfern bei Spielen, Festen usw.
+P.S. Diese Fotos sind nur eine Auswahl von meinem Handy. Mir ist sehr wohl bewusst, dass viele andere nicht dabei sind: Tennis und Kegeln haben ihre Helden, die, die die Terrasse am A-Platz bauen, sind damit und mit vielen anderen Dingen beschäftigt, und die Radabteilung existiert nur dank viel Handarbeit und dem Fahren von Baggern!  Ganz zu schweigen von all den Trainer\*innen, den ehrenamtlichen Helfer\*innen bei Spielen, Festen usw.
