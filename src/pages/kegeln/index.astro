@@ -33,24 +33,65 @@ const posts = (await getCollection('news', ({ data }) => !data.draft && data.spo
     </div>
   </header>
 
-  <section class="section">
+  <!-- Submenu -->
+  <nav class="submenu" aria-label="Seitennavigation">
+    <div class="container submenu__inner">
+      <a href="#ueber-uns" class="submenu__link">Über uns</a>
+      <a href="#bahnvermietung" class="submenu__link">Bahnvermietung</a>
+      <a href="#ansprechpartner" class="submenu__link">Ansprechpartner</a>
+      <a href="#news" class="submenu__link">News</a>
+    </div>
+  </nav>
+
+  <!-- Über uns -->
+  <section class="section" id="ueber-uns">
     <div class="container grid-2">
       <div>
+        <p class="section-eyebrow">Wir über uns</p>
         <h2>Über die Abteilung</h2>
-        <p style="color:var(--mid);line-height:1.75;margin-top:1rem">Die Kegelabteilung des ASN Pfeil Phönix ist eine feste Größe im Vereinsleben. Wir spielen regelmäßig im Mannschaftsbetrieb und veranstalten vereinseigene Turniere. Dabei steht neben dem sportlichen auch der gesellige Aspekt stets im Vordergrund.</p>
+        <p>Die Kegelabteilung des ASN Pfeil Phönix ist eine feste Größe im Vereinsleben. Wir spielen regelmäßig im Mannschaftsbetrieb und veranstalten vereinseigene Turniere. Dabei steht neben dem sportlichen auch der gesellige Aspekt stets im Vordergrund.</p>
       </div>
       <div>
-        <h2>Mitmachen</h2>
-        <p style="color:var(--mid);line-height:1.75;margin-top:1rem">Interessierte sind herzlich willkommen — meldet euch einfach!</p>
+        <p class="section-eyebrow">Mitmachen</p>
+        <h2>Jetzt einsteigen</h2>
+        <p>Interessierte sind herzlich willkommen — meldet euch einfach beim Ansprechpartner oder schreibt uns!</p>
         <a href="/verein#mitglied" class="btn btn--primary" style="margin-top:1.25rem">Mitglied werden →</a>
       </div>
     </div>
   </section>
 
-  <ContactsBar contacts={contacts} eyebrow="Kegelabteilung" title="Ansprechpartner" />
+  <!-- Bahnvermietung -->
+  <section class="section section--off" id="bahnvermietung">
+    <div class="container">
+      <p class="section-eyebrow">Anlage</p>
+      <h2>Bahnvermietung</h2>
+      <div class="bahn-layout">
+        <div class="bahn-text">
+          <p>Unsere Kegelbahnen können auch gemietet werden. Es stehen drei Bundeskegelbahnen und unsere gemütliche Kegelstube zur Verfügung.</p>
+          <div class="bahn-price">
+            <span class="bahn-price__amount">6,00 €</span>
+            <span class="bahn-price__label">pro Bahn / Stunde</span>
+          </div>
+          <p>Bei Interesse einfach beim entsprechenden Ansprechpartner anfragen.</p>
+          <a href="#ansprechpartner" class="btn btn--primary" style="margin-top:1.25rem">Zum Ansprechpartner →</a>
+        </div>
+        <div class="bahn-images">
+          <div class="bahn-img-grid">
+            <img src="/images/kegeln/kegelbahn.jpeg" alt="Kegelbahn ASN Pfeil Phönix" loading="lazy" />
+            <img src="/images/kegeln/aufenthaltsbereich.jpeg" alt="Aufenthaltsbereich Kegelstube" loading="lazy" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ansprechpartner -->
+  <div id="ansprechpartner">
+    <ContactsBar contacts={contacts} eyebrow="Kegelabteilung" title="Ansprechpartner" />
+  </div>
 
   {posts.length > 0 && (
-    <section class="section">
+    <section class="section" id="news">
       <div class="container">
         <p class="section-eyebrow">Aktuelles</p>
         <h2>Kegeln-News</h2>
@@ -80,4 +121,70 @@ const posts = (await getCollection('news', ({ data }) => !data.draft && data.spo
 .dept-header .section-eyebrow { color: rgba(255,255,255,.5); }
 .dept-header .section-eyebrow::before { background: var(--orange); }
 .dept-sub { color: rgba(255,255,255,.55); margin-top: .75rem; }
+
+/* Submenu */
+.submenu {
+  position: sticky; top: 70px; z-index: 90;
+  background: var(--white); border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(15,41,114,.06);
+}
+.submenu__inner { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; }
+.submenu__inner::-webkit-scrollbar { display: none; }
+.submenu__link {
+  font-size: .82rem; font-weight: 600; color: var(--mid);
+  padding: 1rem 1.25rem; white-space: nowrap;
+  border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+}
+.submenu__link:hover { color: var(--navy); }
+.submenu__link.is-active { color: var(--navy); border-bottom-color: var(--navy); }
+
+/* Über uns */
+.section p { color: var(--mid); line-height: 1.75; margin-top: 1rem; }
+
+/* Bahnvermietung */
+.bahn-layout {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 3rem; align-items: center; margin-top: 2rem;
+}
+@media (max-width: 800px) { .bahn-layout { grid-template-columns: 1fr; } }
+.bahn-text p { color: var(--mid); line-height: 1.75; margin-top: 1rem; }
+.bahn-price {
+  display: flex; align-items: baseline; gap: .75rem;
+  background: var(--navy); border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem; margin-top: 1.5rem; margin-bottom: 1rem;
+}
+.bahn-price__amount {
+  font-family: var(--fd); font-size: 2.5rem;
+  color: var(--orange); line-height: 1;
+}
+.bahn-price__label { font-size: .9rem; color: rgba(255,255,255,.65); }
+.bahn-img-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+}
+.bahn-img-grid img {
+  width: 100%; aspect-ratio: 4/3;
+  object-fit: cover; border-radius: var(--radius-lg);
+  transition: transform .3s;
+}
+.bahn-img-grid img:hover { transform: scale(1.02); }
+</style>
+
+<script>
+  const sections = ['ueber-uns', 'bahnvermietung', 'ansprechpartner', 'news'];
+  const links = document.querySelectorAll<HTMLAnchorElement>('.submenu__link');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('is-active'));
+        const active = document.querySelector(`.submenu__link[href="#${entry.target.id}"]`);
+        active?.classList.add('is-active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+</script>
 </style>
