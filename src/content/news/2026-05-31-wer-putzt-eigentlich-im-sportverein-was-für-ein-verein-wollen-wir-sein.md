@@ -1,6 +1,9 @@
 ---
 title: Wer putzt eigentlich im Sportverein? Was für ein Verein wollen wir sein?
-excerpt: Die Antwort lautete bei uns, zumindest bis Ende letzten Jahres, unsere Connie Mersching. Connie ist in meinen Augen eine Legende. So lange die meisten von uns zurückdenken können, war sie diejenige, die unser Mehrzweckgebäude sauber und ordentlich hielt. Die Vergütung, die sie dafür erhielt, war so gering, dass man es getrost als Ehrenamt bezeichnen kann. Letztes Jahr, nach Jahren stiller Hingabe, entschied Connie, den Mopp weiterzugeben. Aber weit weg ist sie nicht gegangen. Sie ist jetzt ein geschätztes Mitglied der Kiosk-Crew an Spieltagen. Immer noch ehrenamtlich. Immer noch dabei.
+excerpt: |-
+  Wer putzt eigentlich im Sportverein?
+
+  Die Antwort lautete bei uns, zumindest bis Ende letzten Jahres, unsere Connie Mersching. Connie ist in meinen Augen eine Legende. So lange die meisten von uns zurückdenken können, war sie diejenige, die unser Mehrzweckgebäude sauber und ordentlich hielt. Die Vergütung, die sie dafür erhielt, war so gering, dass man es getrost als Ehrenamt bezeichnen kann. Letztes Jahr, nach Jahren stiller Hingabe, entschied Connie, den Mopp weiterzugeben. Aber weit weg ist sie nicht gegangen. Sie ist jetzt ein geschätztes Mitglied der Kiosk-Crew an Spieltagen. Immer noch ehrenamtlich. Immer noch dabei.
 date: 2026-05-31
 sport: allgemein
 author: David Elsweiler
