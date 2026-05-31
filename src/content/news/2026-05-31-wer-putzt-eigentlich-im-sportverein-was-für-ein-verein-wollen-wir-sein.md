@@ -31,7 +31,7 @@ Diese Zahl hat mich innehalten lassen und eine größere Frage aufgeworfen: Was 
 
 Das Ehrenamt hat diesen Verein aufgebaut, und ich habe gesehen, was es bewirken kann.
 
-Einige meiner schönsten Erinnerungen hier sind beim Ehrenamt entstanden. Einige meiner engsten Freundschaften wurden bei unspektakulären Arbeiten neben guten Menschen geschlossen (Platzpflege, Maulwürfsperre, Arbeitseinsätze). Einige meiner stolzesten Momente hatten nichts mit Sport zu tun. Sie entstanden dadurch, dass wir gemeinsam etwas aufgebaut haben.
+Einige meiner schönsten Erinnerungen hier sind beim Ehrenamt entstanden. Einige meiner engsten Freundschaften wurden bei unspektakulären Arbeiten neben guten Menschen geschlossen (Platzpflege, Maulwurfsperre, Arbeitseinsätze). Einige meiner stolzesten Momente hatten nichts mit Sport zu tun. Sie entstanden dadurch, dass wir gemeinsam etwas aufgebaut haben.
 
 Ich glaube, dass die meisten unserer 600 Mitglieder eine Verbindung zu diesem Verein spüren. Und ich glaube, dass viele von ihnen bereit wären, einen Beitrag zu leisten, wenn sie wüssten wie, und wenn es unkompliziert wäre. Ein Putzplan. Ein monatlicher Arbeitseinsatz. Eine Gartengruppe für Frühjahr und Herbst. Kleine, organisierte Einsätze von genug Menschen können zusammen etwas Bedeutendes ergeben.
 
@@ -49,4 +49,4 @@ Was für ein Verein wollen wir sein? Das entscheiden wir alle gemeinsam.
 
 David Elsweiler (2. Vorstand)
 
-P.S. Diese Fotos sind nur eine Auswahl aus meinem Handy. Mir ist sehr wohl bewusst, dass viele andere nicht dabei sind: Tennis und Kegeln haben ihre Helden, die, die die Terrasse am A-Platz bauen, sind damit und mit vielen anderen Dingen beschäftigt, und die Radabteilung existiert nur dank viel Handarbeit und dem Fahren von Baggern!  Ganz zu schweigen von all den Trainern, den ehrenamtlichen Helfern bei Spielen, Festen usw.
+P.S. Diese Fotos sind nur eine Auswahl von meinem Handy. Mir ist sehr wohl bewusst, dass viele andere nicht dabei sind: Tennis und Kegeln haben ihre Helden, die, die die Terrasse am A-Platz bauen, sind damit und mit vielen anderen Dingen beschäftigt, und die Radabteilung existiert nur dank viel Handarbeit und dem Fahren von Baggern!  Ganz zu schweigen von all den Trainern, den ehrenamtlichen Helfern bei Spielen, Festen usw.
