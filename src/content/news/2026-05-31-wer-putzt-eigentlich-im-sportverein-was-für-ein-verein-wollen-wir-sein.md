@@ -23,7 +23,7 @@ Im Moment lastet all das auf den Schultern sehr weniger Menschen (ihr wisst wer 
 
 Jetzt müssen wir eine Entscheidung treffen, und die hat ihren Preis.
 
-Wir haben Angebote von professionellen Reinigungsunternehmen eingeholt. Eine Grundreinigung geht in den vierstelligen Bereich. Eine regelmäßige zweiwöchentliche Reinigung kostet uns jährlich einen fünfstelligen Betrag. Zum Vergleich: Unsere gesamten Mitgliedsbeiträge belaufen sich auf rund 50.000 Euro, verteilt auf 600 Mitglieder. Wir würden also etwa ein Fünftel davon allein fürs Putzen ausgeben, ohne das Gelände überhaupt einzurechnen (und Tennis und Kegeln sind auch nicht im Angebot enthalten). 
+Wir haben Angebote von professionellen Reinigungsunternehmen eingeholt. Eine Grundreinigung geht in den vierstelligen Bereich. Eine regelmäßige zweimal wöchentliche Reinigung kostet uns jährlich einen fünfstelligen Betrag. Zum Vergleich: Unsere gesamten Mitgliedsbeiträge belaufen sich auf rund 50.000 Euro, verteilt auf 600 Mitglieder. Wir würden also etwa ein Fünftel davon allein fürs Putzen ausgeben, ohne das Gelände überhaupt einzurechnen (und Tennis und Kegeln sind auch nicht im Angebot enthalten). 
 
 Professionelle Dienstleister zu beauftragen ist eine Option, die wir definitiv nicht vom Tisch nehmen sollten. Aber die Mitglieder sollten wissen, was das in der Praxis bedeutet: höhere Beiträge, Jahr für Jahr, für Arbeiten, die viele von uns selbst erledigen könnten. Und wenn schon keine höheren Beiträge, dann sicherlich auch keine Investitionen in die Art von wichtiger Infrastruktur, die unser Verein braucht und verdient (z.B. Mehrzweckplatz (Tennis), Kunstrasen (Fußball), Sanierung unseres Mehrzweckgebäudes ...) 
 
