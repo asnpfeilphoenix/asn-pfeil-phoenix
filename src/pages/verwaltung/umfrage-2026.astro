@@ -1,0 +1,546 @@
+---
+// src/pages/verwaltung/umfrage-2026.astro
+export const prerender = false;
+const SUPABASE_URL  = import.meta.env.SUPABASE_URL  || '';
+const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
+---
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Umfrage-Auswertung 2026 — ASN Pfeil Phönix</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:#0f2972;--navy-dark:#091d52;--navy-pale:#e8edf8;--navy-tint:#f0f3fc;
+      --orange:#E8780A;--white:#fff;--ink:#111318;--mid:#4A4F5C;--muted:#8A8F9E;
+      --border:#E4E6EE;--green:#16a34a;--red:#dc2626;
+      --fd:'Bebas Neue',sans-serif;--fb:'DM Sans',sans-serif;
+      --radius:6px;--radius-lg:12px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--fb);background:var(--navy-dark);color:var(--ink);min-height:100vh;}
+
+    /* Header */
+    .header{background:var(--navy);border-bottom:3px solid var(--orange);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;}
+    .header-brand{display:flex;align-items:center;gap:.75rem;}
+    .header-brand img{width:40px;height:40px;}
+    .header-brand-text strong{display:block;font-family:var(--fd);font-size:1.2rem;color:var(--white);letter-spacing:.04em;}
+    .header-brand-text span{font-size:.72rem;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase;}
+    .header-right{display:flex;align-items:center;gap:1rem;}
+    .header-badge{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(232,120,10,.2);color:var(--orange);border:1px solid rgba(232,120,10,.3);padding:.3em .8em;border-radius:99px;}
+    .header-user{font-size:.82rem;color:rgba(255,255,255,.5);}
+    .btn-logout{font-family:var(--fb);font-size:.82rem;font-weight:600;background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);padding:.4em 1em;border-radius:var(--radius);cursor:pointer;transition:all .15s;}
+    .btn-logout:hover{border-color:rgba(255,255,255,.5);color:var(--white);}
+
+    /* Login */
+    .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;}
+    .login-card{background:var(--white);border-radius:var(--radius-lg);padding:2.5rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+    .login-logo{display:flex;align-items:center;gap:.75rem;margin-bottom:2rem;}
+    .login-logo img{width:48px;}
+    .login-logo-text strong{display:block;font-family:var(--fd);font-size:1.3rem;color:var(--navy);}
+    .login-logo-text span{font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+    .login-title{font-family:var(--fd);font-size:1.8rem;color:var(--navy);margin-bottom:.4rem;}
+    .login-sub{font-size:.85rem;color:var(--muted);margin-bottom:1.75rem;}
+    .field{display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem;}
+    .field label{font-size:.8rem;font-weight:600;color:var(--mid);}
+    .field input{border:2px solid var(--border);border-radius:var(--radius);padding:.65rem .85rem;font-family:var(--fb);font-size:.95rem;width:100%;transition:border-color .15s;}
+    .field input:focus{outline:none;border-color:var(--navy);}
+    .btn-login{width:100%;background:var(--navy);color:var(--white);border:none;border-radius:var(--radius);padding:.8rem;font-family:var(--fd);font-size:1.1rem;letter-spacing:.04em;cursor:pointer;margin-top:.5rem;display:flex;align-items:center;justify-content:center;gap:.5rem;}
+    .login-error{background:#fef2f2;border:1px solid #fecaca;color:var(--red);border-radius:var(--radius);padding:.75rem 1rem;font-size:.85rem;margin-top:1rem;display:none;}
+    .login-error.visible{display:block;}
+
+    /* Admin */
+    .admin-wrap{display:none;min-height:calc(100vh - 67px);}
+    .admin-wrap.visible{display:block;}
+    .admin-main{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;}
+
+    /* Stats bar */
+    .stats-bar{display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap;}
+    .stat-card{background:var(--white);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;flex:1;min-width:140px;border:1px solid var(--border);}
+    .stat-card__val{font-family:var(--fd);font-size:2.5rem;color:var(--navy);line-height:1;}
+    .stat-card__label{font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:.3rem;}
+
+    /* Section cards */
+    .section-card{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);margin-bottom:1.5rem;overflow:hidden;}
+    .section-head{padding:1rem 1.5rem;border-bottom:1px solid var(--border);background:#fafafa;display:flex;align-items:center;justify-content:space-between;}
+    .section-title{font-family:var(--fd);font-size:1.2rem;color:var(--navy);letter-spacing:.03em;}
+    .section-body{padding:1.5rem;}
+
+    /* Question block */
+    .q-stat{margin-bottom:1.75rem;padding-bottom:1.75rem;border-bottom:1px solid var(--border);}
+    .q-stat:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+    .q-stat-label{font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
+    .q-stat-title{font-size:.95rem;color:var(--ink);font-weight:600;margin-bottom:.75rem;line-height:1.4;}
+
+    /* Scale stats */
+    .scale-stat{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
+    .scale-mean{font-family:var(--fd);font-size:2.5rem;color:var(--navy);line-height:1;}
+    .scale-mean-label{font-size:.7rem;color:var(--muted);font-weight:600;text-transform:uppercase;}
+    .scale-bars{flex:1;min-width:200px;}
+    .scale-bar-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem;font-size:.78rem;}
+    .scale-bar-row span:first-child{width:12px;text-align:right;color:var(--muted);flex-shrink:0;}
+    .scale-bar-outer{flex:1;height:14px;background:var(--border);border-radius:7px;overflow:hidden;}
+    .scale-bar-inner{height:100%;background:var(--navy);border-radius:7px;transition:width .6s ease;}
+    .scale-bar-row span:last-child{width:30px;color:var(--muted);}
+
+    /* Frequency */
+    .freq-list{display:flex;flex-direction:column;gap:.4rem;}
+    .freq-row{display:flex;align-items:center;gap:.75rem;font-size:.85rem;}
+    .freq-label{min-width:200px;color:var(--ink);flex-shrink:0;}
+    .freq-bar-outer{flex:1;height:20px;background:var(--border);border-radius:4px;overflow:hidden;}
+    .freq-bar-inner{height:100%;background:var(--orange);border-radius:4px;transition:width .6s ease;}
+    .freq-count{width:50px;text-align:right;color:var(--muted);font-weight:600;flex-shrink:0;}
+
+    /* Free text */
+    .freitext-list{display:flex;flex-direction:column;gap:.5rem;max-height:300px;overflow-y:auto;}
+    .freitext-item{background:var(--navy-tint);border-radius:var(--radius);padding:.6rem .9rem;font-size:.88rem;color:var(--ink);line-height:1.5;border-left:3px solid var(--navy-pale);}
+    .freitext-empty{color:var(--muted);font-size:.85rem;font-style:italic;}
+
+    /* Toolbar */
+    .toolbar{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.5rem;}
+    .btn-toolbar{background:var(--white);color:var(--navy);border:1px solid var(--border);border-radius:var(--radius);padding:.6em 1.2em;font-family:var(--fd);font-size:.95rem;letter-spacing:.03em;cursor:pointer;transition:all .15s;}
+    .btn-toolbar:hover{background:var(--navy-pale);}
+    .btn-toolbar--primary{background:var(--navy);color:var(--white);border-color:var(--navy);}
+    .btn-toolbar--primary:hover{background:var(--navy-dark);}
+
+    /* Contacts table */
+    .contacts-table{width:100%;border-collapse:collapse;font-size:.875rem;}
+    .contacts-table th{text-align:left;padding:.6rem .75rem;font-size:.67rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--border);background:#fafafa;}
+    .contacts-table td{padding:.75rem;border-bottom:1px solid var(--border);}
+    .contacts-table tr:last-child td{border-bottom:none;}
+
+    /* Loading */
+    .loading-state{text-align:center;padding:3rem;color:var(--muted);}
+    .spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* Toast */
+    .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--white);padding:.75rem 1.5rem;border-radius:99px;font-size:.875rem;font-weight:500;z-index:300;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;}
+    .toast.visible{opacity:1;transform:translateX(-50%) translateY(0);}
+    .toast.toast--success{background:var(--green);}
+
+    /* Grid stats */
+    .grid-stat-table{width:100%;border-collapse:collapse;font-size:.85rem;}
+    .grid-stat-table th{text-align:center;padding:.5rem;font-size:.72rem;font-weight:700;color:var(--muted);border-bottom:1px solid var(--border);}
+    .grid-stat-table th:first-child{text-align:left;}
+    .grid-stat-table td{padding:.5rem;border-bottom:1px solid var(--border);text-align:center;}
+    .grid-stat-table td:first-child{text-align:left;color:var(--ink);}
+    .grid-stat-table tr:last-child td{border-bottom:none;}
+    .mean-val{font-weight:700;color:var(--navy);}
+  </style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login-wrap" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="/images/asn-logo.svg" alt="" />
+      <div class="login-logo-text">
+        <strong>ASN Pfeil Phönix</strong>
+        <span>Umfrage-Auswertung 2026</span>
+      </div>
+    </div>
+    <h1 class="login-title">Anmelden</h1>
+    <p class="login-sub">Nur für autorisierte Administratoren.</p>
+    <div class="field"><label>E-Mail</label><input type="email" id="login-email" /></div>
+    <div class="field"><label>Passwort</label><input type="password" id="login-password" /></div>
+    <button class="btn-login" id="btn-login">
+      <span id="login-btn-text">Einloggen</span>
+      <span id="login-spinner" style="display:none;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite"></span>
+    </button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- Admin -->
+<div id="admin-wrap" class="admin-wrap">
+  <header class="header">
+    <div class="header-brand">
+      <img src="/images/asn-logo.svg" alt="" />
+      <div class="header-brand-text">
+        <strong>Mitgliederbefragung 2026</strong>
+        <span>Ergebnisse & Auswertung</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="header-badge">Intern</span>
+      <span class="header-user" id="header-user"></span>
+      <button class="btn-logout" id="btn-logout">Ausloggen</button>
+    </div>
+  </header>
+
+  <div class="admin-main" id="admin-content">
+    <div class="loading-state"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script is:inline set:html={`window.__SB_URL__=${JSON.stringify(SUPABASE_URL)};window.__SB_KEY__=${JSON.stringify(SUPABASE_ANON)};`}></script>
+
+<script>
+const SUPABASE_URL = window.__SB_URL__;
+const SUPABASE_KEY = window.__SB_KEY__;
+let accessToken = null;
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast visible${type?' toast--'+type:''}`;
+  setTimeout(()=>t.classList.remove('visible'),3000);
+}
+
+async function sbFetch(path, opts={}) {
+  return fetch(`${SUPABASE_URL}${path}`, {
+    ...opts,
+    headers: { 'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${accessToken||SUPABASE_KEY}`,...(opts.headers||{}) }
+  });
+}
+
+// ── Data loading ─────────────────────────────────────────────
+async function loadData() {
+  const res = await sbFetch('/rest/v1/umfrage_antworten?select=*&order=eingegangen_am.desc');
+  if (!res.ok) throw new Error('Laden fehlgeschlagen');
+  return await res.json();
+}
+
+// ── Stat helpers ──────────────────────────────────────────────
+function mean(vals) {
+  if (!vals.length) return null;
+  return (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2);
+}
+function dist(vals, max=5) {
+  const d = {};
+  for(let i=1;i<=max;i++) d[i]=0;
+  vals.forEach(v=>{ if(d[v]!==undefined) d[v]++; });
+  return d;
+}
+function freq(vals) {
+  const f={};
+  vals.flat().forEach(v=>{ if(v) f[v]=(f[v]||0)+1; });
+  return f;
+}
+
+// ── Render helpers ────────────────────────────────────────────
+function scaleHtml(label, vals) {
+  if (!vals.length) return `<div class="q-stat-title">${label}</div><div class="freitext-empty">Keine Antworten.</div>`;
+  const m = mean(vals);
+  const d = dist(vals);
+  const maxCount = Math.max(...Object.values(d));
+  return `
+    <div class="q-stat-title">${label}</div>
+    <div class="scale-stat">
+      <div>
+        <div class="scale-mean">${m}</div>
+        <div class="scale-mean-label">Ø aus ${vals.length}</div>
+      </div>
+      <div class="scale-bars">
+        ${[1,2,3,4,5].map(i=>`
+          <div class="scale-bar-row">
+            <span>${i}</span>
+            <div class="scale-bar-outer"><div class="scale-bar-inner" style="width:${maxCount?Math.round(d[i]/maxCount*100):0}%"></div></div>
+            <span>${d[i]}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function freqHtml(label, vals, labelMap) {
+  const f = freq(vals);
+  const total = vals.filter(v=>v&&v.length).length;
+  const sorted = Object.entries(f).sort((a,b)=>b[1]-a[1]);
+  if (!sorted.length) return `<div class="q-stat-title">${label}</div><div class="freitext-empty">Keine Antworten.</div>`;
+  const maxVal = sorted[0][1];
+  return `
+    <div class="q-stat-title">${label} <span style="font-weight:400;color:var(--muted);font-size:.82rem">(${total} Antworten)</span></div>
+    <div class="freq-list">
+      ${sorted.map(([k,v])=>`
+        <div class="freq-row">
+          <div class="freq-label">${labelMap[k]||k}</div>
+          <div class="freq-bar-outer"><div class="freq-bar-inner" style="width:${maxVal?Math.round(v/maxVal*100):0}%"></div></div>
+          <div class="freq-count">${v}</div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function freitextHtml(label, vals) {
+  const filled = vals.filter(v=>v&&v.trim());
+  return `
+    <div class="q-stat-title">${label} <span style="font-weight:400;color:var(--muted);font-size:.82rem">(${filled.length} Antworten)</span></div>
+    ${filled.length
+      ? `<div class="freitext-list">${filled.map(v=>`<div class="freitext-item">${v}</div>`).join('')}</div>`
+      : '<div class="freitext-empty">Keine Antworten.</div>'}`;
+}
+
+function gridScaleHtml(label, rows) {
+  // rows = [{label, vals}]
+  return `
+    <div class="q-stat-title">${label}</div>
+    <table class="grid-stat-table">
+      <thead><tr><th></th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>Ø</th><th>n</th></tr></thead>
+      <tbody>
+        ${rows.map(({label:l, vals})=>{
+          const d = dist(vals);
+          const m = mean(vals);
+          return `<tr>
+            <td>${l}</td>
+            ${[1,2,3,4,5].map(i=>`<td>${d[i]||0}</td>`).join('')}
+            <td class="mean-val">${m||'—'}</td>
+            <td>${vals.length}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+// ── Label maps ────────────────────────────────────────────────
+const LABEL_MAPS = {
+  q1: {selbst:'Für mich selbst',kind:'Im Namen meines Kindes',beides:'Für mich und mein Kind'},
+  q3: {unter10:'Unter 10','10-13':'10–13','14-17':'14–17','18-25':'18–25','26-35':'26–35','36-45':'36–45','46-60':'46–60',über60:'Über 60'},
+  q4: {vollmitglied:'Vollmitglied',jugend:'Jugendmitglied',familie:'Familienmitgliedschaft',foerdermitglied:'Fördermitglied',sonstiges:'Sonstiges'},
+  q5: {unter1:'< 1 Jahr','1-3':'1–3 Jahre','4-10':'4–10 Jahre',über10:'> 10 Jahre'},
+  q6: {sport:'Um Sport zu treiben',kind_sport:'Damit mein Kind Sport treiben kann',gemeinschaft:'Wegen der Gemeinschaft',eingeladen:'Durch Freunde/Familie',unterstuetzen:'Verein unterstützen',sonstiges:'Sonstiges'},
+  q7: {spielen:'Spielen & Wettkämpfe',zuschauen:'Spiele verfolgen',gemeinschaft:'Gemeinschaft & Freundschaften',einrichtungen:'Einrichtungen & Gelände',lokal:'Teil von etwas Lokalem',kinder:'Sichere Umgebung für Kinder',tradition:'Geschichte & Tradition',sonstiges:'Sonstiges'},
+  q17: {ja_regelmaessig:'Ja, regelmäßig',ja_gelegentlich:'Ja, gelegentlich',nein_wuerde_gerne:'Nein, aber ich würde es gerne',nein_nicht_moeglich:'Nein, derzeit nicht möglich'},
+  q21: {'0':'0 Std.','1-5':'1–5 Std.','6-10':'6–10 Std.','11-20':'11–20 Std.',über20:'> 20 Std.',aufgabe:'Aufgabenabhängig'},
+  q22: {klar_wissen:'Klare Aufgaben & Zeitplan',konkrete_aufgaben:'Konkrete statt offener Aufgaben',team:'Im Team arbeiten',alltag:'Passend zum Alltag',anerkennung:'Anerkennung',kommunikation:'Bessere Kommunikation',sonstiges:'Sonstiges'},
+  q24: {keine:'Keine Erhöhung',bis10:'Bis 10%',bis25:'Bis 25%',über25:'Mehr als 25%',unsicher:'Unsicher'},
+  q25: {umkleide:'Umkleideräume',plaetze:'Plätze',vereinsheim:'Vereinsheim',jugend:'Jugendentwicklung',ausruestung:'Ausrüstung',digital:'Digitale Tools',events:'Veranstaltungen',gelaende:'Gelände',sonstiges:'Sonstiges'},
+  q30: {infrastruktur:'Infrastruktur',menschen:'Menschen & Kommunikation',organisation:'Organisation & Ehrenamt',administration:'Administration',finanzen:'Finanzen & Förderung',sport:'Sport & Angebote',informiert:'Nur informiert bleiben'},
+  q2: {herren_fussball:'Herrenfußball',jugend_fussball:'Jugendfußball',tennis:'Tennis',radsport:'Radsport',kegeln:'Kegeln',dart:'Darts',passiv:'Passivmitglied'},
+};
+
+// ── Main render ───────────────────────────────────────────────
+function renderDashboard(rows) {
+  const submitted = rows.filter(r=>r.status==='submitted');
+  const inProgress = rows.filter(r=>r.status==='in_progress');
+  const n = submitted.length;
+  const g = f => submitted.map(r=>r[f]).filter(v=>v!=null);
+  const gi = f => submitted.map(r=>r[f]).filter(v=>v!=null).map(Number);
+
+  const content = document.getElementById('admin-content');
+  content.innerHTML = `
+    <!-- Stats bar -->
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-card__val">${rows.length}</div><div class="stat-card__label">Eingegangen</div></div>
+      <div class="stat-card"><div class="stat-card__val">${submitted.length}</div><div class="stat-card__label">Abgeschlossen</div></div>
+      <div class="stat-card"><div class="stat-card__val">${inProgress.length}</div><div class="stat-card__label">In Bearbeitung</div></div>
+      <div class="stat-card"><div class="stat-card__val">${n?Math.round(submitted.filter(r=>r.sprache==='en').length/n*100):0}%</div><div class="stat-card__label">Auf Englisch</div></div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn-toolbar btn-toolbar--primary" onclick="downloadCsv()">⬇ Alle Antworten als CSV</button>
+      <button class="btn-toolbar" onclick="loadAndRender()">↻ Aktualisieren</button>
+    </div>
+
+    <!-- S1: About You -->
+    <div class="section-card">
+      <div class="section-head"><div class="section-title">Abschnitt 1 — Über dich</div></div>
+      <div class="section-body">
+        <div class="q-stat">${freqHtml('F1. Für wen ausgefüllt?', g('q1_fuer_wen'), LABEL_MAPS.q1)}</div>
+        <div class="q-stat">${freqHtml('F2. Aktive Abteilung(en)', g('q2_abteilungen'), LABEL_MAPS.q2)}</div>
+        <div class="q-stat">${freqHtml('F3. Altersgruppe', g('q3_altersgruppe'), LABEL_MAPS.q3)}</div>
+        <div class="q-stat">${freqHtml('F4. Mitgliedschaft', g('q4_mitgliedschaft'), LABEL_MAPS.q4)}</div>
+        <div class="q-stat">${freqHtml('F5. Mitgliedsdauer', g('q5_dauer'), LABEL_MAPS.q5)}</div>
+      </div>
+    </div>
+
+    <!-- S2: Club Meaning -->
+    <div class="section-card">
+      <div class="section-head"><div class="section-title">Abschnitt 2 — Was der Verein bedeutet</div></div>
+      <div class="section-body">
+        <div class="q-stat">${freqHtml('F6. Beitrittsgrund', g('q6_gruende'), LABEL_MAPS.q6)}</div>
+        <div class="q-stat">${freqHtml('F7. Was schätzt du heute? (Top 3)', g('q7_top3'), LABEL_MAPS.q7)}</div>
+        <div class="q-stat">${scaleHtml('F8. Verbundenheit mit dem Verein', gi('q8_verbundenheit'))}</div>
+        <div class="q-stat">${freitextHtml('F8a. Was würde helfen, mehr Verbundenheit zu spüren?', g('q8a_freitext'))}</div>
+      </div>
+    </div>
+
+    <!-- S3: Values -->
+    <div class="section-card">
+      <div class="section-head"><div class="section-title">Abschnitt 3 — Unsere Werte</div></div>
+      <div class="section-body">
+        <div class="q-stat">
+          ${gridScaleHtml('F9–F12. Identitätsaussagen', [
+            {label:'F9 Tradition & Fairness — Heute', vals:gi('q9_heute')},
+            {label:'F9 Tradition & Fairness — Zukunft', vals:gi('q9_zukunft')},
+            {label:'F10 Toleranz & Vielfalt — Heute', vals:gi('q10_heute')},
+            {label:'F10 Toleranz & Vielfalt — Zukunft', vals:gi('q10_zukunft')},
+            {label:'F11 Sportlicher Erfolg — Heute', vals:gi('q11_heute')},
+            {label:'F11 Sportlicher Erfolg — Zukunft', vals:gi('q11_zukunft')},
+            {label:'F12 Mut zur Veränderung — Heute', vals:gi('q12_heute')},
+            {label:'F12 Mut zur Veränderung — Zukunft', vals:gi('q12_zukunft')},
+          ])}
+        </div>
+        <div class="q-stat">${freitextHtml('F13. Wichtigster Wert in einem Sportverein', g('q13_freitext'))}</div>
+      </div>
+    </div>
+
+    <!-- S4: How We Are Doing -->
+    <div class="section-card">
+      <div class="section-head"><div class="section-title">Abschnitt 4 — Wie wir heute dastehen</div></div>
+      <div class="section-body">
+        <div class="q-stat">
+          ${gridScaleHtml('F14. Zufriedenheit mit Vereinsaspekten', [
+            {label:'Umkleideräume & Toiletten', vals:gi('q14_umkleide')},
+            {label:'Die Plätze', vals:gi('q14_plaetze')},
+            {label:'Sonstige Einrichtungen', vals:gi('q14_einrichtungen')},
+            {label:'Sauberkeit & Pflege', vals:gi('q14_sauberkeit')},
+            {label:'Vereinskommunikation', vals:gi('q14_kommunikation')},
+          ])}
+        </div>
+        <div class="q-stat">${freitextHtml('F15. Was würde am meisten verbessert werden?', g('q15_freitext'))}</div>
+        <div class="q-stat">${freitextHtml('F16. Was sollte auf keinen Fall geändert werden?', g('q16_freitext'))}</div>
+      </div>
+    </div>
+
+    <!-- S5: Volunteering -->
+    <div class="section-card">
+      <div class="section-head"><div class="section-title">Abschnitt 5 — Ehrenamt und Mitmachen</div></div>
+      <div class="section-body">
+        <div class="q-stat">${freqHtml('F17. Schon ehrenamtlich mitgeholfen?', g('q17_ehrenamt'), LABEL_MAPS.q17)}</div>
+        <div class="q-stat">${freitextHtml('F18. Wobei wurde geholfen?', g('q18_freitext'))}</div>
+        <div class="q-stat">${scaleHtml('F19. Interesse an Skillsbörse', gi('q19_skillsboerse'))}</div>
+        <div class="q-stat">${freitextHtml('F20. Welche Fähigkeiten könnten angeboten werden?', g('q20_freitext'))}</div>
+        <div class="q-stat">${freqHtml('F21. Stunden pro Jahr', g('q21_stunden'), LABEL_MAPS.q21)}</div>
+        <div class="q-stat">${freqHtml('F22. Was würde Mitmachen leichter machen?', g('q22_leichter'), LABEL_MAPS.q22)}</div>
+      </div>
+    </div>
+
+    <!-- S6: Fees -->
+    <div class="section-card">
+      <div class="section-head"><div class="section-title">Abschnitt 6 — Beiträge und Investitionen</div></div>
+      <div class="section-body">
+        <div class="q-stat">${scaleHtml('F23. Preis-Leistungs-Verhältnis', gi('q23_preis_leistung'))}</div>
+        <div class="q-stat">${freqHtml('F24. Akzeptable Beitragserhöhung', g('q24_erhoehung'), LABEL_MAPS.q24)}</div>
+        <div class="q-stat">${freqHtml('F25. Investitionsprioritäten (Top 3)', g('q25_top3'), LABEL_MAPS.q25)}</div>
+      </div>
+    </div>
+
+    <!-- S7: Working Groups -->
+    <div class="section-card">
+      <div class="section-head"><div class="section-title">Abschnitt 7 — Arbeitsgruppen</div></div>
+      <div class="section-body">
+        <div class="q-stat">${freqHtml('F30. Interesse an Arbeitsgruppen', g('q30_gruppen'), LABEL_MAPS.q30)}</div>
+        <div class="q-stat">
+          <div class="q-stat-label">F31</div>
+          <div class="q-stat-title">Kontaktangaben für Arbeitsgruppen <span style="color:#dc2626;font-size:.8rem">(⚠ nicht anonym)</span></div>
+          ${(() => {
+            const contacts = submitted.filter(r=>r.q31_kontakt).map(r=>r.q31_kontakt);
+            return contacts.length
+              ? `<div class="freitext-list">${contacts.map(c=>`<div class="freitext-item">👤 ${c}</div>`).join('')}</div>`
+              : '<div class="freitext-empty">Keine Kontaktangaben.</div>';
+          })()}
+        </div>
+      </div>
+    </div>
+
+    <!-- S8: Next 5 Years -->
+    <div class="section-card">
+      <div class="section-head"><div class="section-title">Abschnitt 8 — Die nächsten fünf Jahre</div></div>
+      <div class="section-body">
+        <div class="q-stat">${freitextHtml('F26. Größte Priorität für den Fünfjahresplan', g('q26_freitext'))}</div>
+        <div class="q-stat">${freitextHtml('F27. Wichtigste Identitätsaussage und warum', g('q27_freitext'))}</div>
+        <div class="q-stat">${freitextHtml('F28. Was für ein Verein soll ASN in 5 Jahren sein?', g('q28_freitext'))}</div>
+        <div class="q-stat">${freitextHtml('F29. Sonstiges', g('q29_freitext'))}</div>
+      </div>
+    </div>
+  `;
+
+  // Store rows for CSV export
+  window.__surveyRows__ = rows;
+}
+
+// ── CSV Export ────────────────────────────────────────────────
+window.downloadCsv = function() {
+  const rows = window.__surveyRows__ || [];
+  if (!rows.length) { showToast('Keine Daten', 'error'); return; }
+
+  const cols = [
+    'code','status','sprache','eingegangen_am','abgeschlossen_am',
+    'q1_fuer_wen','q2_abteilungen','q2_jugend_ag','q3_altersgruppe','q4_mitgliedschaft','q4_sonstiges','q5_dauer',
+    'q6_gruende','q6_sonstiges','q7_top3','q7_sonstiges','q8_verbundenheit','q8a_freitext',
+    'q9_heute','q9_zukunft','q10_heute','q10_zukunft','q11_heute','q11_zukunft','q12_heute','q12_zukunft','q13_freitext',
+    'q14_umkleide','q14_plaetze','q14_einrichtungen','q14_sauberkeit','q14_kommunikation',
+    'q15_freitext','q16_freitext',
+    'q17_ehrenamt','q18_freitext','q19_skillsboerse','q20_freitext','q21_stunden','q22_leichter','q22_sonstiges',
+    'q23_preis_leistung','q24_erhoehung','q25_top3','q25_sonstiges',
+    'q30_gruppen','q31_kontakt',
+    'q26_freitext','q27_freitext','q28_freitext','q29_freitext',
+  ];
+
+  const escape = v => {
+    if (v === null || v === undefined) return '';
+    const s = Array.isArray(v) ? v.join(', ') : String(v);
+    return s.includes(';') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g,'""')}"` : s;
+  };
+
+  const header = cols.join(';');
+  const body = rows.map(r => cols.map(c => escape(r[c])).join(';')).join('\n');
+  const csv = '\uFEFF' + header + '\n' + body;
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'umfrage-2026.csv'; a.click();
+  URL.revokeObjectURL(url);
+  showToast(`${rows.length} Antworten exportiert`, 'success');
+};
+
+// ── Load & render ─────────────────────────────────────────────
+window.loadAndRender = async function() {
+  document.getElementById('admin-content').innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+  try {
+    const rows = await loadData();
+    renderDashboard(rows);
+  } catch(err) {
+    document.getElementById('admin-content').innerHTML = `<div style="color:var(--red);padding:2rem">Fehler: ${err.message}</div>`;
+  }
+};
+
+// ── Login ─────────────────────────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.classList.remove('visible');
+  document.getElementById('login-btn-text').style.display = 'none';
+  document.getElementById('login-spinner').style.display = 'inline-block';
+  document.getElementById('btn-login').disabled = true;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json','apikey':SUPABASE_KEY },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || data.msg || 'Login fehlgeschlagen');
+    accessToken = data.access_token;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-wrap').classList.add('visible');
+    document.getElementById('header-user').textContent = email;
+    loadAndRender();
+  } catch(err) {
+    errEl.textContent = err.message; errEl.classList.add('visible');
+  } finally {
+    document.getElementById('login-btn-text').style.display = '';
+    document.getElementById('login-spinner').style.display = 'none';
+    document.getElementById('btn-login').disabled = false;
+  }
+}
+
+document.getElementById('btn-login').addEventListener('click', doLogin);
+document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+    method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${accessToken}`}
+  });
+  accessToken = null;
+  document.getElementById('admin-wrap').classList.remove('visible');
+  document.getElementById('login-screen').style.display = '';
+  showToast('Ausgeloggt');
+});
+</script>
+</body>
+</html>

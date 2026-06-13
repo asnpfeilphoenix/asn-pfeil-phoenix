@@ -1,0 +1,1011 @@
+---
+// src/pages/umfrage/2026.astro
+import BaseLayout from '../../layouts/BaseLayout.astro';
+export const prerender = true;
+---
+
+<BaseLayout title="Mitgliederbefragung 2026" description="Anonyme Mitgliederbefragung des ASN Pfeil Phönix e.V. 2026">
+
+  <section class="survey-hero">
+    <div class="container">
+      <p class="section-eyebrow">ASN Pfeil Phönix e.V.</p>
+      <h1 id="hero-title">Mitgliederbefragung <em>2026</em></h1>
+      <p class="hero-sub" id="hero-sub">Deine Meinung formt unseren Fünfjahresplan. Anonym · ca. 10–15 Minuten</p>
+      <!-- Language switcher -->
+      <div class="lang-switch">
+        <button class="lang-btn active" id="btn-de" onclick="setLang('de')">🇩🇪 Deutsch</button>
+        <button class="lang-btn" id="btn-en" onclick="setLang('en')">🇬🇧 English</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container survey-container">
+
+      <!-- Resume code entry -->
+      <div class="resume-box" id="resume-box">
+        <div class="resume-inner">
+          <span class="resume-label" id="lbl-resume-title">Umfrage fortsetzen?</span>
+          <div class="resume-row">
+            <input class="field-input resume-input" type="text" id="resume-code-input"
+              placeholder="z.B. PX7K2M" maxlength="6" style="text-transform:uppercase;letter-spacing:.1em" />
+            <button class="btn btn--ghost resume-btn" id="btn-resume" onclick="resumeSurvey()">
+              <span id="lbl-resume-btn">Laden</span>
+            </button>
+          </div>
+          <div class="resume-error" id="resume-error"></div>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="progress-wrap" id="progress-wrap" style="display:none">
+        <div class="progress-sections" id="progress-sections"></div>
+        <div class="progress-bar-outer">
+          <div class="progress-bar-inner" id="progress-bar"></div>
+        </div>
+        <div class="progress-label" id="progress-label"></div>
+      </div>
+
+      <!-- Survey panels -->
+      <div id="survey-panels">
+
+        <!-- ── SECTION 1 ── -->
+        <div class="survey-panel" data-section="1">
+          <div class="panel-head">
+            <div class="panel-eyebrow" data-de="Abschnitt 1" data-en="Section 1"></div>
+            <h2 class="panel-title" data-de="Über dich" data-en="About You"></h2>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F1. Für wen füllst du diese Umfrage aus?" data-en="Q1. Who are you completing this survey for?"></div>
+            <div class="q-hint" data-de="Einfachauswahl" data-en="Single select"></div>
+            <div class="radio-group" data-field="q1_fuer_wen">
+              <label class="radio-opt"><input type="radio" name="q1" value="selbst" /><span data-de="Für mich selbst" data-en="For myself"></span></label>
+              <label class="radio-opt"><input type="radio" name="q1" value="kind" /><span data-de="Im Namen meines Kindes" data-en="On behalf of my child"></span></label>
+              <label class="radio-opt"><input type="radio" name="q1" value="beides" /><span data-de="Für mich und im Namen meines Kindes/meiner Kinder" data-en="For myself and on behalf of my child/children"></span></label>
+            </div>
+            <div class="q-note" data-de="Hinweis: Wenn du mehrere Kinder als Mitglieder hast, fülle bitte für jedes Kind eine separate Umfrage aus." data-en="Note: If you have more than one child who is a member, please complete a separate survey for each child."></div>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F2. In welcher/welchen Abteilung(en) bist du oder das Mitglied aktiv?" data-en="Q2. Which department(s) are you or the member you represent active in?"></div>
+            <div class="q-hint" data-de="Mehrfachauswahl möglich" data-en="Select all that apply"></div>
+            <div class="check-group" data-field="q2_abteilungen">
+              <label class="check-opt"><input type="checkbox" value="herren_fussball" /><span data-de="Herrenfußball" data-en="Men's football"></span></label>
+              <label class="check-opt"><input type="checkbox" value="jugend_fussball" /><span data-de="Jugendfußball" data-en="Youth football"></span></label>
+              <div class="q-sub" id="q2-jugend-sub" style="display:none">
+                <label class="field-label" data-de="Altersgruppe:" data-en="Age group:"></label>
+                <input class="field-input" type="text" id="q2_jugend_ag" style="max-width:200px" placeholder="z.B. U12" />
+              </div>
+              <label class="check-opt"><input type="checkbox" value="tennis" /><span>Tennis</span></label>
+              <label class="check-opt"><input type="checkbox" value="radsport" /><span data-de="Radsport" data-en="Cycling"></span></label>
+              <label class="check-opt"><input type="checkbox" value="kegeln" /><span data-de="Kegeln" data-en="Bowling"></span></label>
+              <label class="check-opt"><input type="checkbox" value="dart" /><span>Darts</span></label>
+              <label class="check-opt"><input type="checkbox" value="passiv" /><span data-de="Nicht aktiv / Passivmitglied" data-en="Not active / social member"></span></label>
+            </div>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F3. Welche Altersgruppe vertrittst du?" data-en="Q3. Which age group do you represent?"></div>
+            <div class="q-hint" data-de="Einfachauswahl" data-en="Single select"></div>
+            <div class="radio-group" data-field="q3_altersgruppe">
+              <label class="radio-opt"><input type="radio" name="q3" value="unter10" /><span data-de="Unter 10" data-en="Under 10"></span></label>
+              <label class="radio-opt"><input type="radio" name="q3" value="10-13" /><span>10–13</span></label>
+              <label class="radio-opt"><input type="radio" name="q3" value="14-17" /><span>14–17</span></label>
+              <label class="radio-opt"><input type="radio" name="q3" value="18-25" /><span>18–25</span></label>
+              <label class="radio-opt"><input type="radio" name="q3" value="26-35" /><span>26–35</span></label>
+              <label class="radio-opt"><input type="radio" name="q3" value="36-45" /><span>36–45</span></label>
+              <label class="radio-opt"><input type="radio" name="q3" value="46-60" /><span>46–60</span></label>
+              <label class="radio-opt"><input type="radio" name="q3" value="über60" /><span data-de="Über 60" data-en="Over 60"></span></label>
+            </div>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F4. Welche Mitgliedschaft hast du / hat das Mitglied?" data-en="Q4. What type of membership do you / does the member hold?"></div>
+            <div class="radio-group" data-field="q4_mitgliedschaft">
+              <label class="radio-opt"><input type="radio" name="q4" value="vollmitglied" /><span data-de="Vollmitglied (Erwachsene)" data-en="Full adult member"></span></label>
+              <label class="radio-opt"><input type="radio" name="q4" value="jugend" /><span data-de="Jugendmitglied" data-en="Youth member"></span></label>
+              <label class="radio-opt"><input type="radio" name="q4" value="familie" /><span data-de="Familienmitgliedschaft" data-en="Family membership"></span></label>
+              <label class="radio-opt"><input type="radio" name="q4" value="foerdermitglied" /><span data-de="Fördermitglied" data-en="Social / passive member"></span></label>
+              <label class="radio-opt radio-opt--other"><input type="radio" name="q4" value="sonstiges" /><span data-de="Sonstiges:" data-en="Other:"></span>
+                <input class="field-input other-input" type="text" id="q4_sonstiges" /></label>
+            </div>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F5. Wie lange bist du / ist das Mitglied schon dabei?" data-en="Q5. How long have you / has the member been part of the club?"></div>
+            <div class="radio-group" data-field="q5_dauer">
+              <label class="radio-opt"><input type="radio" name="q5" value="unter1" /><span data-de="Weniger als 1 Jahr" data-en="Less than 1 year"></span></label>
+              <label class="radio-opt"><input type="radio" name="q5" value="1-3" /><span data-de="1–3 Jahre" data-en="1–3 years"></span></label>
+              <label class="radio-opt"><input type="radio" name="q5" value="4-10" /><span data-de="4–10 Jahre" data-en="4–10 years"></span></label>
+              <label class="radio-opt"><input type="radio" name="q5" value="über10" /><span data-de="Mehr als 10 Jahre" data-en="More than 10 years"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECTION 2 ── -->
+        <div class="survey-panel" data-section="2" style="display:none">
+          <div class="panel-head">
+            <div class="panel-eyebrow" data-de="Abschnitt 2" data-en="Section 2"></div>
+            <h2 class="panel-title" data-de="Was der Verein dir bedeutet" data-en="What the Club Means to You"></h2>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F6. Warum bist du / ist das Mitglied ursprünglich dem Verein beigetreten?" data-en="Q6. Why did you / did the member originally join the club?"></div>
+            <div class="q-hint" data-de="Mehrfachauswahl möglich" data-en="Select all that apply"></div>
+            <div class="check-group" data-field="q6_gruende">
+              <label class="check-opt"><input type="checkbox" value="sport" /><span data-de="Um Sport zu treiben" data-en="To play sport"></span></label>
+              <label class="check-opt"><input type="checkbox" value="kind_sport" /><span data-de="Damit mein Kind Sport treiben kann" data-en="For my child to play sport"></span></label>
+              <label class="check-opt"><input type="checkbox" value="gemeinschaft" /><span data-de="Wegen der Gemeinschaft" data-en="For the social community"></span></label>
+              <label class="check-opt"><input type="checkbox" value="eingeladen" /><span data-de="Ich wurde von Freunden oder der Familie eingeladen" data-en="I was invited by a friend or family member"></span></label>
+              <label class="check-opt"><input type="checkbox" value="unterstuetzen" /><span data-de="Um den Verein zu unterstützen" data-en="To support the club"></span></label>
+              <label class="check-opt check-opt--other"><input type="checkbox" value="sonstiges" /><span data-de="Sonstiges:" data-en="Other:"></span>
+                <input class="field-input other-input" type="text" id="q6_sonstiges" /></label>
+            </div>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F7. Was schätzt du heute am meisten an der Mitgliedschaft? (Wähle deine Top 3)" data-en="Q7. What do you value most about being a member today? (Rank your top 3)"></div>
+            <div class="q-hint" data-de="Wähle bis zu 3 Optionen" data-en="Select up to 3 options"></div>
+            <div class="check-group check-group--max3" data-field="q7_top3" data-max="3">
+              <label class="check-opt"><input type="checkbox" value="spielen" /><span data-de="Spielen und Wettkämpfe" data-en="Playing and competing"></span></label>
+              <label class="check-opt"><input type="checkbox" value="zuschauen" /><span data-de="Spiele verfolgen und Teams anfeuern" data-en="Watching matches and supporting teams"></span></label>
+              <label class="check-opt"><input type="checkbox" value="gemeinschaft" /><span data-de="Die Gemeinschaft und Freundschaften" data-en="The social community and friendships"></span></label>
+              <label class="check-opt"><input type="checkbox" value="einrichtungen" /><span data-de="Die Einrichtungen und das Gelände" data-en="The facilities and grounds"></span></label>
+              <label class="check-opt"><input type="checkbox" value="lokal" /><span data-de="Teil von etwas Lokalem zu sein" data-en="Being part of something local"></span></label>
+              <label class="check-opt"><input type="checkbox" value="kinder" /><span data-de="Eine sichere, aktive Umgebung für Kinder" data-en="A safe, active environment for children"></span></label>
+              <label class="check-opt"><input type="checkbox" value="tradition" /><span data-de="Die Geschichte und Tradition des Vereins" data-en="The club's history and tradition"></span></label>
+              <label class="check-opt check-opt--other"><input type="checkbox" value="sonstiges" /><span data-de="Sonstiges:" data-en="Other:"></span>
+                <input class="field-input other-input" type="text" id="q7_sonstiges" /></label>
+            </div>
+            <div class="q-counter" id="q7-counter"></div>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F8. Wie verbunden fühlst du dich mit dem Verein als Gemeinschaft?" data-en="Q8. How connected do you feel to the club as a community?"></div>
+            <div class="scale-label" data-de="1 = Überhaupt nicht verbunden  —  5 = Sehr stark verbunden" data-en="1 = Not at all connected  —  5 = Very strongly connected"></div>
+            <div class="scale-group" data-field="q8_verbundenheit">
+              <label class="scale-opt"><input type="radio" name="q8" value="1" /><span>1</span></label>
+              <label class="scale-opt"><input type="radio" name="q8" value="2" /><span>2</span></label>
+              <label class="scale-opt"><input type="radio" name="q8" value="3" /><span>3</span></label>
+              <label class="scale-opt"><input type="radio" name="q8" value="4" /><span>4</span></label>
+              <label class="scale-opt"><input type="radio" name="q8" value="5" /><span>5</span></label>
+            </div>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F8a. Gibt es etwas, das dir helfen würde, dich mehr mit dem Verein verbunden zu fühlen?" data-en="Q8a. Is there anything that would make you feel more connected to the club?"></div>
+            <textarea class="field-input" id="q8a_freitext" rows="3" data-field="q8a_freitext"></textarea>
+          </div>
+        </div>
+
+        <!-- ── SECTION 3 ── -->
+        <div class="survey-panel" data-section="3" style="display:none">
+          <div class="panel-head">
+            <div class="panel-eyebrow" data-de="Abschnitt 3" data-en="Section 3"></div>
+            <h2 class="panel-title" data-de="Unsere Werte" data-en="Our Values"></h2>
+            <p class="panel-intro" data-de="Zu Beginn dieses Jahres entwickelten engagierte Vereinsmitglieder vier Aussagen zur Identität des Vereins. Bitte bewertet für jede Aussage: (a) wie gut sie unseren Verein heute beschreibt, und (b) wie wichtig sie euch für unsere Zukunft ist." data-en="Earlier this year, a group of engaged club members developed four statements describing the club's identity. For each statement, please rate: (a) how well it describes our club today, and (b) how important it is for our future."></p>
+          </div>
+
+          <div class="q-block q-block--values">
+            <div class="values-statement" data-de="„Wir sind ein Verein mit Tradition, der bodenständig, aber trotzdem weltoffen ist. Bei uns stehen Fairness und menschliches Miteinander im Mittelpunkt. Wir gewinnen mit Fairness. Wir verlieren mit Anstand."" data-en="\"We are a club with tradition — grounded, but open to the world. Fairness and human togetherness are at the centre of everything we do. We win with fairness. We lose with dignity.\""></div>
+            <div class="scale-pair">
+              <div class="scale-row">
+                <div class="scale-label-small" data-de="Wie gut beschreibt das unseren Verein heute? (1 = Überhaupt nicht — 5 = Vollständig)" data-en="How well does this describe our club today? (1 = Not at all — 5 = Completely)"></div>
+                <div class="scale-group" data-field="q9_heute">
+                  <label class="scale-opt"><input type="radio" name="q9h" value="1"/><span>1</span></label>
+                  <label class="scale-opt"><input type="radio" name="q9h" value="2"/><span>2</span></label>
+                  <label class="scale-opt"><input type="radio" name="q9h" value="3"/><span>3</span></label>
+                  <label class="scale-opt"><input type="radio" name="q9h" value="4"/><span>4</span></label>
+                  <label class="scale-opt"><input type="radio" name="q9h" value="5"/><span>5</span></label>
+                </div>
+              </div>
+              <div class="scale-row">
+                <div class="scale-label-small" data-de="Wie wichtig ist das für unsere Zukunft? (1 = Überhaupt nicht — 5 = Sehr wichtig)" data-en="How important is this for our future? (1 = Not at all — 5 = Very important)"></div>
+                <div class="scale-group" data-field="q9_zukunft">
+                  <label class="scale-opt"><input type="radio" name="q9z" value="1"/><span>1</span></label>
+                  <label class="scale-opt"><input type="radio" name="q9z" value="2"/><span>2</span></label>
+                  <label class="scale-opt"><input type="radio" name="q9z" value="3"/><span>3</span></label>
+                  <label class="scale-opt"><input type="radio" name="q9z" value="4"/><span>4</span></label>
+                  <label class="scale-opt"><input type="radio" name="q9z" value="5"/><span>5</span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="q-block q-block--values">
+            <div class="values-statement" data-de="„Wir sind ein Verein, der Toleranz lebt. Bei uns steht der Mensch im Mittelpunkt. Wir gewinnen mit Offenheit, Nähe und Vielfalt. Wir verlieren mit starren Strukturen und Stillstand."" data-en="\"We are a club that lives tolerance. The person is at the centre. We win with openness, closeness and diversity. We lose with rigid structures and standing still.\""></div>
+            <div class="scale-pair">
+              <div class="scale-row">
+                <div class="scale-label-small" data-de="Wie gut beschreibt das unseren Verein heute?" data-en="How well does this describe our club today?"></div>
+                <div class="scale-group" data-field="q10_heute">
+                  <label class="scale-opt"><input type="radio" name="q10h" value="1"/><span>1</span></label>
+                  <label class="scale-opt"><input type="radio" name="q10h" value="2"/><span>2</span></label>
+                  <label class="scale-opt"><input type="radio" name="q10h" value="3"/><span>3</span></label>
+                  <label class="scale-opt"><input type="radio" name="q10h" value="4"/><span>4</span></label>
+                  <label class="scale-opt"><input type="radio" name="q10h" value="5"/><span>5</span></label>
+                </div>
+              </div>
+              <div class="scale-row">
+                <div class="scale-label-small" data-de="Wie wichtig ist das für unsere Zukunft?" data-en="How important is this for our future?"></div>
+                <div class="scale-group" data-field="q10_zukunft">
+                  <label class="scale-opt"><input type="radio" name="q10z" value="1"/><span>1</span></label>
+                  <label class="scale-opt"><input type="radio" name="q10z" value="2"/><span>2</span></label>
+                  <label class="scale-opt"><input type="radio" name="q10z" value="3"/><span>3</span></label>
+                  <label class="scale-opt"><input type="radio" name="q10z" value="4"/><span>4</span></label>
+                  <label class="scale-opt"><input type="radio" name="q10z" value="5"/><span>5</span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="q-block q-block--values">
+            <div class="values-statement" data-de="„Wir sind ein Verein, der gewinnt. Bei uns steht das erfolgreiche, sportliche und gemeinschaftliche Miteinander im Vordergrund. Wir gewinnen mit sportlicher Reise, Ambition und Spaß."" data-en="\"We are a club that wins — and winning means something to us. Sporting ambition, fun and shared positive experiences are at the heart of what we do.\""></div>
+            <div class="scale-pair">
+              <div class="scale-row">
+                <div class="scale-label-small" data-de="Wie gut beschreibt das unseren Verein heute?" data-en="How well does this describe our club today?"></div>
+                <div class="scale-group" data-field="q11_heute">
+                  <label class="scale-opt"><input type="radio" name="q11h" value="1"/><span>1</span></label>
+                  <label class="scale-opt"><input type="radio" name="q11h" value="2"/><span>2</span></label>
+                  <label class="scale-opt"><input type="radio" name="q11h" value="3"/><span>3</span></label>
+                  <label class="scale-opt"><input type="radio" name="q11h" value="4"/><span>4</span></label>
+                  <label class="scale-opt"><input type="radio" name="q11h" value="5"/><span>5</span></label>
+                </div>
+              </div>
+              <div class="scale-row">
+                <div class="scale-label-small" data-de="Wie wichtig ist das für unsere Zukunft?" data-en="How important is this for our future?"></div>
+                <div class="scale-group" data-field="q11_zukunft">
+                  <label class="scale-opt"><input type="radio" name="q11z" value="1"/><span>1</span></label>
+                  <label class="scale-opt"><input type="radio" name="q11z" value="2"/><span>2</span></label>
+                  <label class="scale-opt"><input type="radio" name="q11z" value="3"/><span>3</span></label>
+                  <label class="scale-opt"><input type="radio" name="q11z" value="4"/><span>4</span></label>
+                  <label class="scale-opt"><input type="radio" name="q11z" value="5"/><span>5</span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="q-block q-block--values">
+            <div class="values-statement" data-de="„Wir sind ein Verein, der Mut zur Veränderung hat. Das zeigt sich durch einen innovativen Geist und mutige Veränderungen, die wir Hand in Hand angehen."" data-en="\"We are a club with the courage to change — innovative, forward-looking, and willing to make bold decisions together.\""></div>
+            <div class="scale-pair">
+              <div class="scale-row">
+                <div class="scale-label-small" data-de="Wie gut beschreibt das unseren Verein heute?" data-en="How well does this describe our club today?"></div>
+                <div class="scale-group" data-field="q12_heute">
+                  <label class="scale-opt"><input type="radio" name="q12h" value="1"/><span>1</span></label>
+                  <label class="scale-opt"><input type="radio" name="q12h" value="2"/><span>2</span></label>
+                  <label class="scale-opt"><input type="radio" name="q12h" value="3"/><span>3</span></label>
+                  <label class="scale-opt"><input type="radio" name="q12h" value="4"/><span>4</span></label>
+                  <label class="scale-opt"><input type="radio" name="q12h" value="5"/><span>5</span></label>
+                </div>
+              </div>
+              <div class="scale-row">
+                <div class="scale-label-small" data-de="Wie wichtig ist das für unsere Zukunft?" data-en="How important is this for our future?"></div>
+                <div class="scale-group" data-field="q12_zukunft">
+                  <label class="scale-opt"><input type="radio" name="q12z" value="1"/><span>1</span></label>
+                  <label class="scale-opt"><input type="radio" name="q12z" value="2"/><span>2</span></label>
+                  <label class="scale-opt"><input type="radio" name="q12z" value="3"/><span>3</span></label>
+                  <label class="scale-opt"><input type="radio" name="q12z" value="4"/><span>4</span></label>
+                  <label class="scale-opt"><input type="radio" name="q12z" value="5"/><span>5</span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F13. In deinen eigenen Worten: Welcher Wert oder welche Eigenschaft ist dir in einem Sportverein am wichtigsten?" data-en="Q13. In your own words: what value or quality matters most to you in a sports club?"></div>
+            <textarea class="field-input" id="q13_freitext" rows="3" data-field="q13_freitext"></textarea>
+          </div>
+        </div>
+
+        <!-- ── SECTION 4 ── -->
+        <div class="survey-panel" data-section="4" style="display:none">
+          <div class="panel-head">
+            <div class="panel-eyebrow" data-de="Abschnitt 4" data-en="Section 4"></div>
+            <h2 class="panel-title" data-de="Wie wir heute dastehen" data-en="How We Are Doing Today"></h2>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F14. Wie zufrieden bist du mit den folgenden Aspekten des Vereins?" data-en="Q14. How satisfied are you with the following aspects of the club?"></div>
+            <div class="scale-label" data-de="1 = Sehr unzufrieden  —  5 = Sehr zufrieden" data-en="1 = Very dissatisfied  —  5 = Very satisfied"></div>
+            <div class="grid-scale">
+              <div class="grid-scale-header">
+                <div></div>
+                <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div>
+              </div>
+              <div class="grid-scale-row" data-field="q14_umkleide">
+                <div class="grid-label" data-de="Umkleideräume und Toiletten" data-en="Changing rooms and toilets"></div>
+                <label><input type="radio" name="q14a" value="1"/></label>
+                <label><input type="radio" name="q14a" value="2"/></label>
+                <label><input type="radio" name="q14a" value="3"/></label>
+                <label><input type="radio" name="q14a" value="4"/></label>
+                <label><input type="radio" name="q14a" value="5"/></label>
+              </div>
+              <div class="grid-scale-row" data-field="q14_plaetze">
+                <div class="grid-label" data-de="Die Plätze" data-en="The pitches"></div>
+                <label><input type="radio" name="q14b" value="1"/></label>
+                <label><input type="radio" name="q14b" value="2"/></label>
+                <label><input type="radio" name="q14b" value="3"/></label>
+                <label><input type="radio" name="q14b" value="4"/></label>
+                <label><input type="radio" name="q14b" value="5"/></label>
+              </div>
+              <div class="grid-scale-row" data-field="q14_einrichtungen">
+                <div class="grid-label" data-de="Sonstige Einrichtungen (Vereinsheim, Kiosk, Lager)" data-en="Other facilities (clubhouse, kiosk, storage)"></div>
+                <label><input type="radio" name="q14c" value="1"/></label>
+                <label><input type="radio" name="q14c" value="2"/></label>
+                <label><input type="radio" name="q14c" value="3"/></label>
+                <label><input type="radio" name="q14c" value="4"/></label>
+                <label><input type="radio" name="q14c" value="5"/></label>
+              </div>
+              <div class="grid-scale-row" data-field="q14_sauberkeit">
+                <div class="grid-label" data-de="Sauberkeit und Pflege des Geländes" data-en="Cleanliness and maintenance of the grounds"></div>
+                <label><input type="radio" name="q14d" value="1"/></label>
+                <label><input type="radio" name="q14d" value="2"/></label>
+                <label><input type="radio" name="q14d" value="3"/></label>
+                <label><input type="radio" name="q14d" value="4"/></label>
+                <label><input type="radio" name="q14d" value="5"/></label>
+              </div>
+              <div class="grid-scale-row" data-field="q14_kommunikation">
+                <div class="grid-label" data-de="Vereinskommunikation (WhatsApp, Website, Social Media)" data-en="Club communication (WhatsApp, website, social media)"></div>
+                <label><input type="radio" name="q14e" value="1"/></label>
+                <label><input type="radio" name="q14e" value="2"/></label>
+                <label><input type="radio" name="q14e" value="3"/></label>
+                <label><input type="radio" name="q14e" value="4"/></label>
+                <label><input type="radio" name="q14e" value="5"/></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F15. Was würdest du am liebsten verbessert sehen?" data-en="Q15. What is the one thing you would most like to see improved?"></div>
+            <textarea class="field-input" id="q15_freitext" rows="3" data-field="q15_freitext"></textarea>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F16. Gibt es etwas im Verein, das wir auf keinen Fall verändern sollten?" data-en="Q16. Is there anything about the club that you think we should make sure we don't change?"></div>
+            <textarea class="field-input" id="q16_freitext" rows="3" data-field="q16_freitext"></textarea>
+          </div>
+        </div>
+
+        <!-- ── SECTION 5 ── -->
+        <div class="survey-panel" data-section="5" style="display:none">
+          <div class="panel-head">
+            <div class="panel-eyebrow" data-de="Abschnitt 5" data-en="Section 5"></div>
+            <h2 class="panel-title" data-de="Ehrenamt und Mitmachen" data-en="Volunteering and Contribution"></h2>
+            <p class="panel-intro" data-de="Unser Verein war schon immer auf das Engagement und die Fähigkeiten seiner Mitglieder angewiesen. Wir möchten besser verstehen, wie wir es mehr Mitgliedern leichter machen können, sich einzubringen." data-en="Our club has always depended on members giving their time and skills. We want to understand better how we can make it easier for more members to get involved."></p>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F17. Hast du / hat das Mitglied schon einmal ehrenamtlich im Verein mitgeholfen?" data-en="Q17. Have you / has the member ever volunteered or helped out at the club?"></div>
+            <div class="radio-group" data-field="q17_ehrenamt">
+              <label class="radio-opt"><input type="radio" name="q17" value="ja_regelmaessig" /><span data-de="Ja, regelmäßig" data-en="Yes, regularly"></span></label>
+              <label class="radio-opt"><input type="radio" name="q17" value="ja_gelegentlich" /><span data-de="Ja, gelegentlich" data-en="Yes, occasionally"></span></label>
+              <label class="radio-opt"><input type="radio" name="q17" value="nein_wuerde_gerne" /><span data-de="Nein, aber ich würde es gerne" data-en="No, but I would like to"></span></label>
+              <label class="radio-opt"><input type="radio" name="q17" value="nein_nicht_moeglich" /><span data-de="Nein, und ich bin derzeit nicht in der Lage dazu" data-en="No, and I am not currently in a position to"></span></label>
+            </div>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F18. Wenn du schon mitgeholfen hast, wobei hast du angepackt? (optional)" data-en="Q18. If you have volunteered before, what kind of things have you helped with? (optional)"></div>
+            <textarea class="field-input" id="q18_freitext" rows="3" data-field="q18_freitext"></textarea>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F19. Wir denken über eine „Skillsbörse" nach — ein System, das Mitglieder anhand ihrer Fähigkeiten mit Aufgaben zusammenbringt. Wie interessiert wärst du?" data-en="Q19. We are exploring a \"Skillsbörse\" — a system matching members to tasks based on their skills. How interested would you be in taking part?"></div>
+            <div class="scale-label" data-de="1 = Überhaupt nicht interessiert  —  5 = Sehr interessiert" data-en="1 = Not at all interested  —  5 = Very interested"></div>
+            <div class="scale-group" data-field="q19_skillsboerse">
+              <label class="scale-opt"><input type="radio" name="q19" value="1"/><span>1</span></label>
+              <label class="scale-opt"><input type="radio" name="q19" value="2"/><span>2</span></label>
+              <label class="scale-opt"><input type="radio" name="q19" value="3"/><span>3</span></label>
+              <label class="scale-opt"><input type="radio" name="q19" value="4"/><span>4</span></label>
+              <label class="scale-opt"><input type="radio" name="q19" value="5"/><span>5</span></label>
+            </div>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F20. Welche Fähigkeiten, Kenntnisse oder Zeit könntest du dem Verein anbieten? (optional)" data-en="Q20. What skills, knowledge or time could you offer the club? (optional)"></div>
+            <div class="q-hint" data-de="z.B. Handwerk, Gartenarbeit, Fotografie, IT, Coaching, Rechtsberatung..." data-en="e.g. DIY, gardening, photography, IT, coaching, legal advice..."></div>
+            <textarea class="field-input" id="q20_freitext" rows="3" data-field="q20_freitext"></textarea>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F21. Wie viele Stunden pro Jahr könntest du realistischerweise beisteuern?" data-en="Q21. Realistically, how many hours per year could you contribute?"></div>
+            <div class="radio-group" data-field="q21_stunden">
+              <label class="radio-opt"><input type="radio" name="q21" value="0" /><span data-de="0 — Ich kann derzeit keine Zeit einbringen" data-en="0 — I am not able to contribute time at the moment"></span></label>
+              <label class="radio-opt"><input type="radio" name="q21" value="1-5" /><span data-de="1–5 Stunden" data-en="1–5 hours"></span></label>
+              <label class="radio-opt"><input type="radio" name="q21" value="6-10" /><span data-de="6–10 Stunden" data-en="6–10 hours"></span></label>
+              <label class="radio-opt"><input type="radio" name="q21" value="11-20" /><span data-de="11–20 Stunden" data-en="11–20 hours"></span></label>
+              <label class="radio-opt"><input type="radio" name="q21" value="über20" /><span data-de="Mehr als 20 Stunden" data-en="More than 20 hours"></span></label>
+              <label class="radio-opt"><input type="radio" name="q21" value="aufgabe" /><span data-de="Das hängt von der Aufgabe ab" data-en="It depends on the task"></span></label>
+            </div>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F22. Was würde es dir leichter machen, dich einzubringen?" data-en="Q22. What would make it easier for you to get involved?"></div>
+            <div class="q-hint" data-de="Mehrfachauswahl möglich" data-en="Select all that apply"></div>
+            <div class="check-group" data-field="q22_leichter">
+              <label class="check-opt"><input type="checkbox" value="klar_wissen" /><span data-de="Klar wissen, was wann zu tun ist" data-en="Knowing clearly what needs doing and when"></span></label>
+              <label class="check-opt"><input type="checkbox" value="konkrete_aufgaben" /><span data-de="Konkrete Aufgaben übernehmen statt offene Verpflichtungen" data-en="Being able to sign up for specific tasks rather than open-ended commitments"></span></label>
+              <label class="check-opt"><input type="checkbox" value="team" /><span data-de="Als Teil eines Teams arbeiten" data-en="Working as part of a team"></span></label>
+              <label class="check-opt"><input type="checkbox" value="alltag" /><span data-de="Aufgaben, die in meinen Alltag passen" data-en="Tasks that fit around my schedule"></span></label>
+              <label class="check-opt"><input type="checkbox" value="anerkennung" /><span data-de="Eine Form der Anerkennung für meinen Beitrag" data-en="Some form of recognition for contributions"></span></label>
+              <label class="check-opt"><input type="checkbox" value="kommunikation" /><span data-de="Bessere Kommunikation darüber, wo Hilfe gebraucht wird" data-en="Better communication about what help is needed"></span></label>
+              <label class="check-opt check-opt--other"><input type="checkbox" value="sonstiges" /><span data-de="Sonstiges:" data-en="Other:"></span>
+                <input class="field-input other-input" type="text" id="q22_sonstiges" /></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECTION 6 ── -->
+        <div class="survey-panel" data-section="6" style="display:none">
+          <div class="panel-head">
+            <div class="panel-eyebrow" data-de="Abschnitt 6" data-en="Section 6"></div>
+            <h2 class="panel-title" data-de="Beiträge und Investitionen" data-en="Fees and Investment"></h2>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F23. Findest du, dass deine Mitgliedschaft ein gutes Preis-Leistungs-Verhältnis bietet?" data-en="Q23. Do you feel your membership represents good value for money?"></div>
+            <div class="scale-label" data-de="1 = Sehr schlechtes Verhältnis  —  5 = Hervorragendes Verhältnis" data-en="1 = Very poor value  —  5 = Excellent value"></div>
+            <div class="scale-group" data-field="q23_preis_leistung">
+              <label class="scale-opt"><input type="radio" name="q23" value="1"/><span>1</span></label>
+              <label class="scale-opt"><input type="radio" name="q23" value="2"/><span>2</span></label>
+              <label class="scale-opt"><input type="radio" name="q23" value="3"/><span>3</span></label>
+              <label class="scale-opt"><input type="radio" name="q23" value="4"/><span>4</span></label>
+              <label class="scale-opt"><input type="radio" name="q23" value="5"/><span>5</span></label>
+            </div>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F24. Wenn der Verein die Beiträge erhöhen müsste, um wesentliche Leistungen und Verbesserungen zu finanzieren, was wäre für dich akzeptabel?" data-en="Q24. If the club needed to increase fees to cover essential services and improvements, what would be acceptable to you?"></div>
+            <div class="q-note" data-de="Hintergrund: Professionelle Gebäudereinigung würde allein rund 14.000 € pro Jahr kosten — mehr als ein Viertel unserer gesamten Mitgliedsbeiträge." data-en="For context: professional cleaning of our building alone would cost around €14,000 per year — more than a quarter of our total membership fee income."></div>
+            <div class="radio-group" data-field="q24_erhoehung">
+              <label class="radio-opt"><input type="radio" name="q24" value="keine" /><span data-de="Ich würde keine Beitragserhöhung unterstützen" data-en="I would not support any fee increase"></span></label>
+              <label class="radio-opt"><input type="radio" name="q24" value="bis10" /><span data-de="Eine Erhöhung von bis zu 10%" data-en="An increase of up to 10%"></span></label>
+              <label class="radio-opt"><input type="radio" name="q24" value="bis25" /><span data-de="Eine Erhöhung von bis zu 25%" data-en="An increase of up to 25%"></span></label>
+              <label class="radio-opt"><input type="radio" name="q24" value="über25" /><span data-de="Eine Erhöhung von mehr als 25%, wenn es zu klaren Verbesserungen führt" data-en="An increase of more than 25% if it meant clear improvements"></span></label>
+              <label class="radio-opt"><input type="radio" name="q24" value="unsicher" /><span data-de="Ich bin unsicher — es hängt davon ab, was wir dafür bekommen" data-en="I'm not sure — it would depend on what we get in return"></span></label>
+            </div>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F25. Wenn der Verein zusätzliches Budget investieren könnte, was wären deine wichtigsten Prioritäten? (Top 3)" data-en="Q25. If the club had additional budget to invest, which would be your top priorities? (Top 3)"></div>
+            <div class="q-hint" data-de="Wähle bis zu 3 Optionen" data-en="Select up to 3 options"></div>
+            <div class="check-group check-group--max3" data-field="q25_top3" data-max="3">
+              <label class="check-opt"><input type="checkbox" value="umkleide" /><span data-de="Verbesserung der Umkleideräume und Toiletten" data-en="Improving changing rooms and toilets"></span></label>
+              <label class="check-opt"><input type="checkbox" value="plaetze" /><span data-de="Platzqualität und -pflege" data-en="Pitch quality and maintenance"></span></label>
+              <label class="check-opt"><input type="checkbox" value="vereinsheim" /><span data-de="Vereinsheim und Gemeinschaftseinrichtungen" data-en="Clubhouse and social facilities"></span></label>
+              <label class="check-opt"><input type="checkbox" value="jugend" /><span data-de="Jugendentwicklung und Coaching" data-en="Youth development and coaching"></span></label>
+              <label class="check-opt"><input type="checkbox" value="ausruestung" /><span data-de="Bessere Ausrüstung und Lagerung" data-en="Better equipment and storage"></span></label>
+              <label class="check-opt"><input type="checkbox" value="digital" /><span data-de="Digitale Tools und Kommunikation" data-en="Digital tools and communication"></span></label>
+              <label class="check-opt"><input type="checkbox" value="events" /><span data-de="Veranstaltungen und Vereinsgemeinschaft" data-en="Social events and club community"></span></label>
+              <label class="check-opt"><input type="checkbox" value="gelaende" /><span data-de="Gelände- und Außenpflege" data-en="Grounds and outdoor maintenance"></span></label>
+              <label class="check-opt check-opt--other"><input type="checkbox" value="sonstiges" /><span data-de="Sonstiges:" data-en="Other:"></span>
+                <input class="field-input other-input" type="text" id="q25_sonstiges" /></label>
+            </div>
+            <div class="q-counter" id="q25-counter"></div>
+          </div>
+        </div>
+
+        <!-- ── SECTION 7 ── -->
+        <div class="survey-panel" data-section="7" style="display:none">
+          <div class="panel-head">
+            <div class="panel-eyebrow" data-de="Abschnitt 7" data-en="Section 7"></div>
+            <h2 class="panel-title" data-de="Unsere Arbeitsgruppen" data-en="Our Working Groups"></h2>
+            <p class="panel-intro" data-de="Im Februar 2026 wurden sechs Arbeitsgruppen gegründet, die sich jeweils einem zentralen Thema widmen. Wir suchen Mitglieder, die Lust haben, aktiv mitzuwirken." data-en="In February 2026, six working groups were formed, each focused on a key area for the club's future. We are looking for members who would like to get involved."></p>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F30. Würdest du gerne an einer oder mehreren dieser Arbeitsgruppen teilnehmen?" data-en="Q30. Would you like to get involved in one or more of these working groups?"></div>
+            <div class="check-group" data-field="q30_gruppen">
+              <label class="check-opt"><input type="checkbox" value="infrastruktur" /><span data-de="Infrastruktur — Planung und Verbesserung unserer Plätze, Gebäude und des gesamten Geländes." data-en="Infrastructure — Planning and improving our pitches, building and grounds."></span></label>
+              <label class="check-opt"><input type="checkbox" value="menschen" /><span data-de="Menschen und Kommunikation — Stärkung unserer Vereinskultur und Verbesserung der Kommunikation." data-en="People and Communication — Strengthening our club culture and improving how we communicate."></span></label>
+              <label class="check-opt"><input type="checkbox" value="organisation" /><span data-de="Organisation und Ehrenamt — Aufbau besserer Strukturen für ehrenamtliches Engagement." data-en="Organisation and Volunteering — Building better structures for volunteering."></span></label>
+              <label class="check-opt"><input type="checkbox" value="administration" /><span data-de="Administration und Verwaltung — Vereinfachung der Vereinsverwaltung und digitale Tools." data-en="Administration — Simplifying how the club is run and improving digital tools."></span></label>
+              <label class="check-opt"><input type="checkbox" value="finanzen" /><span data-de="Finanzen und Förderung — Sicherung der finanziellen Zukunft des Vereins." data-en="Finance and Funding — Securing the club's financial future."></span></label>
+              <label class="check-opt"><input type="checkbox" value="sport" /><span data-de="Sport und Angebote — Weiterentwicklung unseres sportlichen Angebots, Inklusion und neue Zielgruppen." data-en="Sport and Programmes — Developing our sporting offer, inclusion and reaching new groups."></span></label>
+              <label class="check-opt"><input type="checkbox" value="informiert" /><span data-de="Ich kann nicht beitreten, möchte aber informiert bleiben." data-en="I am not able to join, but I would like to be kept informed."></span></label>
+            </div>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F31. Wenn du einer Arbeitsgruppe beitreten möchtest, hinterlasse bitte deinen Namen und deine Kontaktdaten." data-en="Q31. If you would like to join a working group, please leave your name and contact details."></div>
+            <div class="notice notice--warn" style="margin-bottom:.75rem">
+              <span class="notice__icon">⚠</span>
+              <div data-de="Dies ist das einzige Feld dieser Umfrage, das nicht anonym ist. Deine Angaben werden ausschließlich genutzt, um dich bezüglich der Arbeitsgruppen zu kontaktieren." data-en="This is the only field in this survey that is not anonymous. Your details will only be used to contact you regarding the working groups."></div>
+            </div>
+            <textarea class="field-input" id="q31_kontakt" rows="3" data-field="q31_kontakt"
+              data-placeholder-de="Name, E-Mail / Telefon..." data-placeholder-en="Name, email / phone..."></textarea>
+          </div>
+        </div>
+
+        <!-- ── SECTION 8 ── -->
+        <div class="survey-panel" data-section="8" style="display:none">
+          <div class="panel-head">
+            <div class="panel-eyebrow" data-de="Abschnitt 8" data-en="Section 8"></div>
+            <h2 class="panel-title" data-de="Die nächsten fünf Jahre" data-en="The Next Five Years"></h2>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F26. Wir entwickeln einen Fünfjahresplan. Was sollte in deinen eigenen Worten unsere größte Priorität sein?" data-en="Q26. We are developing a five-year plan. In your own words, what should our biggest priority be?"></div>
+            <textarea class="field-input" id="q26_freitext" rows="4" data-field="q26_freitext"></textarea>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F27. Wenn du an die vier Identitätsaussagen in Abschnitt 3 denkst: Welche ist dir persönlich am wichtigsten, und warum?" data-en="Q27. Thinking about the four identity statements in Section 3: which one feels most important to you personally, and why?"></div>
+            <textarea class="field-input" id="q27_freitext" rows="4" data-field="q27_freitext"></textarea>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F28. Was für ein Verein soll der ASN-Pfeil-Phönix in fünf Jahren sein?" data-en="Q28. What kind of club do you want ASN-Pfeil-Phönix to be in five years' time?"></div>
+            <textarea class="field-input" id="q28_freitext" rows="4" data-field="q28_freitext"></textarea>
+          </div>
+
+          <div class="q-block">
+            <div class="q-label" data-de="F29. Gibt es noch etwas, das du uns mitteilen möchtest?" data-en="Q29. Is there anything else you would like to tell us?"></div>
+            <textarea class="field-input" id="q29_freitext" rows="3" data-field="q29_freitext"></textarea>
+          </div>
+        </div>
+
+      </div><!-- /survey-panels -->
+
+      <!-- Navigation -->
+      <div class="survey-nav" id="survey-nav" style="display:none">
+        <div class="nav-left">
+          <button class="btn btn--ghost" id="btn-prev" style="display:none">← <span data-de="Zurück" data-en="Back"></span></button>
+          <button class="btn btn--ghost btn--save" id="btn-save" onclick="saveSurvey()">
+            💾 <span data-de="Speichern & Code erhalten" data-en="Save & get code"></span>
+          </button>
+        </div>
+        <div class="nav-right">
+          <button class="btn btn--primary" id="btn-next"><span data-de="Weiter" data-en="Next"></span> →</button>
+          <button class="btn btn--submit" id="btn-submit" style="display:none">
+            <span id="submit-text" data-de="Umfrage abschicken ✓" data-en="Submit survey ✓"></span>
+            <span id="submit-spinner" class="spinner" style="display:none"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Save code modal -->
+      <div class="code-modal-overlay" id="code-overlay">
+        <div class="code-modal">
+          <div class="code-modal-icon">💾</div>
+          <h3 id="code-modal-title" data-de="Dein Fortschritt ist gespeichert" data-en="Your progress is saved"></h3>
+          <p id="code-modal-desc" data-de="Notiere diesen Code, um die Umfrage später fortzusetzen:" data-en="Note this code to continue the survey later:"></p>
+          <div class="code-display" id="code-display"></div>
+          <p class="code-note" id="code-note" data-de="Gib diesen Code oben auf der Seite ein, um weiterzumachen." data-en="Enter this code at the top of the page to continue."></p>
+          <button class="btn btn--primary" onclick="closeCodeModal()" id="code-modal-close" data-de="Weiter ausfüllen" data-en="Continue filling in"></button>
+        </div>
+      </div>
+
+      <!-- Success screen -->
+      <div class="success-screen" id="success-screen" style="display:none">
+        <div class="success-icon">🎉</div>
+        <h2 id="success-title" data-de="Vielen Dank!" data-en="Thank you!"></h2>
+        <p id="success-desc" data-de="Deine Antworten wurden anonym übermittelt. Die Ergebnisse werden bei der Jahreshauptversammlung im Oktober 2026 präsentiert." data-en="Your responses have been submitted anonymously. Results will be presented at the Jahreshauptversammlung in October 2026."></p>
+        <a href="/" class="btn btn--primary" style="margin-top:1.5rem" data-de="Zur Startseite" data-en="Back to home"></a>
+      </div>
+
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style is:global>
+  .survey-hero { background: var(--navy); padding-block: clamp(2rem,4vw,3.5rem); }
+  .survey-hero h1 { color: var(--white); }
+  .survey-hero h1 em { color: var(--orange); font-style: normal; }
+  .survey-hero .section-eyebrow { color: rgba(255,255,255,.5); }
+  .survey-hero .section-eyebrow::before { background: var(--orange); }
+  .hero-sub { color: rgba(255,255,255,.65); font-size: 1rem; margin-top: .4rem; }
+
+  .lang-switch { display: flex; gap: .5rem; margin-top: 1.25rem; }
+  .lang-btn { background: rgba(255,255,255,.12); color: rgba(255,255,255,.7); border: 1px solid rgba(255,255,255,.2); border-radius: var(--radius); padding: .4em 1em; font-family: var(--fb); font-size: .85rem; cursor: pointer; transition: all .15s; }
+  .lang-btn.active { background: var(--orange); color: var(--white); border-color: var(--orange); }
+  .lang-btn:hover:not(.active) { background: rgba(255,255,255,.2); }
+
+  .survey-container { max-width: 780px; }
+
+  /* Resume box */
+  .resume-box { background: var(--navy-tint); border: 1px solid var(--navy-pale); border-radius: var(--radius-lg); padding: 1rem 1.5rem; margin-bottom: 1.5rem; }
+  .resume-inner { display: flex; flex-direction: column; gap: .5rem; }
+  .resume-label { font-size: .82rem; font-weight: 600; color: var(--navy); }
+  .resume-row { display: flex; gap: .5rem; }
+  .resume-input { max-width: 160px; font-family: monospace; letter-spacing: .1em; }
+  .resume-btn { white-space: nowrap; }
+  .resume-error { font-size: .78rem; color: #dc2626; min-height: 1rem; }
+
+  /* Progress */
+  .progress-wrap { margin-bottom: 2rem; }
+  .progress-sections { display: flex; gap: 4px; margin-bottom: .5rem; flex-wrap: wrap; }
+  .progress-section-dot { height: 6px; border-radius: 3px; flex: 1; min-width: 20px; background: var(--border); transition: background .3s; }
+  .progress-section-dot.done { background: var(--orange); }
+  .progress-section-dot.active { background: var(--navy); }
+  .progress-bar-outer { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: .5rem; }
+  .progress-bar-inner { height: 100%; background: var(--navy); border-radius: 2px; transition: width .4s ease; }
+  .progress-label { font-size: .78rem; color: var(--muted); font-weight: 600; }
+
+  /* Panel */
+  .survey-panel { animation: fadeUp .3s ease both; }
+  .panel-head { margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 3px solid var(--orange); }
+  .panel-eyebrow { font-size: .67rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--orange); margin-bottom: .4rem; }
+  .panel-title { font-family: var(--fd); font-size: clamp(1.6rem,3vw,2.2rem); color: var(--navy); }
+  .panel-intro { color: var(--mid); font-size: .9rem; margin-top: .5rem; line-height: 1.6; }
+
+  /* Questions */
+  .q-block { margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
+  .q-block:last-child { border-bottom: none; }
+  .q-block--values { background: var(--navy-tint); border: 1px solid var(--navy-pale); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.25rem; }
+  .q-label { font-weight: 600; color: var(--ink); margin-bottom: .5rem; line-height: 1.5; }
+  .q-hint { font-size: .78rem; color: var(--muted); margin-bottom: .6rem; }
+  .q-note { font-size: .78rem; color: var(--muted); margin-top: .5rem; font-style: italic; line-height: 1.5; }
+  .q-sub { margin-left: 1.5rem; margin-top: .5rem; }
+  .q-counter { font-size: .78rem; color: var(--muted); margin-top: .4rem; }
+
+  /* Values statement */
+  .values-statement { font-style: italic; color: var(--navy); font-size: .95rem; line-height: 1.6; margin-bottom: 1rem; border-left: 3px solid var(--orange); padding-left: .75rem; }
+  .scale-pair { display: flex; flex-direction: column; gap: .75rem; }
+  .scale-row { display: flex; flex-direction: column; gap: .4rem; }
+  .scale-label-small { font-size: .82rem; color: var(--mid); font-weight: 600; }
+
+  /* Radio / Checkbox */
+  .radio-group { display: flex; flex-direction: column; gap: .4rem; }
+  .radio-opt { display: flex; align-items: flex-start; gap: .6rem; cursor: pointer; font-size: .92rem; color: var(--ink); padding: .4rem 0; }
+  .radio-opt input[type="radio"] { accent-color: var(--navy); width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; }
+  .check-group { display: flex; flex-direction: column; gap: .4rem; }
+  .check-opt { display: flex; align-items: flex-start; gap: .6rem; cursor: pointer; font-size: .92rem; color: var(--ink); padding: .4rem 0; }
+  .check-opt input[type="checkbox"] { accent-color: var(--navy); width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; }
+  .check-opt--other, .radio-opt--other { flex-wrap: wrap; align-items: center; gap: .4rem; }
+  .other-input { max-width: 300px; font-size: .88rem; padding: .35rem .6rem; }
+  .check-opt.disabled { opacity: .45; pointer-events: none; }
+
+  /* Scale */
+  .scale-label { font-size: .8rem; color: var(--muted); margin-bottom: .6rem; }
+  .scale-group { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .scale-opt { display: flex; flex-direction: column; align-items: center; gap: .3rem; cursor: pointer; }
+  .scale-opt input[type="radio"] { accent-color: var(--navy); width: 20px; height: 20px; }
+  .scale-opt span { font-size: .82rem; color: var(--mid); font-weight: 600; }
+
+  /* Grid scale */
+  .grid-scale { margin-top: .75rem; }
+  .grid-scale-header { display: grid; grid-template-columns: 1fr repeat(5, 40px); gap: .25rem; font-size: .78rem; font-weight: 700; color: var(--muted); text-align: center; margin-bottom: .25rem; }
+  .grid-scale-row { display: grid; grid-template-columns: 1fr repeat(5, 40px); gap: .25rem; align-items: center; padding: .5rem 0; border-bottom: 1px solid var(--border); }
+  .grid-scale-row label { display: flex; justify-content: center; }
+  .grid-scale-row input[type="radio"] { accent-color: var(--navy); width: 18px; height: 18px; }
+  .grid-label { font-size: .88rem; color: var(--ink); line-height: 1.4; }
+
+  /* Textarea */
+  textarea.field-input { resize: vertical; }
+
+  /* Nav */
+  .survey-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 2.5rem; gap: 1rem; flex-wrap: wrap; }
+  .nav-left, .nav-right { display: flex; gap: .75rem; align-items: center; }
+  .btn--save { font-size: .82rem; border-color: var(--border); color: var(--mid); }
+  .btn--submit { background: var(--orange); color: var(--white); border-color: var(--orange); }
+  .btn--submit:hover { background: #c96508; }
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Code modal */
+  .code-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
+  .code-modal-overlay.visible { display: flex; }
+  .code-modal { background: var(--white); border-radius: var(--radius-lg); padding: 2.5rem 2rem; max-width: 420px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+  .code-modal-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .code-modal h3 { font-family: var(--fd); font-size: 1.6rem; color: var(--navy); margin-bottom: .5rem; }
+  .code-modal p { color: var(--mid); font-size: .9rem; margin-bottom: 1rem; }
+  .code-display { background: var(--navy); color: var(--orange); font-family: var(--fd); font-size: 2.5rem; letter-spacing: .2em; padding: .75rem 1.5rem; border-radius: var(--radius); margin: 1rem 0; }
+  .code-note { font-size: .8rem; color: var(--muted); margin-bottom: 1.5rem; }
+
+  /* Success */
+  .success-screen { text-align: center; padding: 3rem 1rem; }
+  .success-icon { font-size: 4rem; margin-bottom: 1rem; }
+  .success-screen h2 { font-family: var(--fd); font-size: 2.5rem; color: var(--navy); margin-bottom: .75rem; }
+  .success-screen p { color: var(--mid); max-width: 50ch; margin: 0 auto; line-height: 1.6; }
+
+  /* Notice */
+  .notice { display: flex; align-items: flex-start; gap: .7rem; border-radius: var(--radius); padding: .85rem 1rem; font-size: .85rem; line-height: 1.55; }
+  .notice--warn { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+  .notice__icon { font-size: 1rem; flex-shrink: 0; margin-top: .05rem; }
+
+  /* Field */
+  .field-input { border: 2px solid var(--border); border-radius: var(--radius); padding: .6rem .85rem; font-family: var(--fb); font-size: .95rem; color: var(--ink); background: var(--white); transition: border-color .15s; width: 100%; }
+  .field-input:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(15,41,114,.1); }
+  .field-label { font-size: .8rem; font-weight: 600; color: var(--mid); }
+
+  @media (max-width: 600px) {
+    .grid-scale-header, .grid-scale-row { grid-template-columns: 1fr repeat(5, 32px); }
+    .survey-nav { flex-direction: column-reverse; }
+    .nav-left, .nav-right { width: 100%; justify-content: space-between; }
+  }
+</style>
+
+<script>
+(() => {
+  'use strict';
+
+  const TOTAL_SECTIONS = 8;
+  const SECTION_NAMES_DE = ['Über dich','Was der Verein bedeutet','Unsere Werte','Wie wir dastehen','Ehrenamt','Beiträge','Arbeitsgruppen','Nächste 5 Jahre'];
+  const SECTION_NAMES_EN = ['About You','What the Club Means','Our Values','How We Are Doing','Volunteering','Fees','Working Groups','Next 5 Years'];
+
+  let currentSection = 1;
+  let resumeCode = null;
+  let lang = 'de';
+
+  // ── Language ────────────────────────────────────────────────
+  window.setLang = function(l) {
+    lang = l;
+    document.getElementById('btn-de').classList.toggle('active', l === 'de');
+    document.getElementById('btn-en').classList.toggle('active', l === 'en');
+    // Update all bilingual elements
+    document.querySelectorAll('[data-de]').forEach(el => {
+      const txt = l === 'de' ? el.dataset.de : el.dataset.en;
+      if (txt !== undefined) {
+        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+          if (el.dataset.placeholderDe) el.placeholder = l === 'de' ? el.dataset.placeholderDe : el.dataset.placeholderEn;
+        } else {
+          el.textContent = txt;
+        }
+      }
+    });
+    updateProgress();
+  };
+
+  // ── Progress ─────────────────────────────────────────────────
+  function updateProgress() {
+    const dotsEl = document.getElementById('progress-sections');
+    const barEl = document.getElementById('progress-bar');
+    const labelEl = document.getElementById('progress-label');
+    const names = lang === 'de' ? SECTION_NAMES_DE : SECTION_NAMES_EN;
+
+    dotsEl.innerHTML = Array.from({length: TOTAL_SECTIONS}, (_, i) => {
+      const cls = i + 1 < currentSection ? 'done' : i + 1 === currentSection ? 'active' : '';
+      return `<div class="progress-section-dot ${cls}" title="${names[i]}"></div>`;
+    }).join('');
+
+    const pct = ((currentSection - 1) / TOTAL_SECTIONS * 100).toFixed(0);
+    barEl.style.width = `${pct}%`;
+    labelEl.textContent = lang === 'de'
+      ? `Abschnitt ${currentSection} von ${TOTAL_SECTIONS}: ${names[currentSection-1]}`
+      : `Section ${currentSection} of ${TOTAL_SECTIONS}: ${names[currentSection-1]}`;
+  }
+
+  // ── Navigation ────────────────────────────────────────────────
+  function showSection(n) {
+    document.querySelectorAll('.survey-panel').forEach(p => p.style.display = 'none');
+    const panel = document.querySelector(`.survey-panel[data-section="${n}"]`);
+    if (panel) { panel.style.display = ''; window.scrollTo({top: 0, behavior: 'smooth'}); }
+    currentSection = n;
+    document.getElementById('btn-prev').style.display = n > 1 ? '' : 'none';
+    document.getElementById('btn-next').style.display = n < TOTAL_SECTIONS ? '' : 'none';
+    document.getElementById('btn-submit').style.display = n === TOTAL_SECTIONS ? '' : 'none';
+    updateProgress();
+  }
+
+  document.getElementById('btn-next').addEventListener('click', () => {
+    if (currentSection < TOTAL_SECTIONS) showSection(currentSection + 1);
+  });
+  document.getElementById('btn-prev').addEventListener('click', () => {
+    if (currentSection > 1) showSection(currentSection - 1);
+  });
+
+  // ── Jugend sub-field ─────────────────────────────────────────
+  document.querySelector('input[value="jugend_fussball"]')?.addEventListener('change', function() {
+    document.getElementById('q2-jugend-sub').style.display = this.checked ? '' : 'none';
+  });
+
+  // ── Max-3 checkboxes ─────────────────────────────────────────
+  document.querySelectorAll('.check-group--max3').forEach(group => {
+    const max = parseInt(group.dataset.max || '3');
+    const counterId = group.id?.replace('group','counter') ||
+      (group.dataset.field === 'q7_top3' ? 'q7-counter' : group.dataset.field === 'q25_top3' ? 'q25-counter' : null);
+    const updateCounter = () => {
+      const checked = group.querySelectorAll('input[type="checkbox"]:checked').length;
+      group.querySelectorAll('input[type="checkbox"]:not(:checked)').forEach(cb => {
+        cb.closest('label').classList.toggle('disabled', checked >= max);
+      });
+      const el = counterId ? document.getElementById(counterId) : null;
+      if (el) el.textContent = lang === 'de'
+        ? `${checked} von ${max} ausgewählt`
+        : `${checked} of ${max} selected`;
+    };
+    group.addEventListener('change', updateCounter);
+  });
+
+  // ── Collect answers ───────────────────────────────────────────
+  function collectAnswers() {
+    const answers: Record<string, any> = {};
+
+    // Radio groups
+    document.querySelectorAll('.radio-group[data-field]').forEach(group => {
+      const field = (group as HTMLElement).dataset.field!;
+      const checked = group.querySelector('input[type="radio"]:checked') as HTMLInputElement;
+      if (checked) answers[field] = isNaN(Number(checked.value)) ? checked.value : Number(checked.value);
+    });
+
+    // Scale groups (also radio)
+    document.querySelectorAll('.scale-group[data-field]').forEach(group => {
+      const field = (group as HTMLElement).dataset.field!;
+      const checked = group.querySelector('input[type="radio"]:checked') as HTMLInputElement;
+      if (checked) answers[field] = Number(checked.value);
+    });
+
+    // Grid scale rows
+    document.querySelectorAll('.grid-scale-row[data-field]').forEach(row => {
+      const field = (row as HTMLElement).dataset.field!;
+      const checked = row.querySelector('input[type="radio"]:checked') as HTMLInputElement;
+      if (checked) answers[field] = Number(checked.value);
+    });
+
+    // Checkbox groups
+    document.querySelectorAll('.check-group[data-field]').forEach(group => {
+      const field = (group as HTMLElement).dataset.field!;
+      const vals = Array.from(group.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(cb => (cb as HTMLInputElement).value);
+      if (vals.length) answers[field] = vals;
+    });
+
+    // Textareas and text inputs with data-field
+    document.querySelectorAll('[data-field]').forEach(el => {
+      const field = (el as HTMLElement).dataset.field!;
+      if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+        const v = (el as HTMLInputElement).value.trim();
+        if (v) answers[field] = v;
+      }
+    });
+
+    // "Other" text inputs
+    const otherFields: Record<string, string> = {
+      'q4_sonstiges': 'q4_sonstiges',
+      'q6_sonstiges': 'q6_sonstiges',
+      'q7_sonstiges': 'q7_sonstiges',
+      'q22_sonstiges': 'q22_sonstiges',
+      'q25_sonstiges': 'q25_sonstiges',
+      'q2_jugend_ag': 'q2_jugend_ag',
+    };
+    Object.entries(otherFields).forEach(([id, field]) => {
+      const el = document.getElementById(id) as HTMLInputElement;
+      if (el?.value.trim()) answers[field] = el.value.trim();
+    });
+
+    answers.sprache = lang;
+    return answers;
+  }
+
+  // ── Resume ────────────────────────────────────────────────────
+  window.resumeSurvey = async function() {
+    const code = (document.getElementById('resume-code-input') as HTMLInputElement).value.trim().toUpperCase();
+    const errEl = document.getElementById('resume-error');
+    if (!code || code.length !== 6) {
+      errEl.textContent = lang === 'de' ? 'Bitte 6-stelligen Code eingeben.' : 'Please enter a 6-character code.';
+      return;
+    }
+    errEl.textContent = lang === 'de' ? 'Lädt...' : 'Loading...';
+    try {
+      const res = await fetch(`/api/save-umfrage?code=${code}`);
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        errEl.textContent = data.error || (lang === 'de' ? 'Code nicht gefunden.' : 'Code not found.');
+        return;
+      }
+      errEl.textContent = '';
+      resumeCode = code;
+      restoreAnswers(data.data);
+      startSurvey();
+      showSection(1); // Start from beginning with filled answers
+    } catch {
+      errEl.textContent = lang === 'de' ? 'Fehler beim Laden.' : 'Loading failed.';
+    }
+  };
+
+  function restoreAnswers(data: Record<string, any>) {
+    if (data.sprache) setLang(data.sprache);
+
+    // Restore radio buttons
+    Object.entries(data).forEach(([field, value]) => {
+      if (value === null || value === undefined) return;
+      // Radio groups
+      const radioGroup = document.querySelector(`.radio-group[data-field="${field}"]`);
+      if (radioGroup) {
+        const rb = radioGroup.querySelector(`input[value="${value}"]`) as HTMLInputElement;
+        if (rb) rb.checked = true;
+      }
+      // Scale groups
+      const scaleGroup = document.querySelector(`.scale-group[data-field="${field}"]`);
+      if (scaleGroup) {
+        const rb = scaleGroup.querySelector(`input[value="${value}"]`) as HTMLInputElement;
+        if (rb) rb.checked = true;
+      }
+      // Grid rows
+      const gridRow = document.querySelector(`.grid-scale-row[data-field="${field}"]`);
+      if (gridRow) {
+        const rb = gridRow.querySelector(`input[value="${value}"]`) as HTMLInputElement;
+        if (rb) rb.checked = true;
+      }
+      // Textareas
+      const ta = document.querySelector(`[data-field="${field}"]`) as HTMLTextAreaElement;
+      if (ta && ta.tagName === 'TEXTAREA') ta.value = value;
+      // Checkboxes (arrays)
+      if (Array.isArray(value)) {
+        const checkGroup = document.querySelector(`.check-group[data-field="${field}"]`);
+        if (checkGroup) {
+          value.forEach(v => {
+            const cb = checkGroup.querySelector(`input[value="${v}"]`) as HTMLInputElement;
+            if (cb) cb.checked = true;
+          });
+        }
+      }
+    });
+    // Restore other text fields
+    ['q4_sonstiges','q6_sonstiges','q7_sonstiges','q22_sonstiges','q25_sonstiges','q2_jugend_ag'].forEach(id => {
+      if (data[id]) {
+        const el = document.getElementById(id) as HTMLInputElement;
+        if (el) el.value = data[id];
+      }
+    });
+    if (data.q2_jugend_ag) document.getElementById('q2-jugend-sub')!.style.display = '';
+  }
+
+  // ── Save ──────────────────────────────────────────────────────
+  window.saveSurvey = async function() {
+    const answers = collectAnswers();
+    try {
+      const res = await fetch('/api/save-umfrage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: resumeCode, answers, status: 'in_progress' }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        resumeCode = data.code;
+        document.getElementById('code-display')!.textContent = data.code;
+        document.getElementById('code-overlay')!.classList.add('visible');
+      }
+    } catch { /* silent */ }
+  };
+
+  window.closeCodeModal = function() {
+    document.getElementById('code-overlay')!.classList.remove('visible');
+  };
+
+  // ── Submit ────────────────────────────────────────────────────
+  document.getElementById('btn-submit')!.addEventListener('click', async () => {
+    const btn = document.getElementById('btn-submit')!;
+    document.getElementById('submit-text')!.style.display = 'none';
+    document.getElementById('submit-spinner')!.style.display = '';
+    btn.setAttribute('disabled','true');
+    try {
+      const answers = collectAnswers();
+      const res = await fetch('/api/save-umfrage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: resumeCode, answers, status: 'submitted' }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('survey-panels')!.style.display = 'none';
+        document.getElementById('survey-nav')!.style.display = 'none';
+        document.getElementById('progress-wrap')!.style.display = 'none';
+        document.getElementById('success-screen')!.style.display = '';
+        window.scrollTo({top: 0, behavior: 'smooth'});
+      }
+    } catch {
+      document.getElementById('submit-text')!.style.display = '';
+      document.getElementById('submit-spinner')!.style.display = 'none';
+      btn.removeAttribute('disabled');
+      alert(lang === 'de' ? 'Fehler beim Absenden. Bitte erneut versuchen.' : 'Submission failed. Please try again.');
+    }
+  });
+
+  // ── Init ──────────────────────────────────────────────────────
+  function startSurvey() {
+    document.getElementById('resume-box')!.style.display = 'none';
+    document.getElementById('progress-wrap')!.style.display = '';
+    document.getElementById('survey-nav')!.style.display = '';
+    showSection(1);
+  }
+
+  // Start survey immediately (resume box is optional)
+  document.getElementById('btn-next')!.addEventListener('click', startSurvey, { once: true });
+  // Actually show the first panel and nav on load
+  startSurvey();
+  setLang('de');
+})();
+</script>
