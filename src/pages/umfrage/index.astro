@@ -1,0 +1,250 @@
+---
+// src/pages/umfrage/index.astro
+import BaseLayout from '../../layouts/BaseLayout.astro';
+export const prerender = true;
+
+// ── Replace these with your actual YouTube video IDs once uploaded ──
+const VIDEO_DE = 'dQw4w9WgXcQ'; // placeholder — replace with German video ID
+const VIDEO_EN = 'dQw4w9WgXcQ'; // placeholder — replace with English video ID
+---
+
+<BaseLayout title="Mitgliederbefragung 2026 — ASN Pfeil Phönix" description="Nimm an der Mitgliederbefragung 2026 des ASN Pfeil Phönix teil und gestalte unseren Fünfjahresplan mit.">
+
+  <!-- Hero -->
+  <section class="umfrage-hero">
+    <div class="container">
+      <p class="section-eyebrow">ASN Pfeil Phönix e.V.</p>
+      <h1 id="hero-title">Mitgliederbefragung <em>2026</em></h1>
+      <div class="lang-switch">
+        <button class="lang-btn active" id="btn-de" onclick="setLang('de')">🇩🇪 Deutsch</button>
+        <button class="lang-btn" id="btn-en" onclick="setLang('en')">🇬🇧 English</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container entry-container">
+
+      <!-- Intro text -->
+      <div class="intro-card">
+        <div class="intro-text" id="intro-text-de">
+          <h2>Deine Meinung zählt</h2>
+          <p>Unser Verein steht vor wichtigen Entscheidungen — und wir möchten, dass alle Mitglieder dabei eine Stimme haben. Diese anonyme Umfrage ist Teil unseres Fünfjahresplans, den wir bei der <strong>Jahreshauptversammlung im Oktober 2026</strong> vorstellen werden.</p>
+          <p>Die Umfrage dauert ca. <strong>10–15 Minuten</strong> und ist vollständig anonym. Du kannst sie jederzeit unterbrechen und später mit einem persönlichen Code weitermachen.</p>
+          <ul class="intro-list">
+            <li>✅ Vollständig anonym</li>
+            <li>✅ Jederzeit pausierbar — mit Code fortsetzen</li>
+            <li>✅ Auf Deutsch oder Englisch</li>
+            <li>✅ Ergebnisse werden bei der JHV Oktober 2026 präsentiert</li>
+          </ul>
+        </div>
+        <div class="intro-text" id="intro-text-en" style="display:none">
+          <h2>Your voice matters</h2>
+          <p>Our club is facing important decisions — and we want every member to have a say. This anonymous survey is part of our five-year plan, which we will present at the <strong>Jahreshauptversammlung in October 2026</strong>.</p>
+          <p>The survey takes around <strong>10–15 minutes</strong> and is completely anonymous. You can pause at any time and continue later using a personal code.</p>
+          <ul class="intro-list">
+            <li>✅ Completely anonymous</li>
+            <li>✅ Pause and resume with a code</li>
+            <li>✅ Available in German and English</li>
+            <li>✅ Results will be presented at the AGM in October 2026</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Video section -->
+      <div class="video-section">
+        <h3 class="video-title" id="video-title-de">Eine kurze Einführung von David</h3>
+        <h3 class="video-title" id="video-title-en" style="display:none">A short introduction from David</h3>
+
+        <div class="video-grid">
+          <div class="video-wrap" id="video-de-wrap">
+            <div class="video-label">🇩🇪 Deutsch</div>
+            <div class="video-embed">
+              <iframe
+                src={`https://www.youtube-nocookie.com/embed/${VIDEO_DE}`}
+                title="Einführung zur Mitgliederbefragung 2026 (Deutsch)"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+              </iframe>
+            </div>
+          </div>
+          <div class="video-wrap" id="video-en-wrap">
+            <div class="video-label">🇬🇧 English</div>
+            <div class="video-embed">
+              <iframe
+                src={`https://www.youtube-nocookie.com/embed/${VIDEO_EN}`}
+                title="Introduction to the Member Survey 2026 (English)"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+              </iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA + Resume -->
+      <div class="cta-block">
+        <a href="/umfrage/2026" class="btn-start" id="btn-start">
+          <span id="btn-start-text-de">Jetzt an der Umfrage teilnehmen →</span>
+          <span id="btn-start-text-en" style="display:none">Start the survey now →</span>
+        </a>
+
+        <div class="resume-divider">
+          <span id="resume-divider-de">oder mit Code fortsetzen</span>
+          <span id="resume-divider-en" style="display:none">or continue with a code</span>
+        </div>
+
+        <div class="resume-box">
+          <p class="resume-label" id="resume-label-de">Hast du die Umfrage bereits begonnen? Gib deinen 6-stelligen Code ein, um dort weiterzumachen, wo du aufgehört hast.</p>
+          <p class="resume-label" id="resume-label-en" style="display:none">Already started the survey? Enter your 6-character code to continue where you left off.</p>
+          <div class="resume-row">
+            <input class="field-input resume-input" type="text" id="resume-code"
+              maxlength="6" style="text-transform:uppercase;letter-spacing:.12em;font-family:monospace;max-width:180px"
+              data-placeholder-de="z.B. PX7K2M" data-placeholder-en="e.g. PX7K2M"
+              placeholder="z.B. PX7K2M" />
+            <button class="btn-resume" id="btn-resume" onclick="resumeSurvey()">
+              <span id="resume-btn-de">Laden</span>
+              <span id="resume-btn-en" style="display:none">Load</span>
+            </button>
+          </div>
+          <div class="resume-error" id="resume-error"></div>
+        </div>
+
+        <p class="privacy-note" id="privacy-note-de">🔒 Alle Antworten sind vollständig anonym. Es werden keine personenbezogenen Daten gespeichert, es sei denn, du hinterlässt freiwillig Kontaktdaten im letzten Abschnitt.</p>
+        <p class="privacy-note" id="privacy-note-en" style="display:none">🔒 All responses are completely anonymous. No personal data is stored unless you voluntarily leave contact details in the final section.</p>
+      </div>
+
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style is:global>
+  .umfrage-hero { background: var(--navy); padding-block: clamp(2rem,4vw,3.5rem); }
+  .umfrage-hero h1 { color: var(--white); }
+  .umfrage-hero h1 em { color: var(--orange); font-style: normal; }
+  .umfrage-hero .section-eyebrow { color: rgba(255,255,255,.5); }
+  .umfrage-hero .section-eyebrow::before { background: var(--orange); }
+
+  .lang-switch { display: flex; gap: .5rem; margin-top: 1.25rem; }
+  .lang-btn { background: rgba(255,255,255,.12); color: rgba(255,255,255,.7); border: 1px solid rgba(255,255,255,.2); border-radius: var(--radius); padding: .4em 1em; font-family: var(--fb); font-size: .85rem; cursor: pointer; transition: all .15s; }
+  .lang-btn.active { background: var(--orange); color: var(--white); border-color: var(--orange); }
+  .lang-btn:hover:not(.active) { background: rgba(255,255,255,.2); }
+
+  .entry-container { max-width: 820px; }
+
+  /* Intro card */
+  .intro-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem; box-shadow: 0 2px 16px rgba(15,41,114,.06); }
+  .intro-text h2 { font-family: var(--fd); font-size: 1.8rem; color: var(--navy); margin-bottom: .75rem; }
+  .intro-text p { color: var(--mid); line-height: 1.7; margin-bottom: .75rem; }
+  .intro-list { list-style: none; display: flex; flex-direction: column; gap: .4rem; margin-top: 1rem; }
+  .intro-list li { font-size: .9rem; color: var(--ink); }
+
+  /* Video */
+  .video-section { margin-bottom: 2.5rem; }
+  .video-title { font-family: var(--fd); font-size: 1.4rem; color: var(--navy); margin-bottom: 1rem; letter-spacing: .03em; }
+  .video-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .video-wrap { display: flex; flex-direction: column; gap: .5rem; }
+  .video-label { font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .video-embed { position: relative; padding-top: 56.25%; border-radius: var(--radius-lg); overflow: hidden; background: var(--navy-pale); }
+  .video-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  /* CTA */
+  .cta-block { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; text-align: center; }
+  .btn-start { display: inline-flex; align-items: center; background: var(--orange); color: var(--white); border-radius: var(--radius-lg); padding: 1rem 2.5rem; font-family: var(--fd); font-size: 1.4rem; letter-spacing: .04em; text-decoration: none; transition: background .15s; }
+  .btn-start:hover { background: #c96508; }
+  .resume-divider { display: flex; align-items: center; gap: .75rem; width: 100%; max-width: 480px; color: var(--muted); font-size: .82rem; }
+  .resume-divider::before, .resume-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .resume-box { background: var(--navy-tint); border: 1px solid var(--navy-pale); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; width: 100%; max-width: 480px; }
+  .resume-label { font-size: .82rem; color: var(--mid); margin-bottom: .75rem; line-height: 1.5; }
+  .resume-row { display: flex; gap: .5rem; }
+  .resume-input { flex: 1; }
+  .btn-resume { background: var(--navy); color: var(--white); border: none; border-radius: var(--radius); padding: .6rem 1.25rem; font-family: var(--fd); font-size: 1rem; letter-spacing: .04em; cursor: pointer; white-space: nowrap; transition: background .15s; }
+  .btn-resume:hover { background: var(--navy-dark); }
+  .resume-error { font-size: .78rem; color: #dc2626; min-height: 1.2em; margin-top: .4rem; text-align: left; }
+  .privacy-note { font-size: .78rem; color: var(--muted); max-width: 480px; line-height: 1.6; }
+
+  .field-input { border: 2px solid var(--border); border-radius: var(--radius); padding: .6rem .85rem; font-family: var(--fb); font-size: .95rem; color: var(--ink); background: var(--white); width: 100%; transition: border-color .15s; }
+  .field-input:focus { outline: none; border-color: var(--navy); }
+
+  @media (max-width: 600px) {
+    .video-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+(() => {
+  let lang = 'de';
+
+  const deEls = id => document.getElementById(id);
+
+  window.setLang = function(l) {
+    lang = l;
+    document.getElementById('btn-de').classList.toggle('active', l === 'de');
+    document.getElementById('btn-en').classList.toggle('active', l === 'en');
+
+    const show = (id, visible) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = visible ? '' : 'none';
+    };
+
+    // Text blocks
+    show('intro-text-de', l === 'de'); show('intro-text-en', l === 'en');
+    show('video-title-de', l === 'de'); show('video-title-en', l === 'en');
+    show('btn-start-text-de', l === 'de'); show('btn-start-text-en', l === 'en');
+    show('resume-divider-de', l === 'de'); show('resume-divider-en', l === 'en');
+    show('resume-label-de', l === 'de'); show('resume-label-en', l === 'en');
+    show('resume-btn-de', l === 'de'); show('resume-btn-en', l === 'en');
+    show('privacy-note-de', l === 'de'); show('privacy-note-en', l === 'en');
+
+    // Placeholder
+    const codeInput = document.getElementById('resume-code');
+    if (codeInput) codeInput.placeholder = l === 'de' ? 'z.B. PX7K2M' : 'e.g. PX7K2M';
+
+    // Pass language to survey page via URL parameter
+    const btn = document.getElementById('btn-start');
+    if (btn) btn.href = `/umfrage/2026?lang=${l}`;
+  };
+
+  window.resumeSurvey = async function() {
+    const code = (document.getElementById('resume-code').value || '').trim().toUpperCase();
+    const errEl = document.getElementById('resume-error');
+    errEl.textContent = '';
+
+    if (!code || code.length !== 6) {
+      errEl.textContent = lang === 'de' ? 'Bitte einen 6-stelligen Code eingeben.' : 'Please enter a 6-character code.';
+      return;
+    }
+
+    errEl.textContent = lang === 'de' ? 'Lädt...' : 'Loading...';
+
+    try {
+      const res = await fetch(`/api/save-umfrage?code=${code}`);
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        errEl.textContent = data.error || (lang === 'de' ? 'Code nicht gefunden.' : 'Code not found.');
+        return;
+      }
+      // Valid — redirect to survey with code and language
+      window.location.href = `/umfrage/2026?code=${code}&lang=${lang}`;
+    } catch {
+      errEl.textContent = lang === 'de' ? 'Fehler beim Laden.' : 'Loading failed.';
+    }
+  };
+
+  // Allow Enter key in code input
+  document.getElementById('resume-code').addEventListener('keydown', e => {
+    if (e.key === 'Enter') resumeSurvey();
+  });
+
+  // Auto-uppercase code input
+  document.getElementById('resume-code').addEventListener('input', function() {
+    this.value = this.value.toUpperCase();
+  });
+
+  // Init
+  setLang('de');
+})();
+</script>

@@ -994,7 +994,7 @@ export const prerender = true;
     }
   });
 
-  // ── Init ──────────────────────────────────────────────────────
+  // ── Init — read URL params ─────────────────────────────────
   function startSurvey() {
     document.getElementById('resume-box')!.style.display = 'none';
     document.getElementById('progress-wrap')!.style.display = '';
@@ -1002,10 +1002,29 @@ export const prerender = true;
     showSection(1);
   }
 
-  // Start survey immediately (resume box is optional)
-  document.getElementById('btn-next')!.addEventListener('click', startSurvey, { once: true });
-  // Actually show the first panel and nav on load
-  startSurvey();
-  setLang('de');
+  // Read lang and code from URL if coming from entry page
+  const params = new URLSearchParams(window.location.search);
+  const urlLang = params.get('lang');
+  const urlCode = params.get('code');
+
+  if (urlLang === 'en') setLang('en');
+  else setLang('de');
+
+  if (urlCode) {
+    // Auto-resume if code passed from entry page
+    (async () => {
+      try {
+        const res = await fetch(`/api/save-umfrage?code=${urlCode.toUpperCase()}`);
+        const data = await res.json();
+        if (data.success) {
+          resumeCode = urlCode.toUpperCase();
+          restoreAnswers(data.data);
+        }
+      } catch { /* ignore */ }
+      startSurvey();
+    })();
+  } else {
+    startSurvey();
+  }
 })();
 </script>
