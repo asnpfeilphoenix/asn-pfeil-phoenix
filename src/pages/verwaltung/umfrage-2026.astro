@@ -424,9 +424,9 @@ function renderDashboard(rows) {
     <div class="section-card">
       <div class="section-head"><div class="section-title">Abschnitt 7 — Arbeitsgruppen</div></div>
       <div class="section-body">
-        <div class="q-stat">${freqHtml('F30. Interesse an Arbeitsgruppen', g('q30_gruppen'), LABEL_MAPS.q30)}</div>
+        <div class="q-stat">${freqHtml('F26. Interesse an Arbeitsgruppen', g('q30_gruppen'), LABEL_MAPS.q30)}</div>
         <div class="q-stat">
-          <div class="q-stat-label">F31</div>
+          <div class="q-stat-label">F27</div>
           <div class="q-stat-title">Kontaktangaben für Arbeitsgruppen <span style="color:#dc2626;font-size:.8rem">(⚠ nicht anonym)</span></div>
           ${(() => {
             const contacts = submitted.filter(r=>r.q31_kontakt).map(r=>r.q31_kontakt);
@@ -442,10 +442,10 @@ function renderDashboard(rows) {
     <div class="section-card">
       <div class="section-head"><div class="section-title">Abschnitt 8 — Die nächsten fünf Jahre</div></div>
       <div class="section-body">
-        <div class="q-stat">${freitextHtml('F26. Größte Priorität für den Fünfjahresplan', g('q26_freitext'))}</div>
-        <div class="q-stat">${freitextHtml('F27. Wichtigste Identitätsaussage und warum', g('q27_freitext'))}</div>
-        <div class="q-stat">${freitextHtml('F28. Was für ein Verein soll ASN in 5 Jahren sein?', g('q28_freitext'))}</div>
-        <div class="q-stat">${freitextHtml('F29. Sonstiges', g('q29_freitext'))}</div>
+        <div class="q-stat">${freitextHtml('F28. Größte Priorität für den Fünfjahresplan', g('q26_freitext'))}</div>
+        <div class="q-stat">${freitextHtml('F29. Wichtigste Identitätsaussage und warum', g('q27_freitext'))}</div>
+        <div class="q-stat">${freitextHtml('F30. Was für ein Verein soll ASN in 5 Jahren sein?', g('q28_freitext'))}</div>
+        <div class="q-stat">${freitextHtml('F31. Sonstiges', g('q29_freitext'))}</div>
       </div>
     </div>
   `;
