@@ -73,10 +73,6 @@ export const prerender = true;
             <div class="check-group" data-field="q2_abteilungen">
               <label class="check-opt"><input type="checkbox" value="herren_fussball" /><span data-de="Herrenfußball" data-en="Men's football"></span></label>
               <label class="check-opt"><input type="checkbox" value="jugend_fussball" /><span data-de="Jugendfußball" data-en="Youth football"></span></label>
-              <div class="q-sub" id="q2-jugend-sub" style="display:none">
-                <label class="field-label" data-de="Altersgruppe:" data-en="Age group:"></label>
-                <input class="field-input" type="text" id="q2_jugend_ag" style="max-width:200px" placeholder="z.B. U12" />
-              </div>
               <label class="check-opt"><input type="checkbox" value="tennis" /><span>Tennis</span></label>
               <label class="check-opt"><input type="checkbox" value="radsport" /><span data-de="Radsport" data-en="Cycling"></span></label>
               <label class="check-opt"><input type="checkbox" value="kegeln" /><span data-de="Kegeln" data-en="Bowling"></span></label>
@@ -390,7 +386,7 @@ export const prerender = true;
           </div>
 
           <div class="q-block">
-            <div class="q-label" data-de="F19. Wir denken über eine „Skillsbörse" nach — ein System, das Mitglieder anhand ihrer Fähigkeiten mit Aufgaben zusammenbringt. Wie interessiert wärst du?" data-en="Q19. We are exploring a \"Skillsbörse\" — a system matching members to tasks based on their skills. How interested would you be in taking part?"></div>
+            <div class="q-label" data-de="F19. Wir denken über eine 'Skillsbörse' nach — ein System, das Mitglieder anhand ihrer Fähigkeiten und Verfügbarkeit mit Aufgaben zusammenbringt und Teams organisiert, die gemeinsam anpacken. Die Aufgaben könnten von Gartenarbeit und Instandhaltung bis hin zu Hilfe an Spieltagen, Fotografie, Design, IT, Rechts- oder Finanzberatung und vielem mehr reichen. Wie interessiert wärst du daran, mitzumachen?" data-en="Q19. We are exploring a Skillsbörse — a system that matches members to tasks based on their skills and availability, and helps organise teams to work on things together. Tasks could range from gardening and maintenance to helping on match days, photography, design, IT, legal or financial advice, and much more. How interested would you be in taking part?"></div>
             <div class="scale-label" data-de="1 = Überhaupt nicht interessiert  —  5 = Sehr interessiert" data-en="1 = Not at all interested  —  5 = Very interested"></div>
             <div class="scale-group" data-field="q19_skillsboerse">
               <label class="scale-opt"><input type="radio" name="q19" value="1"/><span>1</span></label>
@@ -537,11 +533,6 @@ export const prerender = true;
           <div class="q-block">
             <div class="q-label" data-de="F30. Was für ein Verein soll der ASN-Pfeil-Phönix in fünf Jahren sein?" data-en="Q30. What kind of club do you want ASN-Pfeil-Phönix to be in five years' time?"></div>
             <textarea class="field-input" id="q28_freitext" rows="4" data-field="q28_freitext"></textarea>
-          </div>
-
-          <div class="q-block">
-            <div class="q-label" data-de="F31. Gibt es noch etwas, das du uns mitteilen möchtest?" data-en="Q31. Is there anything else you would like to tell us?"></div>
-            <textarea class="field-input" id="q29_freitext" rows="3" data-field="q29_freitext"></textarea>
           </div>
         </div>
 
@@ -809,11 +800,6 @@ export const prerender = true;
     if (currentSection > 1) showSection(currentSection - 1);
   });
 
-  // ── Jugend sub-field ─────────────────────────────────────────
-  document.querySelector('input[value="jugend_fussball"]')?.addEventListener('change', function() {
-    document.getElementById('q2-jugend-sub').style.display = this.checked ? '' : 'none';
-  });
-
   // ── Max-3 checkboxes ─────────────────────────────────────────
   document.querySelectorAll('.check-group--max3').forEach(group => {
     const max = parseInt(group.dataset.max || '3');
@@ -881,7 +867,6 @@ export const prerender = true;
       'q7_sonstiges': 'q7_sonstiges',
       'q22_sonstiges': 'q22_sonstiges',
       'q25_sonstiges': 'q25_sonstiges',
-      'q2_jugend_ag': 'q2_jugend_ag',
     };
     Object.entries(otherFields).forEach(([id, field]) => {
       const el = document.getElementById(id) as HTMLInputElement;
@@ -957,7 +942,7 @@ export const prerender = true;
       }
     });
     // Restore other text fields
-    ['q4_sonstiges','q6_sonstiges','q7_sonstiges','q22_sonstiges','q25_sonstiges','q2_jugend_ag'].forEach(id => {
+    ['q4_sonstiges','q6_sonstiges','q7_sonstiges','q22_sonstiges','q25_sonstiges'].forEach(id => {
       if (data[id]) {
         const el = document.getElementById(id) as HTMLInputElement;
         if (el) el.value = data[id];
