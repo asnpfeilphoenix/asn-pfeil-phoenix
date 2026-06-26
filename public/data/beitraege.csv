@@ -24,3 +24,4 @@ tennis,jugend_zweitkind,2. Kind und mehr (Elternteil Mitglied),0,0,jugend,0,27
 tennis,passiv,Passives Mitglied,96,0,erwachsene,18,999
 tennis,zweitverein,Zweitverein,182,30,erwachsene,18,999
 tennis,ehren,Ehrenmitglied,0,0,alle,0,999
+foerdermitglied,standard,Fördermitgliedschaft (inkl. Parkberechtigung),150,0,erwachsene,18,999

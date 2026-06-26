@@ -1,0 +1,427 @@
+---
+// src/pages/verwaltung/foerdermitglieder.astro
+export const prerender = false;
+const SUPABASE_URL  = import.meta.env.SUPABASE_URL  || '';
+const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
+---
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fördermitglieder-Verwaltung — ASN Pfeil Phönix</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --navy:#0f2972;--navy-dark:#091d52;--navy-pale:#e8edf8;--navy-tint:#f0f3fc;
+      --orange:#E8780A;--white:#fff;--ink:#111318;--mid:#4A4F5C;--muted:#8A8F9E;
+      --border:#E4E6EE;--green:#16a34a;--red:#dc2626;--amber:#d97706;
+      --fd:'Bebas Neue',sans-serif;--fb:'DM Sans',sans-serif;--radius:6px;--radius-lg:12px;
+    }
+    body{font-family:var(--fb);background:#f0f2f8;color:var(--ink);min-height:100vh;}
+    .header{background:var(--navy);border-bottom:3px solid var(--orange);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+    .header-brand{display:flex;align-items:center;gap:.75rem;}
+    .header-brand img{width:40px;height:40px;}
+    .header-brand-text strong{display:block;font-family:var(--fd);font-size:1.2rem;color:var(--white);letter-spacing:.04em;}
+    .header-brand-text span{font-size:.72rem;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase;}
+    .header-right{display:flex;align-items:center;gap:1rem;}
+    .header-badge{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(232,120,10,.2);color:var(--orange);border:1px solid rgba(232,120,10,.3);padding:.3em .8em;border-radius:99px;}
+    .header-user{font-size:.82rem;color:rgba(255,255,255,.5);}
+    .btn-logout{font-family:var(--fb);font-size:.82rem;font-weight:600;background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);padding:.4em 1em;border-radius:var(--radius);cursor:pointer;}
+    .btn-logout:hover{border-color:rgba(255,255,255,.5);color:var(--white);}
+
+    .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:var(--navy-dark);}
+    .login-card{background:var(--white);border-radius:var(--radius-lg);padding:2.5rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+    .login-logo{display:flex;align-items:center;gap:.75rem;margin-bottom:2rem;}
+    .login-logo img{width:48px;}
+    .login-logo-text strong{display:block;font-family:var(--fd);font-size:1.3rem;color:var(--navy);}
+    .login-logo-text span{font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+    .login-title{font-family:var(--fd);font-size:1.8rem;color:var(--navy);margin-bottom:.4rem;}
+    .login-sub{font-size:.85rem;color:var(--muted);margin-bottom:1.75rem;}
+    .field{display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem;}
+    .field label{font-size:.8rem;font-weight:600;color:var(--mid);}
+    .field input{border:2px solid var(--border);border-radius:var(--radius);padding:.65rem .85rem;font-family:var(--fb);font-size:.95rem;width:100%;}
+    .field input:focus{outline:none;border-color:var(--navy);}
+    .btn-login{width:100%;background:var(--navy);color:var(--white);border:none;border-radius:var(--radius);padding:.8rem;font-family:var(--fd);font-size:1.1rem;letter-spacing:.04em;cursor:pointer;margin-top:.5rem;}
+    .login-error{background:#fef2f2;border:1px solid #fecaca;color:var(--red);border-radius:var(--radius);padding:.75rem 1rem;font-size:.85rem;margin-top:1rem;display:none;}
+    .login-error.visible{display:block;}
+    .access-denied{text-align:center;padding:4rem 2rem;color:var(--white);}
+    .access-denied h2{font-family:var(--fd);font-size:2rem;margin-bottom:.75rem;}
+
+    .admin-wrap{display:none;}
+    .admin-wrap.visible{display:block;}
+    .admin-main{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;}
+
+    .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:1.5rem;}
+    .stat-card{background:var(--white);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;border:1px solid var(--border);box-shadow:0 1px 4px rgba(15,41,114,.06);}
+    .stat-card__val{font-family:var(--fd);font-size:2.6rem;color:var(--navy);line-height:1;}
+    .stat-card__label{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:.3rem;}
+
+    .toolbar{display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;}
+    .btn-tool{background:var(--white);color:var(--navy);border:1px solid var(--border);border-radius:var(--radius);padding:.6em 1.1em;font-family:var(--fd);font-size:.95rem;letter-spacing:.03em;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+    .btn-tool:hover{background:var(--navy-pale);}
+    .btn-tool--primary{background:var(--navy);color:var(--white);border-color:var(--navy);}
+    .btn-tool--primary:hover{background:var(--navy-dark);}
+    .btn-tool--orange{background:var(--orange);color:white;border-color:var(--orange);}
+    .btn-tool--orange:hover{background:#c96508;}
+
+    .tabs{display:flex;gap:0;margin-bottom:1.5rem;background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);flex-wrap:wrap;}
+    .tab{flex:1;min-width:140px;padding:.85rem 1rem;text-align:center;font-family:var(--fd);font-size:.95rem;letter-spacing:.03em;cursor:pointer;color:var(--muted);border:none;background:transparent;}
+    .tab.active{background:var(--navy);color:var(--white);}
+    .tab-panel{display:none;}
+    .tab-panel.active{display:block;}
+
+    .table-card{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;box-shadow:0 1px 4px rgba(15,41,114,.06);}
+    .table-card__head{padding:1rem 1.5rem;border-bottom:3px solid var(--orange);background:var(--navy);}
+    .table-card__title{font-family:var(--fd);font-size:1.1rem;color:var(--white);letter-spacing:.04em;}
+    table{width:100%;border-collapse:collapse;font-size:.875rem;}
+    th{text-align:left;padding:.7rem 1rem;font-size:.67rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--border);background:#fafafa;white-space:nowrap;}
+    td{padding:.75rem 1rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:var(--navy-tint);}
+    .badge{display:inline-block;font-size:.67rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.25em .7em;border-radius:99px;}
+    .badge--beantragt{background:#fef9c3;color:#854d0e;}
+    .badge--genehmigt{background:#dcfce7;color:#166534;}
+    .badge--warteliste{background:#fef3c7;color:#92400e;}
+    .badge--abgelehnt{background:#fee2e2;color:#991b1b;}
+    .badge--beendet{background:#e5e7eb;color:#4b5563;}
+    .row-actions{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .btn-sm{font-family:var(--fb);font-size:.78rem;font-weight:600;border-radius:var(--radius);padding:.35em .8em;cursor:pointer;border:1px solid var(--border);background:white;}
+    .btn-sm--approve{background:var(--green);color:white;border-color:var(--green);}
+    .btn-sm--reject{background:transparent;color:var(--red);border-color:#fecaca;}
+    .btn-sm--end{background:transparent;color:var(--amber);border-color:#fde68a;}
+    .btn-sm--view{background:var(--navy);color:white;border-color:var(--navy);}
+    .empty-state{text-align:center;padding:3rem;color:var(--muted);}
+    .code-mono{font-family:monospace;font-weight:700;color:var(--navy);}
+
+    .settings-card{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 4px rgba(15,41,114,.06);}
+    .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+    .settings-grid .field-label{font-size:.78rem;font-weight:600;color:var(--mid);margin-bottom:.3rem;display:block;}
+    .settings-grid input{border:2px solid var(--border);border-radius:var(--radius);padding:.55rem .8rem;font-family:var(--fb);font-size:.92rem;width:100%;}
+
+    .loading{text-align:center;padding:3rem;color:var(--muted);}
+    .spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--white);padding:.75rem 1.5rem;border-radius:99px;font-size:.875rem;font-weight:500;z-index:300;opacity:0;transition:all .3s;pointer-events:none;}
+    .toast.visible{opacity:1;transform:translateX(-50%) translateY(0);}
+    .toast--success{background:var(--green);} .toast--error{background:var(--red);}
+
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;}
+    .modal-overlay.visible{display:flex;}
+    .modal-box{background:var(--white);border-radius:var(--radius-lg);padding:2rem;max-width:440px;width:100%;}
+    .modal-box h3{font-family:var(--fd);font-size:1.5rem;color:var(--navy);margin-bottom:.75rem;}
+    .modal-box p{font-size:.9rem;color:var(--mid);line-height:1.6;margin-bottom:1.25rem;}
+    .modal-box textarea{width:100%;border:2px solid var(--border);border-radius:var(--radius);padding:.6rem .8rem;font-family:var(--fb);font-size:.9rem;margin-bottom:1.25rem;resize:vertical;}
+    .modal-btns{display:flex;gap:.75rem;}
+    .btn-cancel{flex:1;background:transparent;border:2px solid var(--border);color:var(--mid);border-radius:var(--radius);padding:.7rem;font-family:var(--fb);font-size:.9rem;font-weight:600;cursor:pointer;}
+    .btn-confirm{flex:1;border:none;border-radius:var(--radius);padding:.7rem;font-family:var(--fb);font-size:.9rem;font-weight:600;cursor:pointer;color:white;}
+  </style>
+</head>
+<body>
+
+<div class="login-wrap" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="/images/asn-logo.svg" alt="" />
+      <div class="login-logo-text"><strong>ASN Pfeil Phönix</strong><span>Fördermitglieder-Verwaltung</span></div>
+    </div>
+    <h1 class="login-title">Anmelden</h1>
+    <p class="login-sub">Nur für autorisierte Administratoren.</p>
+    <div class="field"><label>E-Mail</label><input type="email" id="login-email" /></div>
+    <div class="field"><label>Passwort</label><input type="password" id="login-password" /></div>
+    <button class="btn-login" id="btn-login">Einloggen</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<div id="admin-wrap" class="admin-wrap">
+  <header class="header">
+    <div class="header-brand">
+      <img src="/images/asn-logo.svg" alt="" />
+      <div class="header-brand-text"><strong>Fördermitglieder</strong><span>Parkausweis-Verwaltung</span></div>
+    </div>
+    <div class="header-right">
+      <span class="header-badge">🅿️ Parking</span>
+      <span class="header-user" id="header-user"></span>
+      <button class="btn-logout" id="btn-logout">Ausloggen</button>
+    </div>
+  </header>
+  <div class="admin-main" id="admin-content"><div class="loading"><div class="spinner"></div></div></div>
+</div>
+
+<div class="modal-overlay" id="reject-overlay">
+  <div class="modal-box">
+    <h3>Antrag ablehnen</h3>
+    <p>Optionale Begründung (wird per E-Mail an den Antragsteller gesendet):</p>
+    <textarea id="reject-reason" rows="3" placeholder="Begründung (optional)"></textarea>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeRejectModal()">Abbrechen</button>
+      <button class="btn-confirm" style="background:var(--red)" id="btn-confirm-reject">Ablehnen</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="end-overlay">
+  <div class="modal-box">
+    <h3>Mitgliedschaft beenden?</h3>
+    <p id="end-msg">Der Parkplatz wird freigegeben. Falls eine Warteliste besteht, wird automatisch die/der nächste Wartende benachrichtigt und der Platz zugewiesen.</p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeEndModal()">Abbrechen</button>
+      <button class="btn-confirm" style="background:var(--amber)" id="btn-confirm-end">Beenden</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script is:inline set:html={`window.__SB_URL__=${JSON.stringify(SUPABASE_URL)};window.__SB_KEY__=${JSON.stringify(SUPABASE_ANON)};`}></script>
+
+<script>
+const SB_URL = window.__SB_URL__;
+const SB_KEY = window.__SB_KEY__;
+let accessToken = null;
+let userRoles = [];
+let rejectTarget = null;
+let endTarget = null;
+
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast visible${type?' toast--'+type:''}`;
+  setTimeout(()=>t.classList.remove('visible'),3000);
+}
+
+async function sbFetch(path, opts={}) {
+  return fetch(`${SB_URL}${path}`, { ...opts, headers: { 'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${accessToken||SB_KEY}`,...(opts.headers||{}) } });
+}
+async function apiFetch(path, body) {
+  return fetch(path, { method:'POST', headers:{ 'Content-Type':'application/json','Authorization':`Bearer ${accessToken}` }, body: JSON.stringify(body) });
+}
+
+function fmtDate(d) { if(!d) return '—'; return new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+function fmtDateTime(d) { if(!d) return '—'; return new Date(d).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Berlin'}); }
+
+const STATUS_LABEL = { beantragt:'Beantragt', genehmigt:'Genehmigt', warteliste:'Warteliste', abgelehnt:'Abgelehnt', beendet:'Beendet' };
+
+function renderTable(rows, status) {
+  const filtered = rows.filter(r => r.status === status);
+  if (!filtered.length) return '<div class="empty-state">Keine Einträge.</div>';
+  return `<div class="table-card">
+    <div class="table-card__head"><div class="table-card__title">${STATUS_LABEL[status]} (${filtered.length})</div></div>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Name</th><th>Kennzeichen</th><th>Eingegangen</th>${status==='genehmigt'?'<th>Platz</th><th>Gültig bis</th>':''}${status==='abgelehnt'?'<th>Grund</th>':''}<th>Kontakt</th><th></th></tr></thead>
+      <tbody>${filtered.map(r => `<tr>
+        <td><strong>${r.anrede||''} ${r.vorname} ${r.nachname}</strong></td>
+        <td class="code-mono">${r.kennzeichen}</td>
+        <td style="color:var(--muted);font-size:.82rem">${fmtDateTime(r.eingegangen_am)}</td>
+        ${status==='genehmigt'?`<td><strong>Nr. ${r.parkplatz_nummer}</strong></td><td>${fmtDate(r.gueltig_bis)}</td>`:''}
+        ${status==='abgelehnt'?`<td style="font-size:.82rem;color:var(--muted)">${r.abgelehnt_grund||'—'}</td>`:''}
+        <td style="font-size:.82rem;color:var(--muted)">${r.email}<br>${r.telefon||''}</td>
+        <td><div class="row-actions">
+          ${status==='beantragt'||status==='warteliste' ? `
+            <button class="btn-sm btn-sm--approve" onclick="approveApplicant('${r.antrag_id}')">Genehmigen</button>
+            <button class="btn-sm btn-sm--reject" onclick="openRejectModal('${r.antrag_id}')">Ablehnen</button>` : ''}
+          ${status==='genehmigt' ? `
+            <button class="btn-sm btn-sm--view" onclick="viewPermit('${r.permit_code}')">Ausweis</button>
+            <button class="btn-sm btn-sm--end" onclick="openEndModal('${r.antrag_id}','${r.vorname} ${r.nachname}')">Beenden</button>` : ''}
+        </div></td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+  </div>`;
+}
+
+function renderSettings(config) {
+  return `<div class="settings-card">
+    <div style="font-family:var(--fd);font-size:1.1rem;color:var(--navy);margin-bottom:1rem">⚙️ Einstellungen</div>
+    <div class="settings-grid">
+      <div><label class="field-label">Maximale Parkplätze</label><input type="number" id="cfg-max" value="${config.max_plaetze}" /></div>
+      <div><label class="field-label">Gültigkeitsjahr</label><input type="number" id="cfg-jahr" value="${config.gueltig_jahr}" /></div>
+    </div>
+    <button class="btn-tool btn-tool--primary" onclick="saveConfig()">Speichern</button>
+    <p style="font-size:.82rem;color:var(--muted);margin-top:1rem;line-height:1.5">
+      ℹ️ Der Jahresbeitrag wird wie bei allen anderen Mitgliedschaften in <code style="background:var(--navy-tint);padding:.1em .4em;border-radius:4px">public/data/beitraege.csv</code> gepflegt (Zeile mit <code style="background:var(--navy-tint);padding:.1em .4em;border-radius:4px">abteilung=foerdermitglied</code>).
+    </p>
+  </div>`;
+}
+
+async function loadAndRender() {
+  document.getElementById('admin-content').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const [rowsRes, configRes] = await Promise.all([
+      sbFetch('/rest/v1/foerdermitglieder?select=*&order=eingegangen_am.asc'),
+      sbFetch('/rest/v1/foerdermitglied_config?id=eq.config&select=*'),
+    ]);
+    const rows = await rowsRes.json();
+    const config = (await configRes.json())[0] || { max_plaetze:15, gueltig_jahr:2026 };
+    window.__rows__ = rows; window.__config__ = config;
+
+    const counts = { beantragt:0, genehmigt:0, warteliste:0, abgelehnt:0, beendet:0 };
+    rows.forEach(r => { counts[r.status] = (counts[r.status]||0) + 1; });
+
+    document.getElementById('admin-content').innerHTML = `
+      <div class="stats-bar">
+        <div class="stat-card"><div class="stat-card__val">${counts.genehmigt}/${config.max_plaetze}</div><div class="stat-card__label">Plätze belegt</div></div>
+        <div class="stat-card"><div class="stat-card__val">${counts.beantragt}</div><div class="stat-card__label">Neue Anträge</div></div>
+        <div class="stat-card"><div class="stat-card__val">${counts.warteliste}</div><div class="stat-card__label">Warteliste</div></div>
+        <div class="stat-card"><div class="stat-card__val">${counts.abgelehnt + counts.beendet}</div><div class="stat-card__label">Abgelehnt/Beendet</div></div>
+      </div>
+      <div class="toolbar">
+        <button class="btn-tool btn-tool--primary" onclick="downloadCsv()">⬇ CSV exportieren</button>
+        <button class="btn-tool btn-tool--orange" onclick="window.location.href='/verwaltung/parkausweis-temp'">🎫 Temp.-Ausweis erstellen</button>
+        <button class="btn-tool" onclick="window.location.href='/verwaltung/parkausweis-check'">🔍 Ausweis prüfen</button>
+        <button class="btn-tool" onclick="loadAndRender()">↻ Aktualisieren</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active" data-tab="beantragt" onclick="switchTab('beantragt')">📥 Anträge (${counts.beantragt})</button>
+        <button class="tab" data-tab="genehmigt" onclick="switchTab('genehmigt')">✅ Genehmigt (${counts.genehmigt})</button>
+        <button class="tab" data-tab="warteliste" onclick="switchTab('warteliste')">⏳ Warteliste (${counts.warteliste})</button>
+        <button class="tab" data-tab="abgelehnt" onclick="switchTab('abgelehnt')">✗ Abgelehnt (${counts.abgelehnt})</button>
+        <button class="tab" data-tab="beendet" onclick="switchTab('beendet')">⬛ Beendet (${counts.beendet})</button>
+        <button class="tab" data-tab="settings" onclick="switchTab('settings')">⚙️ Einstellungen</button>
+      </div>
+      <div class="tab-panel active" data-panel="beantragt">${renderTable(rows,'beantragt')}</div>
+      <div class="tab-panel" data-panel="genehmigt">${renderTable(rows,'genehmigt')}</div>
+      <div class="tab-panel" data-panel="warteliste">${renderTable(rows,'warteliste')}</div>
+      <div class="tab-panel" data-panel="abgelehnt">${renderTable(rows,'abgelehnt')}</div>
+      <div class="tab-panel" data-panel="beendet">${renderTable(rows,'beendet')}</div>
+      <div class="tab-panel" data-panel="settings">${renderSettings(config)}</div>
+    `;
+  } catch (err) {
+    document.getElementById('admin-content').innerHTML = `<div class="loading" style="color:var(--red)">Fehler: ${err.message}</div>`;
+  }
+}
+window.loadAndRender = loadAndRender;
+
+window.switchTab = function(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === tab));
+};
+
+window.saveConfig = async function() {
+  const max_plaetze = parseInt(document.getElementById('cfg-max').value);
+  const gueltig_jahr = parseInt(document.getElementById('cfg-jahr').value);
+  try {
+    const res = await sbFetch('/rest/v1/foerdermitglied_config?id=eq.config', {
+      method:'PATCH', headers:{'Prefer':'return=minimal'}, body: JSON.stringify({ max_plaetze, gueltig_jahr }),
+    });
+    if (!res.ok) throw new Error('Speichern fehlgeschlagen');
+    toast('Einstellungen gespeichert', 'success');
+    loadAndRender();
+  } catch (err) { toast('Fehler: ' + err.message, 'error'); }
+};
+
+window.approveApplicant = async function(antrag_id) {
+  if (!confirm('Antrag genehmigen und Parkausweis erstellen?')) return;
+  toast('Wird verarbeitet…');
+  try {
+    const res = await apiFetch('/api/foerdermitglied-approve', { antrag_id });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    toast(data.status === 'warteliste' ? 'Auf Warteliste gesetzt (alle Plätze belegt)' : `Genehmigt — Platz Nr. ${data.parkplatz_nummer}`, 'success');
+    loadAndRender();
+  } catch (err) { toast('Fehler: ' + err.message, 'error'); }
+};
+
+window.openRejectModal = function(antrag_id) {
+  rejectTarget = antrag_id;
+  document.getElementById('reject-reason').value = '';
+  document.getElementById('reject-overlay').classList.add('visible');
+};
+window.closeRejectModal = function() { document.getElementById('reject-overlay').classList.remove('visible'); rejectTarget = null; };
+document.getElementById('btn-confirm-reject').addEventListener('click', async () => {
+  if (!rejectTarget) return;
+  const grund = document.getElementById('reject-reason').value.trim();
+  try {
+    const res = await apiFetch('/api/foerdermitglied-reject', { antrag_id: rejectTarget, grund });
+    if (!res.ok) throw new Error((await res.json()).error);
+    toast('Antrag abgelehnt', 'success');
+    closeRejectModal(); loadAndRender();
+  } catch (err) { toast('Fehler: ' + err.message, 'error'); }
+});
+
+window.openEndModal = function(antrag_id, name) {
+  endTarget = antrag_id;
+  document.getElementById('end-msg').textContent = `Mitgliedschaft von ${name} beenden? Der Parkplatz wird freigegeben. Falls eine Warteliste besteht, wird automatisch die/der nächste Wartende benachrichtigt.`;
+  document.getElementById('end-overlay').classList.add('visible');
+};
+window.closeEndModal = function() { document.getElementById('end-overlay').classList.remove('visible'); endTarget = null; };
+document.getElementById('btn-confirm-end').addEventListener('click', async () => {
+  if (!endTarget) return;
+  try {
+    const res = await apiFetch('/api/foerdermitglied-end', { antrag_id: endTarget });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    toast(data.promoted ? `Beendet — ${data.promoted_name} von Warteliste übernommen (Platz Nr. ${data.parkplatz_nummer})` : 'Mitgliedschaft beendet', 'success');
+    closeEndModal(); loadAndRender();
+  } catch (err) { toast('Fehler: ' + err.message, 'error'); }
+});
+
+window.viewPermit = async function(code) {
+  try {
+    const res = await fetch(`/api/generate-parkausweis-pdf?code=${code}`, { headers: { 'Authorization': `Bearer ${accessToken}` } });
+    if (!res.ok) throw new Error('PDF konnte nicht geladen werden');
+    const blob = await res.blob();
+    window.open(URL.createObjectURL(blob), '_blank');
+  } catch (err) { toast('Fehler: ' + err.message, 'error'); }
+};
+
+window.downloadCsv = function() {
+  const rows = window.__rows__ || [];
+  if (!rows.length) { toast('Keine Daten', 'error'); return; }
+  const cols = ['antrag_id','permit_code','status','anrede','vorname','nachname','strasse','plz','ort','telefon','email','kennzeichen','fahrzeug_marke','fahrzeug_modell','fahrzeug_farbe','parkplatz_nummer','gueltig_von','gueltig_bis','betrag_jaehrlich','eingegangen_am','genehmigt_am','abgelehnt_grund'];
+  const esc = v => { const s = String(v ?? ''); return s.includes(';')||s.includes('"') ? `"${s.replace(/"/g,'""')}"` : s; };
+  const csv = '\uFEFF' + cols.join(';') + '\n' + rows.map(r => cols.map(c => esc(r[c])).join(';')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8;'}));
+  a.download = 'foerdermitglieder.csv'; a.click();
+  toast(`${rows.length} Einträge exportiert`, 'success');
+};
+
+// ── Login & role check ──────────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.classList.remove('visible');
+  document.getElementById('btn-login').disabled = true;
+  try {
+    const res = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+      method:'POST', headers:{'Content-Type':'application/json','apikey':SB_KEY}, body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || 'Login fehlgeschlagen');
+    accessToken = data.access_token;
+
+    // Check role
+    const roleRes = await sbFetch(`/rest/v1/admin_roles?email=eq.${encodeURIComponent(email)}&select=abteilungen`);
+    const roleRows = await roleRes.json();
+    userRoles = roleRows[0]?.abteilungen || [];
+
+    if (!userRoles.includes('all') && !userRoles.includes('foerdermitglieder')) {
+      document.getElementById('login-screen').innerHTML = `<div class="access-denied"><h2>Kein Zugriff</h2><p>Dein Konto hat keine Berechtigung für die Fördermitglieder-Verwaltung.</p></div>`;
+      return;
+    }
+
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-wrap').classList.add('visible');
+    document.getElementById('header-user').textContent = email;
+    loadAndRender();
+  } catch (err) {
+    errEl.textContent = err.message; errEl.classList.add('visible');
+  } finally {
+    document.getElementById('btn-login').disabled = false;
+  }
+}
+document.getElementById('btn-login').addEventListener('click', doLogin);
+document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await fetch(`${SB_URL}/auth/v1/logout`, { method:'POST', headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${accessToken}`} });
+  accessToken = null;
+  document.getElementById('admin-wrap').classList.remove('visible');
+  document.getElementById('login-screen').style.display = '';
+  toast('Ausgeloggt');
+});
+</script>
+</body>
+</html>
