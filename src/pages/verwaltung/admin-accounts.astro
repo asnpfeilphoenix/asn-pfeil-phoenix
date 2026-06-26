@@ -1,0 +1,468 @@
+---
+// src/pages/verwaltung/admin-accounts.astro
+export const prerender = false;
+const SUPABASE_URL  = import.meta.env.SUPABASE_URL  || '';
+const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
+---
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin-Konten — ASN Pfeil Phönix</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style is:global>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --navy:#0f2972;--navy-dark:#091d52;--navy-pale:#e8edf8;--navy-tint:#f0f3fc;
+      --orange:#E8780A;--white:#fff;--ink:#111318;--mid:#4A4F5C;--muted:#8A8F9E;
+      --border:#E4E6EE;--green:#16a34a;--red:#dc2626;
+      --fd:'Bebas Neue',sans-serif;--fb:'DM Sans',sans-serif;--radius:6px;--radius-lg:12px;
+    }
+    body{font-family:var(--fb);background:#f0f2f8;color:var(--ink);min-height:100vh;}
+    .header{background:var(--navy);border-bottom:3px solid var(--orange);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+    .header-brand{display:flex;align-items:center;gap:.75rem;}
+    .header-brand img{width:40px;height:40px;}
+    .header-brand-text strong{display:block;font-family:var(--fd);font-size:1.2rem;color:var(--white);letter-spacing:.04em;}
+    .header-brand-text span{font-size:.72rem;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase;}
+    .header-right{display:flex;align-items:center;gap:1rem;}
+    .header-user{font-size:.82rem;color:rgba(255,255,255,.5);}
+    .btn-logout{font-family:var(--fb);font-size:.82rem;font-weight:600;background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);padding:.4em 1em;border-radius:var(--radius);cursor:pointer;text-decoration:none;display:inline-block;}
+    .btn-logout:hover{border-color:rgba(255,255,255,.5);color:var(--white);}
+
+    .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:var(--navy-dark);}
+    .login-card{background:var(--white);border-radius:var(--radius-lg);padding:2.5rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+    .login-title{font-family:var(--fd);font-size:1.8rem;color:var(--navy);margin-bottom:.4rem;}
+    .login-sub{font-size:.85rem;color:var(--muted);margin-bottom:1.75rem;}
+    .field{display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem;}
+    .field label{font-size:.8rem;font-weight:600;color:var(--mid);}
+    .field input{border:2px solid var(--border);border-radius:var(--radius);padding:.65rem .85rem;font-family:var(--fb);font-size:.95rem;width:100%;}
+    .btn-login{width:100%;background:var(--navy);color:var(--white);border:none;border-radius:var(--radius);padding:.8rem;font-family:var(--fd);font-size:1.1rem;cursor:pointer;margin-top:.5rem;}
+    .login-error{background:#fef2f2;border:1px solid #fecaca;color:var(--red);border-radius:var(--radius);padding:.75rem 1rem;font-size:.85rem;margin-top:1rem;display:none;}
+    .login-error.visible{display:block;}
+    .access-denied{text-align:center;padding:4rem 2rem;color:var(--white);}
+    .access-denied h2{font-family:var(--fd);font-size:2rem;margin-bottom:.75rem;}
+
+    .admin-wrap{display:none;}
+    .admin-wrap.visible{display:block;}
+    .admin-main{max-width:1000px;margin:0 auto;padding:2rem 1.5rem;}
+
+    .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:1.5rem;}
+    .stat-card{background:var(--white);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;border:1px solid var(--border);box-shadow:0 1px 4px rgba(15,41,114,.06);}
+    .stat-card__val{font-family:var(--fd);font-size:2.6rem;color:var(--navy);line-height:1;}
+    .stat-card__label{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:.3rem;}
+
+    .toolbar{display:flex;gap:.75rem;margin-bottom:1.5rem;}
+    .btn-tool{background:var(--orange);color:white;border:none;border-radius:var(--radius);padding:.65em 1.3em;font-family:var(--fd);font-size:1.05rem;letter-spacing:.03em;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.1);}
+    .btn-tool:hover{background:#c96508;}
+
+    .table-card{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;box-shadow:0 1px 4px rgba(15,41,114,.06);}
+    table{width:100%;border-collapse:collapse;font-size:.875rem;}
+    th{text-align:left;padding:.7rem 1rem;font-size:.67rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--border);background:#fafafa;}
+    td{padding:.85rem 1rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:var(--navy-tint);}
+    .role-badge{display:inline-block;font-size:.67rem;font-weight:700;letter-spacing:.04em;padding:.25em .65em;border-radius:99px;background:var(--navy-pale);color:var(--navy);margin:.1em;}
+    .role-badge--all{background:var(--orange);color:white;}
+    .no-auth-warn{font-size:.7rem;color:var(--red);font-weight:600;}
+    .row-actions{display:flex;gap:.4rem;flex-wrap:wrap;}
+    .btn-sm{font-family:var(--fb);font-size:.78rem;font-weight:600;border-radius:var(--radius);padding:.35em .8em;cursor:pointer;border:1px solid var(--border);background:white;}
+    .btn-sm--edit{color:var(--navy);}
+    .btn-sm--pw{color:var(--mid);}
+    .btn-sm--del{color:var(--red);border-color:#fecaca;}
+
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;}
+    .modal-overlay.visible{display:flex;}
+    .modal-box{background:var(--white);border-radius:var(--radius-lg);padding:2rem;max-width:460px;width:100%;max-height:90vh;overflow-y:auto;}
+    .modal-box h3{font-family:var(--fd);font-size:1.5rem;color:var(--navy);margin-bottom:1rem;}
+    .modal-field{margin-bottom:1rem;}
+    .modal-field label{font-size:.8rem;font-weight:600;color:var(--mid);display:block;margin-bottom:.3rem;}
+    .modal-field input{width:100%;border:2px solid var(--border);border-radius:var(--radius);padding:.6rem .8rem;font-family:var(--fb);font-size:.92rem;}
+    .modal-field input:disabled{background:#f5f5f5;color:var(--muted);}
+    .pw-row{display:flex;gap:.5rem;}
+    .pw-row input{flex:1;}
+    .btn-gen{background:var(--navy-tint);border:1px solid var(--navy-pale);color:var(--navy);border-radius:var(--radius);padding:.6rem 1rem;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+    .role-checks{display:flex;flex-direction:column;gap:.5rem;margin-top:.4rem;}
+    .role-check-opt{display:flex;align-items:center;gap:.6rem;font-size:.9rem;cursor:pointer;}
+    .role-check-opt input{accent-color:var(--navy);width:17px;height:17px;}
+    .role-check-opt--all{font-weight:700;color:var(--orange);border-bottom:1px solid var(--border);padding-bottom:.6rem;margin-bottom:.2rem;}
+    .role-note{font-size:.76rem;color:var(--muted);margin-top:.5rem;line-height:1.5;}
+    .modal-btns{display:flex;gap:.75rem;margin-top:1.5rem;}
+    .btn-cancel{flex:1;background:transparent;border:2px solid var(--border);color:var(--mid);border-radius:var(--radius);padding:.7rem;font-family:var(--fb);font-size:.9rem;font-weight:600;cursor:pointer;}
+    .btn-confirm{flex:1;border:none;border-radius:var(--radius);padding:.7rem;font-family:var(--fb);font-size:.9rem;font-weight:600;cursor:pointer;color:white;background:var(--navy);}
+    .btn-confirm--danger{background:var(--red);}
+    .modal-err{color:var(--red);font-size:.82rem;margin-top:.5rem;display:none;}
+    .modal-err.visible{display:block;}
+
+    .loading{text-align:center;padding:3rem;color:var(--muted);}
+    .spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--white);padding:.75rem 1.5rem;border-radius:99px;font-size:.875rem;font-weight:500;z-index:300;opacity:0;transition:all .3s;pointer-events:none;}
+    .toast.visible{opacity:1;transform:translateX(-50%) translateY(0);}
+    .toast--success{background:var(--green);} .toast--error{background:var(--red);}
+  </style>
+</head>
+<body>
+
+<div class="login-wrap" id="login-screen">
+  <div class="login-card">
+    <h1 class="login-title">Anmelden</h1>
+    <p class="login-sub">Admin-Konten verwalten — nur für Vollzugriff-Konten.</p>
+    <div class="field"><label>E-Mail</label><input type="email" id="login-email" /></div>
+    <div class="field"><label>Passwort</label><input type="password" id="login-password" /></div>
+    <button class="btn-login" id="btn-login">Einloggen</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<div id="admin-wrap" class="admin-wrap">
+  <header class="header">
+    <div class="header-brand">
+      <img src="/images/asn-logo.svg" alt="" />
+      <div class="header-brand-text"><strong>Admin-Konten</strong><span>Zugänge & Rechte verwalten</span></div>
+    </div>
+    <div class="header-right">
+      <a href="/verwaltung" class="btn-logout">← Übersicht</a>
+      <span class="header-user" id="header-user"></span>
+      <button class="btn-logout" id="btn-logout">Ausloggen</button>
+    </div>
+  </header>
+  <div class="admin-main" id="admin-content"><div class="loading"><div class="spinner"></div></div></div>
+</div>
+
+<!-- Create/Edit modal -->
+<div class="modal-overlay" id="form-overlay">
+  <div class="modal-box">
+    <h3 id="form-title">Neuen Admin anlegen</h3>
+    <div class="modal-field">
+      <label>Name</label>
+      <input type="text" id="f-name" placeholder="Vor- und Nachname" />
+    </div>
+    <div class="modal-field">
+      <label>E-Mail</label>
+      <input type="email" id="f-email" placeholder="name@beispiel.de" />
+    </div>
+    <div class="modal-field" id="f-password-group">
+      <label>Passwort</label>
+      <div class="pw-row">
+        <input type="text" id="f-password" placeholder="Mind. 8 Zeichen" />
+        <button type="button" class="btn-gen" onclick="generatePw()">🎲 Generieren</button>
+      </div>
+    </div>
+    <div class="modal-field">
+      <label>Rechte</label>
+      <div class="role-checks">
+        <label class="role-check-opt role-check-opt--all"><input type="checkbox" id="r-all" onchange="toggleAllRole()" /> Vollzugriff (alle Bereiche)</label>
+        <label class="role-check-opt"><input type="checkbox" class="r-tag" value="fussball" /> Fußball</label>
+        <label class="role-check-opt"><input type="checkbox" class="r-tag" value="kegeln" /> Kegeln</label>
+        <label class="role-check-opt"><input type="checkbox" class="r-tag" value="radsport" /> Radsport</label>
+        <label class="role-check-opt"><input type="checkbox" class="r-tag" value="dart" /> Dart</label>
+        <label class="role-check-opt"><input type="checkbox" class="r-tag" value="tennis" /> Tennis</label>
+        <label class="role-check-opt"><input type="checkbox" class="r-tag" value="foerdermitglieder" /> Fördermitglieder & Parkausweise</label>
+      </div>
+      <div class="role-note">ℹ️ Die Mitgliederbefragung ist für jedes Admin-Konto sichtbar, unabhängig von diesen Häkchen.</div>
+    </div>
+    <div class="modal-err" id="form-err"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeFormModal()">Abbrechen</button>
+      <button class="btn-confirm" id="btn-save-form">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Password change modal -->
+<div class="modal-overlay" id="pw-overlay">
+  <div class="modal-box">
+    <h3>Passwort ändern</h3>
+    <p style="font-size:.85rem;color:var(--mid);margin-bottom:1rem" id="pw-target-label"></p>
+    <div class="modal-field">
+      <label>Neues Passwort</label>
+      <div class="pw-row">
+        <input type="text" id="pw-new" placeholder="Mind. 8 Zeichen" />
+        <button type="button" class="btn-gen" onclick="generatePwModal()">🎲 Generieren</button>
+      </div>
+    </div>
+    <div class="modal-err" id="pw-err"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closePwModal()">Abbrechen</button>
+      <button class="btn-confirm" id="btn-save-pw">Ändern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirm -->
+<div class="modal-overlay" id="del-overlay">
+  <div class="modal-box">
+    <h3 style="color:var(--red)">Konto löschen?</h3>
+    <p style="font-size:.9rem;color:var(--mid);line-height:1.6" id="del-msg"></p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeDelModal()">Abbrechen</button>
+      <button class="btn-confirm btn-confirm--danger" id="btn-confirm-del">Löschen</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script is:inline set:html={`window.__SB_URL__=${JSON.stringify(SUPABASE_URL)};window.__SB_KEY__=${JSON.stringify(SUPABASE_ANON)};`}></script>
+<script>
+const SB_URL = window.__SB_URL__;
+const SB_KEY = window.__SB_KEY__;
+let accessToken = null;
+let editTarget = null; // email of admin being edited, or null for create
+let pwTarget = null;   // { email, user_id }
+let delTarget = null;  // { email, user_id }
+
+const SESSION_KEY = 'asn_admin_session';
+function saveSession(data, email) {
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify({ access_token: data.access_token, email, expires_at: Date.now() + ((data.expires_in||3600)*1000) - 60000 })); } catch {}
+}
+function getSavedSession() {
+  try { const raw = localStorage.getItem(SESSION_KEY); if (!raw) return null; const s = JSON.parse(raw); if (!s.expires_at || s.expires_at < Date.now()) return null; return s; } catch { return null; }
+}
+function clearSavedSession() { try { localStorage.removeItem(SESSION_KEY); } catch {} }
+
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast visible${type?' toast--'+type:''}`;
+  setTimeout(()=>t.classList.remove('visible'),3000);
+}
+function genPassword() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+  return Array.from({length:14}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+}
+window.generatePw = () => { document.getElementById('f-password').value = genPassword(); };
+window.generatePwModal = () => { document.getElementById('pw-new').value = genPassword(); };
+
+const ROLE_LABELS = { fussball:'Fußball', kegeln:'Kegeln', radsport:'Radsport', dart:'Dart', tennis:'Tennis', foerdermitglieder:'Fördermitglieder' };
+
+async function apiCall(method, body) {
+  const res = await fetch('/api/admin-accounts', {
+    method, headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${accessToken}` },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Fehler');
+  return data;
+}
+
+function fmtDate(d) { if(!d) return 'Noch nie'; return new Date(d).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Berlin'}); }
+
+function renderTable(admins) {
+  return `<div class="table-card"><div style="overflow-x:auto"><table>
+    <thead><tr><th>Name</th><th>E-Mail</th><th>Rechte</th><th>Letzter Login</th><th></th></tr></thead>
+    <tbody>${admins.map(a => `<tr>
+      <td><strong>${a.name || '—'}</strong></td>
+      <td>${a.email}${!a.has_auth_account ? '<br><span class="no-auth-warn">⚠ Kein Login-Konto</span>' : ''}</td>
+      <td>${(a.abteilungen||[]).includes('all')
+          ? '<span class="role-badge role-badge--all">Vollzugriff</span>'
+          : (a.abteilungen||[]).map(t => `<span class="role-badge">${ROLE_LABELS[t]||t}</span>`).join('') || '<span style="color:var(--muted);font-size:.8rem">Keine</span>'}</td>
+      <td style="color:var(--muted);font-size:.82rem">${fmtDate(a.last_sign_in_at)}</td>
+      <td><div class="row-actions">
+        <button class="btn-sm btn-sm--edit" onclick='openEditModal(${JSON.stringify(a).replace(/'/g,"&apos;")})'>Bearbeiten</button>
+        ${a.has_auth_account ? `<button class="btn-sm btn-sm--pw" onclick='openPwModal(${JSON.stringify({email:a.email,user_id:a.auth_user_id,name:a.name}).replace(/'/g,"&apos;")})'>Passwort</button>` : ''}
+        <button class="btn-sm btn-sm--del" onclick='openDelModal(${JSON.stringify({email:a.email,user_id:a.auth_user_id,name:a.name}).replace(/'/g,"&apos;")})'>Löschen</button>
+      </div></td>
+    </tr>`).join('')}</tbody>
+  </table></div></div>`;
+}
+
+async function loadAndRender() {
+  const content = document.getElementById('admin-content');
+  content.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const data = await apiCall('GET');
+    const admins = data.admins || [];
+    window.__admins__ = admins;
+    const fullAccess = admins.filter(a => (a.abteilungen||[]).includes('all')).length;
+    const noAuth = admins.filter(a => !a.has_auth_account).length;
+
+    content.innerHTML = `
+      <div class="stats-bar">
+        <div class="stat-card"><div class="stat-card__val">${admins.length}</div><div class="stat-card__label">Admin-Konten</div></div>
+        <div class="stat-card"><div class="stat-card__val">${fullAccess}</div><div class="stat-card__label">Vollzugriff</div></div>
+        <div class="stat-card"><div class="stat-card__val">${noAuth}</div><div class="stat-card__label">Ohne Login</div></div>
+      </div>
+      <div class="toolbar"><button class="btn-tool" onclick="openCreateModal()">+ Neuen Admin anlegen</button></div>
+      ${renderTable(admins)}
+    `;
+  } catch (err) {
+    content.innerHTML = `<div class="loading" style="color:var(--red)">Fehler: ${err.message}</div>`;
+  }
+}
+
+// ── Create/Edit modal ─────────────────────────────────────────
+window.openCreateModal = function() {
+  editTarget = null;
+  document.getElementById('form-title').textContent = 'Neuen Admin anlegen';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-email').value = '';
+  document.getElementById('f-email').disabled = false;
+  document.getElementById('f-password').value = '';
+  document.getElementById('f-password-group').style.display = '';
+  document.getElementById('r-all').checked = false;
+  document.querySelectorAll('.r-tag').forEach(cb => { cb.checked = false; cb.disabled = false; });
+  document.getElementById('form-err').classList.remove('visible');
+  document.getElementById('form-overlay').classList.add('visible');
+};
+
+window.openEditModal = function(admin) {
+  editTarget = admin.email;
+  document.getElementById('form-title').textContent = 'Admin bearbeiten';
+  document.getElementById('f-name').value = admin.name || '';
+  document.getElementById('f-email').value = admin.email;
+  document.getElementById('f-email').disabled = true;
+  document.getElementById('f-password-group').style.display = 'none';
+  const tags = admin.abteilungen || [];
+  const isAll = tags.includes('all');
+  document.getElementById('r-all').checked = isAll;
+  document.querySelectorAll('.r-tag').forEach(cb => { cb.checked = !isAll && tags.includes(cb.value); cb.disabled = isAll; });
+  document.getElementById('form-err').classList.remove('visible');
+  document.getElementById('form-overlay').classList.add('visible');
+};
+
+window.closeFormModal = function() { document.getElementById('form-overlay').classList.remove('visible'); };
+
+window.toggleAllRole = function() {
+  const isAll = document.getElementById('r-all').checked;
+  document.querySelectorAll('.r-tag').forEach(cb => { cb.disabled = isAll; if (isAll) cb.checked = false; });
+};
+
+document.getElementById('btn-save-form').addEventListener('click', async () => {
+  const errEl = document.getElementById('form-err');
+  errEl.classList.remove('visible');
+  const name = document.getElementById('f-name').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const isAll = document.getElementById('r-all').checked;
+  const abteilungen = isAll ? ['all'] : Array.from(document.querySelectorAll('.r-tag:checked')).map(cb => cb.value);
+
+  if (!email) { errEl.textContent = 'E-Mail ist erforderlich.'; errEl.classList.add('visible'); return; }
+
+  const btn = document.getElementById('btn-save-form');
+  btn.disabled = true; btn.textContent = 'Speichert…';
+  try {
+    if (editTarget) {
+      await apiCall('PATCH', { email: editTarget, name, abteilungen });
+      toast('Admin aktualisiert', 'success');
+    } else {
+      const password = document.getElementById('f-password').value;
+      if (!password || password.length < 8) throw new Error('Passwort muss mindestens 8 Zeichen haben.');
+      await apiCall('POST', { name, email, password, abteilungen });
+      toast('Admin angelegt', 'success');
+    }
+    closeFormModal();
+    loadAndRender();
+  } catch (err) {
+    errEl.textContent = err.message; errEl.classList.add('visible');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Speichern';
+  }
+});
+
+// ── Password modal ────────────────────────────────────────────
+window.openPwModal = function(target) {
+  pwTarget = target;
+  document.getElementById('pw-target-label').textContent = `Für: ${target.name || target.email}`;
+  document.getElementById('pw-new').value = '';
+  document.getElementById('pw-err').classList.remove('visible');
+  document.getElementById('pw-overlay').classList.add('visible');
+};
+window.closePwModal = function() { document.getElementById('pw-overlay').classList.remove('visible'); pwTarget = null; };
+
+document.getElementById('btn-save-pw').addEventListener('click', async () => {
+  const errEl = document.getElementById('pw-err');
+  errEl.classList.remove('visible');
+  const password = document.getElementById('pw-new').value;
+  if (!password || password.length < 8) { errEl.textContent = 'Passwort muss mindestens 8 Zeichen haben.'; errEl.classList.add('visible'); return; }
+  const btn = document.getElementById('btn-save-pw');
+  btn.disabled = true; btn.textContent = 'Ändert…';
+  try {
+    await apiCall('PATCH', { email: pwTarget.email, user_id: pwTarget.user_id, password });
+    toast('Passwort geändert', 'success');
+    closePwModal();
+  } catch (err) {
+    errEl.textContent = err.message; errEl.classList.add('visible');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Ändern';
+  }
+});
+
+// ── Delete modal ───────────────────────────────────────────────
+window.openDelModal = function(target) {
+  delTarget = target;
+  document.getElementById('del-msg').textContent = `Das Konto von ${target.name || target.email} (${target.email}) wird unwiderruflich gelöscht — inklusive Login-Zugang.`;
+  document.getElementById('del-overlay').classList.add('visible');
+};
+window.closeDelModal = function() { document.getElementById('del-overlay').classList.remove('visible'); delTarget = null; };
+
+document.getElementById('btn-confirm-del').addEventListener('click', async () => {
+  if (!delTarget) return;
+  const btn = document.getElementById('btn-confirm-del');
+  btn.disabled = true; btn.textContent = 'Löscht…';
+  try {
+    await apiCall('DELETE', { email: delTarget.email, user_id: delTarget.user_id });
+    toast('Konto gelöscht', 'success');
+    closeDelModal();
+    loadAndRender();
+  } catch (err) {
+    toast('Fehler: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Löschen';
+  }
+});
+
+// ── Login & role gate ────────────────────────────────────────
+async function checkRoleAndShow(email) {
+  try {
+    await apiCall('GET'); // GET itself enforces 'all' server-side
+  } catch {
+    document.getElementById('login-screen').innerHTML = `<div class="access-denied"><h2>Kein Zugriff</h2><p>Nur Konten mit Vollzugriff können Admin-Konten verwalten.</p></div>`;
+    document.getElementById('login-screen').style.display = '';
+    return;
+  }
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-wrap').classList.add('visible');
+  document.getElementById('header-user').textContent = email;
+  loadAndRender();
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.classList.remove('visible');
+  document.getElementById('btn-login').disabled = true;
+  try {
+    const res = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+      method:'POST', headers:{'Content-Type':'application/json','apikey':SB_KEY}, body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || 'Login fehlgeschlagen');
+    accessToken = data.access_token;
+    saveSession(data, email);
+    await checkRoleAndShow(email);
+  } catch (err) {
+    errEl.textContent = err.message; errEl.classList.add('visible');
+  } finally {
+    document.getElementById('btn-login').disabled = false;
+  }
+}
+document.getElementById('btn-login').addEventListener('click', doLogin);
+document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await fetch(`${SB_URL}/auth/v1/logout`, { method:'POST', headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${accessToken}`} });
+  accessToken = null;
+  clearSavedSession();
+  document.getElementById('admin-wrap').classList.remove('visible');
+  document.getElementById('login-screen').style.display = '';
+  toast('Ausgeloggt');
+});
+
+(() => {
+  const saved = getSavedSession();
+  if (saved) { accessToken = saved.access_token; checkRoleAndShow(saved.email); }
+})();
+</script>
+</body>
+</html>
