@@ -209,6 +209,7 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
       </div>
     </div>
     <div class="header-right">
+      <a href="/verwaltung" class="btn-logout" style="text-decoration:none">← Übersicht</a>
       <span class="header-badge">Intern</span>
       <span class="header-badge" id="header-role-badge" style="display:none;background:rgba(15,41,114,.3);color:#a8c4e0;border-color:rgba(15,41,114,.4)"></span>
       <span class="header-user" id="header-user"></span>
@@ -290,6 +291,30 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
   let currentAntrag = null;
   let accessToken = null;
   let deleteId = null;
+
+  // ── Shared admin session (single sign-on across all /verwaltung/* portals) ──
+  const SESSION_KEY = 'asn_admin_session';
+  function saveSession(data, email) {
+    try {
+      localStorage.setItem(SESSION_KEY, JSON.stringify({
+        access_token: data.access_token,
+        email,
+        expires_at: Date.now() + ((data.expires_in || 3600) * 1000) - 60000,
+      }));
+    } catch {}
+  }
+  function getSavedSession() {
+    try {
+      const raw = localStorage.getItem(SESSION_KEY);
+      if (!raw) return null;
+      const s = JSON.parse(raw);
+      if (!s.expires_at || s.expires_at < Date.now()) return null;
+      return s;
+    } catch { return null; }
+  }
+  function clearSavedSession() {
+    try { localStorage.removeItem(SESSION_KEY); } catch {}
+  }
 
   // ── Auth helpers ──────────────────────────────────────────
   async function supabaseFetch(path, options = {}) {
@@ -743,6 +768,7 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
       const session = await login(email, password);
       accessToken = session.access_token;
       currentUser = session.user;
+      saveSession(session, email);
       showAdmin(email);
     } catch (err) {
       errEl.textContent = err.message;
@@ -763,11 +789,21 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
     await logout();
     accessToken = null;
     currentUser = null;
+    clearSavedSession();
     document.getElementById('admin-wrap').classList.remove('visible');
     document.getElementById('login-screen').style.display = '';
     document.getElementById('login-password').value = '';
     showToast('Ausgeloggt');
   });
+
+  // ── Auto-restore session from another /verwaltung/* portal ──
+  (() => {
+    const saved = getSavedSession();
+    if (saved) {
+      accessToken = saved.access_token;
+      showAdmin(saved.email);
+    }
+  })();
 </script>
 
 </body>

@@ -1,0 +1,268 @@
+---
+// src/pages/verwaltung/index.astro
+// Central admin hub — single login, then shows only the portals the
+// logged-in admin has access to, based on admin_roles.abteilungen.
+export const prerender = false;
+const SUPABASE_URL  = import.meta.env.SUPABASE_URL  || '';
+const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
+---
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verwaltungsportal — ASN Pfeil Phönix</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style is:global>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --navy:#0f2972;--navy-dark:#091d52;--navy-pale:#e8edf8;--navy-tint:#f0f3fc;
+      --orange:#E8780A;--white:#fff;--ink:#111318;--mid:#4A4F5C;--muted:#8A8F9E;
+      --border:#E4E6EE;--green:#16a34a;--red:#dc2626;
+      --fd:'Bebas Neue',sans-serif;--fb:'DM Sans',sans-serif;--radius:6px;--radius-lg:12px;
+    }
+    body{font-family:var(--fb);background:#f0f2f8;color:var(--ink);min-height:100vh;}
+
+    .header{background:var(--navy);border-bottom:3px solid var(--orange);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;}
+    .header-brand{display:flex;align-items:center;gap:.75rem;}
+    .header-brand img{width:40px;height:40px;}
+    .header-brand-text strong{display:block;font-family:var(--fd);font-size:1.2rem;color:var(--white);letter-spacing:.04em;}
+    .header-brand-text span{font-size:.72rem;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase;}
+    .header-right{display:flex;align-items:center;gap:1rem;}
+    .header-user{font-size:.82rem;color:rgba(255,255,255,.5);}
+    .btn-logout{font-family:var(--fb);font-size:.82rem;font-weight:600;background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);padding:.4em 1em;border-radius:var(--radius);cursor:pointer;}
+    .btn-logout:hover{border-color:rgba(255,255,255,.5);color:var(--white);}
+
+    .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:var(--navy-dark);}
+    .login-card{background:var(--white);border-radius:var(--radius-lg);padding:2.5rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+    .login-logo{display:flex;align-items:center;gap:.75rem;margin-bottom:2rem;}
+    .login-logo img{width:48px;}
+    .login-logo-text strong{display:block;font-family:var(--fd);font-size:1.3rem;color:var(--navy);}
+    .login-logo-text span{font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+    .login-title{font-family:var(--fd);font-size:1.8rem;color:var(--navy);margin-bottom:.4rem;}
+    .login-sub{font-size:.85rem;color:var(--muted);margin-bottom:1.75rem;}
+    .field{display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem;}
+    .field label{font-size:.8rem;font-weight:600;color:var(--mid);}
+    .field input{border:2px solid var(--border);border-radius:var(--radius);padding:.65rem .85rem;font-family:var(--fb);font-size:.95rem;width:100%;}
+    .field input:focus{outline:none;border-color:var(--navy);}
+    .btn-login{width:100%;background:var(--navy);color:var(--white);border:none;border-radius:var(--radius);padding:.8rem;font-family:var(--fd);font-size:1.1rem;letter-spacing:.04em;cursor:pointer;margin-top:.5rem;display:flex;align-items:center;justify-content:center;gap:.5rem;}
+    .login-error{background:#fef2f2;border:1px solid #fecaca;color:var(--red);border-radius:var(--radius);padding:.75rem 1rem;font-size:.85rem;margin-top:1rem;display:none;}
+    .login-error.visible{display:block;}
+
+    .hub-wrap{display:none;}
+    .hub-wrap.visible{display:block;}
+    .hub-main{max-width:1000px;margin:0 auto;padding:2.5rem 1.5rem;}
+    .hub-intro{margin-bottom:2rem;}
+    .hub-intro h1{font-family:var(--fd);font-size:2rem;color:var(--navy);letter-spacing:.03em;}
+    .hub-intro p{color:var(--muted);font-size:.92rem;margin-top:.3rem;}
+
+    .hub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;}
+    .hub-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;text-decoration:none;display:flex;flex-direction:column;gap:.75rem;transition:all .15s;box-shadow:0 1px 4px rgba(15,41,114,.06);}
+    .hub-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(15,41,114,.15);border-color:var(--navy-pale);}
+    .hub-card-icon{font-size:2.2rem;}
+    .hub-card-title{font-family:var(--fd);font-size:1.3rem;color:var(--navy);letter-spacing:.03em;}
+    .hub-card-desc{font-size:.85rem;color:var(--mid);line-height:1.5;}
+    .hub-card-badge{font-size:.67rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);}
+
+    .hub-empty{text-align:center;padding:4rem 2rem;color:var(--muted);}
+    .hub-empty-icon{font-size:2.5rem;margin-bottom:1rem;}
+    .loading{text-align:center;padding:4rem;color:var(--muted);}
+    .spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+  </style>
+</head>
+<body>
+
+<div class="login-wrap" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="/images/asn-logo.svg" alt="" />
+      <div class="login-logo-text"><strong>ASN Pfeil Phönix</strong><span>Verwaltungsportal</span></div>
+    </div>
+    <h1 class="login-title">Anmelden</h1>
+    <p class="login-sub">Ein Login für alle Verwaltungsbereiche.</p>
+    <div class="field"><label>E-Mail</label><input type="email" id="login-email" /></div>
+    <div class="field"><label>Passwort</label><input type="password" id="login-password" /></div>
+    <button class="btn-login" id="btn-login">Einloggen</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<div class="hub-wrap" id="hub-wrap">
+  <header class="header">
+    <div class="header-brand">
+      <img src="/images/asn-logo.svg" alt="" />
+      <div class="header-brand-text"><strong>ASN Pfeil Phönix</strong><span>Verwaltungsportal</span></div>
+    </div>
+    <div class="header-right">
+      <span class="header-user" id="header-user"></span>
+      <button class="btn-logout" id="btn-logout">Ausloggen</button>
+    </div>
+  </header>
+  <div class="hub-main">
+    <div class="hub-intro">
+      <h1>Übersicht</h1>
+      <p>Wähle einen Verwaltungsbereich.</p>
+    </div>
+    <div id="hub-grid"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+</div>
+
+<script is:inline set:html={`window.__SB_URL__=${JSON.stringify(SUPABASE_URL)};window.__SB_KEY__=${JSON.stringify(SUPABASE_ANON)};`}></script>
+<script>
+const SB_URL = window.__SB_URL__;
+const SB_KEY = window.__SB_KEY__;
+let accessToken = null;
+
+// ── Shared admin session (single sign-on across all /verwaltung/* portals) ──
+const SESSION_KEY = 'asn_admin_session';
+function saveSession(data, email) {
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      access_token: data.access_token,
+      email,
+      expires_at: Date.now() + ((data.expires_in || 3600) * 1000) - 60000,
+    }));
+  } catch {}
+}
+function getSavedSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (!s.expires_at || s.expires_at < Date.now()) return null;
+    return s;
+  } catch { return null; }
+}
+function clearSavedSession() {
+  try { localStorage.removeItem(SESSION_KEY); } catch {}
+}
+
+async function sbFetch(path, opts = {}) {
+  return fetch(`${SB_URL}${path}`, { ...opts, headers: { 'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${accessToken||SB_KEY}`,...(opts.headers||{}) } });
+}
+
+// ── Portal definitions ────────────────────────────────────────
+// `tags`: which admin_roles.abteilungen values unlock this card.
+// 'all' always unlocks everything. 'any' means any logged-in admin sees it.
+const PORTALS = [
+  {
+    href: '/verwaltung/antraege-2025', icon: '📋',
+    title: 'Mitgliedsanträge',
+    desc: 'Anträge auf Mitgliedschaft prüfen, Beiträge einsehen, CSV-Export für die Vereinsverwaltung.',
+    tags: ['fussball','kegeln','radsport','dart','tennis'],
+  },
+  {
+    href: '/verwaltung/camp-2025', icon: '⚽',
+    title: 'Sommer-Fußballcamp',
+    desc: 'Anmeldungen zum Fußballcamp verwalten, Rechnungen einsehen und herunterladen.',
+    tags: ['fussball'],
+  },
+  {
+    href: '/verwaltung/umfrage-2026', icon: '📊',
+    title: 'Mitgliederbefragung',
+    desc: 'Antworten und Auswertung der Mitgliederbefragung 2026 ansehen.',
+    tags: ['any'],
+  },
+  {
+    href: '/verwaltung/foerdermitglieder', icon: '🅿️',
+    title: 'Fördermitglieder',
+    desc: 'Anträge auf Fördermitgliedschaft genehmigen, Parkplätze verwalten, Warteliste.',
+    tags: ['foerdermitglieder'],
+  },
+  {
+    href: '/verwaltung/parkausweis-check', icon: '🔍',
+    title: 'Parkausweis-Prüfung',
+    desc: 'Parkausweise per Code oder QR-Scan auf Gültigkeit prüfen.',
+    tags: ['foerdermitglieder'],
+  },
+  {
+    href: '/verwaltung/parkausweis-temp', icon: '🎫',
+    title: 'Temporärer Parkausweis',
+    desc: 'Zeitlich begrenzte Parkausweise für Spender oder besondere Anlässe erstellen.',
+    tags: ['foerdermitglieder'],
+  },
+];
+
+function hasAccess(userTags, portalTags) {
+  if (userTags.includes('all')) return true;
+  if (portalTags.includes('any')) return true;
+  return portalTags.some(t => userTags.includes(t));
+}
+
+function renderHub(userTags) {
+  const visible = PORTALS.filter(p => hasAccess(userTags, p.tags));
+  const grid = document.getElementById('hub-grid');
+
+  if (!visible.length) {
+    grid.innerHTML = `<div class="hub-empty"><div class="hub-empty-icon">🔒</div><div>Dein Konto hat aktuell keinen Zugriff auf einen Verwaltungsbereich.<br>Bitte wende dich an David.</div></div>`;
+    return;
+  }
+
+  grid.innerHTML = `<div class="hub-grid">${visible.map(p => `
+    <a href="${p.href}" class="hub-card">
+      <div class="hub-card-icon">${p.icon}</div>
+      <div class="hub-card-title">${p.title}</div>
+      <div class="hub-card-desc">${p.desc}</div>
+    </a>
+  `).join('')}</div>`;
+}
+
+async function onAuthenticated(email) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('hub-wrap').classList.add('visible');
+  document.getElementById('header-user').textContent = email;
+
+  try {
+    const res = await sbFetch(`/rest/v1/admin_roles?email=eq.${encodeURIComponent(email)}&select=abteilungen`);
+    const rows = await res.json();
+    const userTags = rows[0]?.abteilungen || [];
+    renderHub(userTags);
+  } catch {
+    document.getElementById('hub-grid').innerHTML = '<div class="hub-empty">Fehler beim Laden der Berechtigungen.</div>';
+  }
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.classList.remove('visible');
+  document.getElementById('btn-login').disabled = true;
+  try {
+    const res = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST', headers: { 'Content-Type':'application/json','apikey':SB_KEY }, body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || 'Login fehlgeschlagen');
+    accessToken = data.access_token;
+    saveSession(data, email);
+    onAuthenticated(email);
+  } catch (err) {
+    errEl.textContent = err.message; errEl.classList.add('visible');
+  } finally {
+    document.getElementById('btn-login').disabled = false;
+  }
+}
+document.getElementById('btn-login').addEventListener('click', doLogin);
+document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await fetch(`${SB_URL}/auth/v1/logout`, { method:'POST', headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${accessToken}`} });
+  accessToken = null;
+  clearSavedSession();
+  document.getElementById('hub-wrap').classList.remove('visible');
+  document.getElementById('login-screen').style.display = '';
+});
+
+// ── Auto-restore session from another /verwaltung/* portal ──
+(() => {
+  const saved = getSavedSession();
+  if (saved) {
+    accessToken = saved.access_token;
+    onAuthenticated(saved.email);
+  }
+})();
+</script>
+</body>
+</html>

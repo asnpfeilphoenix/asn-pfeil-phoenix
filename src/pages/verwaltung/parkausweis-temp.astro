@@ -93,7 +93,7 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
       <img src="/images/asn-logo.svg" alt="" />
       <div class="header-brand-text"><strong>Temporärer Parkausweis</strong><span>Für Spenden & besondere Anlässe</span></div>
     </div>
-    <a href="/verwaltung/foerdermitglieder" class="btn-back">← Zurück</a>
+    <a href="/verwaltung" class="btn-back">← Übersicht</a>
   </header>
 
   <div class="main">
@@ -153,6 +153,27 @@ const SB_URL = window.__SB_URL__;
 const SB_KEY = window.__SB_KEY__;
 let accessToken = null;
 let lastCode = null;
+
+// ── Shared admin session (single sign-on across all /verwaltung/* portals) ──
+const SESSION_KEY = 'asn_admin_session';
+function saveSession(data, email) {
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      access_token: data.access_token,
+      email,
+      expires_at: Date.now() + ((data.expires_in || 3600) * 1000) - 60000,
+    }));
+  } catch {}
+}
+function getSavedSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (!s.expires_at || s.expires_at < Date.now()) return null;
+    return s;
+  } catch { return null; }
+}
 
 async function sbFetch(path, opts={}) {
   return fetch(`${SB_URL}${path}`, { ...opts, headers:{ 'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${accessToken||SB_KEY}`,...(opts.headers||{}) } });
@@ -230,6 +251,12 @@ window.downloadOne = async function(code) {
   a.href = URL.createObjectURL(blob); a.download = `Parkausweis-${code}.pdf`; a.click();
 };
 
+function onAuthenticated(email) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-wrap').classList.add('visible');
+  loadRecent();
+}
+
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
@@ -242,15 +269,23 @@ async function doLogin() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error_description || 'Login fehlgeschlagen');
     accessToken = data.access_token;
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('main-wrap').classList.add('visible');
-    loadRecent();
+    saveSession(data, email);
+    onAuthenticated(email);
   } catch (err) {
     errEl.textContent = err.message; errEl.classList.add('visible');
   }
 }
 document.getElementById('btn-login').addEventListener('click', doLogin);
 document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+// ── Auto-restore session from another /verwaltung/* portal ──
+(() => {
+  const saved = getSavedSession();
+  if (saved) {
+    accessToken = saved.access_token;
+    onAuthenticated(saved.email);
+  }
+})();
 </script>
 </body>
 </html>
