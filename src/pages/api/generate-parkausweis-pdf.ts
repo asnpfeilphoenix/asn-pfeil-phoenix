@@ -72,12 +72,13 @@ async function generatePermitPDF(opts: {
 
     if (opts.grund) {
       doc.fillColor(mid).font('Helvetica').fontSize(9).text('ANLASS', 320, boxY + 64);
-      doc.fillColor('black').font('Helvetica').fontSize(11).text(opts.grund, 320, boxY + 78, { width: 200 });
+      doc.fillColor('black').font('Helvetica').fontSize(11).text(opts.grund, 320, boxY + 78, { width: 80 });
     }
 
-    // QR code
-    doc.image(qrBuffer, 410, boxY + 100, { width: 90 });
-    doc.fillColor(mid).font('Helvetica').fontSize(7).text('Zur Prüfung scannen', 405, boxY + 195, { width: 100, align: 'center' });
+    // QR code — positioned well within the detail box, clear of the notice box below
+    doc.image(qrBuffer, 410, boxY + 50, { width: 90 });
+    doc.link(410, boxY + 50, 90, 90, opts.checkUrl);
+    doc.fillColor(mid).font('Helvetica').fontSize(7).text('Zur Prüfung scannen', 405, boxY + 143, { width: 100, align: 'center' });
 
     // Important notice
     const noticeY = boxY + 180;

@@ -51,8 +51,9 @@ async function generatePermitPDF(opts: {
     doc.fillColor(mid).font('Helvetica').fontSize(9).text('GÜLTIGKEIT', 320, boxY + 18);
     doc.fillColor('black').font('Helvetica-Bold').fontSize(12).text(`${fmtDate(opts.gueltigVon)}  bis  ${fmtDate(opts.gueltigBis)}`, 320, boxY + 32, { width: 200 });
 
-    doc.image(qrBuffer, 410, boxY + 100, { width: 90 });
-    doc.fillColor(mid).font('Helvetica').fontSize(7).text('Zur Prüfung scannen', 405, boxY + 195, { width: 100, align: 'center' });
+    doc.image(qrBuffer, 410, boxY + 50, { width: 90 });
+    doc.link(410, boxY + 50, 90, 90, opts.checkUrl);
+    doc.fillColor(mid).font('Helvetica').fontSize(7).text('Zur Prüfung scannen', 405, boxY + 143, { width: 100, align: 'center' });
 
     const noticeY = boxY + 180;
     doc.rect(50, noticeY, 495, 70).fillAndStroke('#fffbeb', '#fde68a');
