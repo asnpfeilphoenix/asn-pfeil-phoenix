@@ -1,0 +1,256 @@
+---
+// src/pages/verwaltung/parkausweis-temp.astro
+export const prerender = false;
+const SUPABASE_URL  = import.meta.env.SUPABASE_URL  || '';
+const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
+---
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Temporärer Parkausweis erstellen — ASN Pfeil Phönix</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --navy:#0f2972;--navy-dark:#091d52;--navy-pale:#e8edf8;--navy-tint:#f0f3fc;
+      --orange:#E8780A;--white:#fff;--ink:#111318;--mid:#4A4F5C;--muted:#8A8F9E;
+      --border:#E4E6EE;--green:#16a34a;--red:#dc2626;
+      --fd:'Bebas Neue',sans-serif;--fb:'DM Sans',sans-serif;--radius:6px;--radius-lg:12px;
+    }
+    body{font-family:var(--fb);background:#f0f2f8;color:var(--ink);min-height:100vh;}
+    .header{background:var(--navy);border-bottom:3px solid var(--orange);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;}
+    .header-brand{display:flex;align-items:center;gap:.75rem;}
+    .header-brand img{width:40px;}
+    .header-brand-text strong{display:block;font-family:var(--fd);font-size:1.2rem;color:var(--white);}
+    .header-brand-text span{font-size:.72rem;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase;}
+    .btn-back{font-family:var(--fb);font-size:.82rem;font-weight:600;background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);padding:.4em 1em;border-radius:var(--radius);cursor:pointer;text-decoration:none;}
+    .btn-back:hover{border-color:rgba(255,255,255,.5);color:white;}
+
+    .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:var(--navy-dark);}
+    .login-card{background:var(--white);border-radius:var(--radius-lg);padding:2.5rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+    .login-title{font-family:var(--fd);font-size:1.8rem;color:var(--navy);margin-bottom:.4rem;}
+    .login-sub{font-size:.85rem;color:var(--muted);margin-bottom:1.75rem;}
+    .field{display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem;}
+    .field label{font-size:.8rem;font-weight:600;color:var(--mid);}
+    .field input{border:2px solid var(--border);border-radius:var(--radius);padding:.65rem .85rem;font-family:var(--fb);font-size:.95rem;width:100%;}
+    .btn-login{width:100%;background:var(--navy);color:var(--white);border:none;border-radius:var(--radius);padding:.8rem;font-family:var(--fd);font-size:1.1rem;cursor:pointer;margin-top:.5rem;}
+    .login-error{background:#fef2f2;border:1px solid #fecaca;color:var(--red);border-radius:var(--radius);padding:.75rem 1rem;font-size:.85rem;margin-top:1rem;display:none;}
+    .login-error.visible{display:block;}
+
+    .main-wrap{display:none;}
+    .main-wrap.visible{display:block;}
+    .main{max-width:640px;margin:0 auto;padding:2rem 1.5rem;}
+    .form-card{background:white;border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;box-shadow:0 1px 4px rgba(15,41,114,.06);}
+    .form-head{background:var(--navy);padding:1.25rem 1.5rem;border-bottom:3px solid var(--orange);}
+    .form-head h2{font-family:var(--fd);font-size:1.5rem;color:white;}
+    .form-head p{color:rgba(255,255,255,.6);font-size:.85rem;margin-top:.25rem;}
+    .form-body{padding:1.5rem;}
+    .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .field-grid .full{grid-column:1/-1;}
+    .field-group{display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem;}
+    .field-label{font-size:.8rem;font-weight:600;color:var(--mid);}
+    .field-input{border:2px solid var(--border);border-radius:var(--radius);padding:.6rem .85rem;font-family:var(--fb);font-size:.95rem;width:100%;}
+    .field-input:focus{outline:none;border-color:var(--navy);}
+    .btn-submit{width:100%;background:var(--orange);color:white;border:none;border-radius:var(--radius);padding:.9rem;font-family:var(--fd);font-size:1.15rem;letter-spacing:.04em;cursor:pointer;margin-top:.5rem;}
+    .btn-submit:hover{background:#c96508;}
+    .btn-submit:disabled{opacity:.6;cursor:not-allowed;}
+
+    .success-box{display:none;text-align:center;padding:2.5rem 1.5rem;}
+    .success-box.visible{display:block;}
+    .success-icon{font-size:2.5rem;margin-bottom:.75rem;}
+    .success-box h3{font-family:var(--fd);font-size:1.6rem;color:var(--navy);margin-bottom:.5rem;}
+    .success-code{display:inline-block;background:var(--navy);color:var(--orange);font-family:var(--fd);font-size:1.4rem;letter-spacing:.1em;padding:.5rem 1.2rem;border-radius:var(--radius);margin:1rem 0;}
+    .btn-download{background:var(--navy);color:white;border:none;border-radius:var(--radius);padding:.8rem 1.6rem;font-family:var(--fd);font-size:1.1rem;cursor:pointer;margin-top:.5rem;}
+    .btn-new{background:transparent;border:2px solid var(--border);color:var(--mid);border-radius:var(--radius);padding:.7rem 1.4rem;font-family:var(--fb);font-size:.9rem;font-weight:600;cursor:pointer;margin-top:.75rem;}
+
+    .recent-card{background:white;border-radius:var(--radius-lg);border:1px solid var(--border);margin-top:1.5rem;overflow:hidden;}
+    .recent-head{padding:1rem 1.5rem;background:#fafafa;border-bottom:1px solid var(--border);font-family:var(--fd);font-size:1.1rem;color:var(--navy);}
+    table{width:100%;border-collapse:collapse;font-size:.85rem;}
+    th{text-align:left;padding:.6rem 1rem;font-size:.67rem;font-weight:700;color:var(--muted);background:#fafafa;border-bottom:2px solid var(--border);}
+    td{padding:.6rem 1rem;border-bottom:1px solid var(--border);}
+    .btn-sm{background:var(--navy);color:white;border:none;border-radius:var(--radius);padding:.3em .8em;font-size:.78rem;cursor:pointer;}
+  </style>
+</head>
+<body>
+
+<div class="login-wrap" id="login-screen">
+  <div class="login-card">
+    <h1 class="login-title">Anmelden</h1>
+    <p class="login-sub">Nur für autorisierte Administratoren.</p>
+    <div class="field"><label>E-Mail</label><input type="email" id="login-email" /></div>
+    <div class="field"><label>Passwort</label><input type="password" id="login-password" /></div>
+    <button class="btn-login" id="btn-login">Einloggen</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<div class="main-wrap" id="main-wrap">
+  <header class="header">
+    <div class="header-brand">
+      <img src="/images/asn-logo.svg" alt="" />
+      <div class="header-brand-text"><strong>Temporärer Parkausweis</strong><span>Für Spenden & besondere Anlässe</span></div>
+    </div>
+    <a href="/verwaltung/foerdermitglieder" class="btn-back">← Zurück</a>
+  </header>
+
+  <div class="main">
+    <div class="form-card">
+      <div class="form-head">
+        <h2>Neuen Ausweis erstellen</h2>
+        <p>Für Spender oder besondere Anlässe — kein fester Parkplatz, nur zeitlich begrenzt gültig.</p>
+      </div>
+      <div class="form-body" id="form-body">
+        <div class="field-grid">
+          <div class="field-group full">
+            <label class="field-label">Name <span style="color:var(--red)">*</span></label>
+            <input class="field-input" type="text" id="f-name" />
+          </div>
+          <div class="field-group full">
+            <label class="field-label">Adresse</label>
+            <input class="field-input" type="text" id="f-adresse" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Kennzeichen <span style="color:var(--red)">*</span></label>
+            <input class="field-input" type="text" id="f-kennzeichen" style="text-transform:uppercase" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Anlass / Grund</label>
+            <input class="field-input" type="text" id="f-grund" placeholder="z.B. Spende 2026" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Gültig von <span style="color:var(--red)">*</span></label>
+            <input class="field-input" type="date" id="f-von" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Gültig bis <span style="color:var(--red)">*</span></label>
+            <input class="field-input" type="date" id="f-bis" />
+          </div>
+        </div>
+        <button class="btn-submit" id="btn-submit">Parkausweis erstellen →</button>
+      </div>
+      <div class="success-box" id="success-box">
+        <div class="success-icon">🎫</div>
+        <h3>Ausweis erstellt!</h3>
+        <div class="success-code" id="success-code"></div>
+        <div><button class="btn-download" id="btn-download">⬇ PDF herunterladen</button></div>
+        <div><button class="btn-new" onclick="resetForm()">+ Weiteren Ausweis erstellen</button></div>
+      </div>
+    </div>
+
+    <div class="recent-card">
+      <div class="recent-head">Zuletzt erstellt</div>
+      <div id="recent-list" style="overflow-x:auto"><div style="padding:1.5rem;color:var(--muted)">Lädt…</div></div>
+    </div>
+  </div>
+</div>
+
+<script is:inline set:html={`window.__SB_URL__=${JSON.stringify(SUPABASE_URL)};window.__SB_KEY__=${JSON.stringify(SUPABASE_ANON)};`}></script>
+<script>
+const SB_URL = window.__SB_URL__;
+const SB_KEY = window.__SB_KEY__;
+let accessToken = null;
+let lastCode = null;
+
+async function sbFetch(path, opts={}) {
+  return fetch(`${SB_URL}${path}`, { ...opts, headers:{ 'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${accessToken||SB_KEY}`,...(opts.headers||{}) } });
+}
+function fmtDate(d) { if(!d) return '—'; return new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+
+window.resetForm = function() {
+  ['f-name','f-adresse','f-kennzeichen','f-grund','f-von','f-bis'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('form-body').style.display = '';
+  document.getElementById('success-box').classList.remove('visible');
+};
+
+document.getElementById('btn-submit').addEventListener('click', async () => {
+  const name = document.getElementById('f-name').value.trim();
+  const kennzeichen = document.getElementById('f-kennzeichen').value.trim().toUpperCase();
+  const von = document.getElementById('f-von').value;
+  const bis = document.getElementById('f-bis').value;
+  if (!name || !kennzeichen || !von || !bis) { alert('Bitte Name, Kennzeichen und Gültigkeitszeitraum angeben.'); return; }
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true; btn.textContent = 'Wird erstellt…';
+
+  try {
+    const res = await fetch('/api/create-temp-parkausweis', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${accessToken}`},
+      body: JSON.stringify({
+        name, kennzeichen,
+        adresse: document.getElementById('f-adresse').value.trim(),
+        grund: document.getElementById('f-grund').value.trim(),
+        gueltig_von: von, gueltig_bis: bis,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    lastCode = data.permit_code;
+    document.getElementById('form-body').style.display = 'none';
+    document.getElementById('success-box').classList.add('visible');
+    document.getElementById('success-code').textContent = data.permit_code;
+    loadRecent();
+  } catch (err) {
+    alert('Fehler: ' + err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Parkausweis erstellen →';
+  }
+});
+
+document.getElementById('btn-download').addEventListener('click', async () => {
+  if (!lastCode) return;
+  const res = await fetch(`/api/generate-parkausweis-pdf?code=${lastCode}`, { headers:{'Authorization':`Bearer ${accessToken}`} });
+  const blob = await res.blob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `Parkausweis-${lastCode}.pdf`; a.click();
+});
+
+async function loadRecent() {
+  const el = document.getElementById('recent-list');
+  try {
+    const res = await sbFetch('/rest/v1/temp_parkausweise?select=*&order=erstellt_am.desc&limit=10');
+    const rows = await res.json();
+    if (!rows.length) { el.innerHTML = '<div style="padding:1.5rem;color:var(--muted)">Noch keine Ausweise erstellt.</div>'; return; }
+    el.innerHTML = `<table>
+      <thead><tr><th>Code</th><th>Name</th><th>Kennzeichen</th><th>Gültig</th><th></th></tr></thead>
+      <tbody>${rows.map(r => `<tr>
+        <td><strong>${r.permit_code}</strong></td><td>${r.name}</td><td>${r.kennzeichen}</td>
+        <td>${fmtDate(r.gueltig_von)} – ${fmtDate(r.gueltig_bis)}</td>
+        <td><button class="btn-sm" onclick="downloadOne('${r.permit_code}')">PDF</button></td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  } catch { el.innerHTML = '<div style="padding:1.5rem;color:var(--red)">Fehler beim Laden.</div>'; }
+}
+window.downloadOne = async function(code) {
+  const res = await fetch(`/api/generate-parkausweis-pdf?code=${code}`, { headers:{'Authorization':`Bearer ${accessToken}`} });
+  const blob = await res.blob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `Parkausweis-${code}.pdf`; a.click();
+};
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.classList.remove('visible');
+  try {
+    const res = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+      method:'POST', headers:{'Content-Type':'application/json','apikey':SB_KEY}, body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || 'Login fehlgeschlagen');
+    accessToken = data.access_token;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('main-wrap').classList.add('visible');
+    loadRecent();
+  } catch (err) {
+    errEl.textContent = err.message; errEl.classList.add('visible');
+  }
+}
+document.getElementById('btn-login').addEventListener('click', doLogin);
+document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>

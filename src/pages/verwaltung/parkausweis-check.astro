@@ -1,0 +1,183 @@
+---
+// src/pages/verwaltung/parkausweis-check.astro
+export const prerender = false;
+const SUPABASE_URL  = import.meta.env.SUPABASE_URL  || '';
+const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
+---
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parkausweis prüfen — ASN Pfeil Phönix</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --navy:#0f2972;--navy-dark:#091d52;--navy-pale:#e8edf8;--navy-tint:#f0f3fc;
+      --orange:#E8780A;--white:#fff;--ink:#111318;--mid:#4A4F5C;--muted:#8A8F9E;
+      --border:#E4E6EE;--green:#16a34a;--red:#dc2626;
+      --fd:'Bebas Neue',sans-serif;--fb:'DM Sans',sans-serif;--radius:6px;--radius-lg:12px;
+    }
+    body{font-family:var(--fb);background:var(--navy-dark);color:var(--ink);min-height:100vh;}
+    .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;}
+    .login-card{background:var(--white);border-radius:var(--radius-lg);padding:2.5rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+    .login-logo{display:flex;align-items:center;gap:.75rem;margin-bottom:2rem;}
+    .login-logo img{width:48px;}
+    .login-logo-text strong{display:block;font-family:var(--fd);font-size:1.3rem;color:var(--navy);}
+    .login-logo-text span{font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+    .login-title{font-family:var(--fd);font-size:1.8rem;color:var(--navy);margin-bottom:.4rem;}
+    .login-sub{font-size:.85rem;color:var(--muted);margin-bottom:1.75rem;}
+    .field{display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem;}
+    .field label{font-size:.8rem;font-weight:600;color:var(--mid);}
+    .field input{border:2px solid var(--border);border-radius:var(--radius);padding:.65rem .85rem;font-family:var(--fb);font-size:.95rem;width:100%;}
+    .btn-login{width:100%;background:var(--navy);color:var(--white);border:none;border-radius:var(--radius);padding:.8rem;font-family:var(--fd);font-size:1.1rem;cursor:pointer;margin-top:.5rem;}
+    .login-error{background:#fef2f2;border:1px solid #fecaca;color:var(--red);border-radius:var(--radius);padding:.75rem 1rem;font-size:.85rem;margin-top:1rem;display:none;}
+    .login-error.visible{display:block;}
+
+    .check-wrap{display:none;min-height:100vh;padding:2rem 1rem;}
+    .check-wrap.visible{display:flex;flex-direction:column;align-items:center;}
+    .check-header{display:flex;align-items:center;gap:.75rem;margin-bottom:2rem;}
+    .check-header img{width:36px;}
+    .check-header strong{font-family:var(--fd);font-size:1.3rem;color:var(--white);}
+
+    .search-box{background:var(--white);border-radius:var(--radius-lg);padding:1.5rem;width:100%;max-width:480px;margin-bottom:1.5rem;}
+    .search-row{display:flex;gap:.5rem;}
+    .search-row input{flex:1;border:2px solid var(--border);border-radius:var(--radius);padding:.7rem .9rem;font-family:monospace;font-size:1rem;letter-spacing:.08em;text-transform:uppercase;}
+    .search-row button{background:var(--navy);color:white;border:none;border-radius:var(--radius);padding:.7rem 1.3rem;font-family:var(--fd);font-size:1.05rem;cursor:pointer;}
+
+    .result-card{width:100%;max-width:480px;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.3);}
+    .result-status{padding:1.5rem;text-align:center;}
+    .result-status.valid{background:var(--green);}
+    .result-status.invalid{background:var(--red);}
+    .result-status-icon{font-size:3rem;}
+    .result-status-text{font-family:var(--fd);font-size:2rem;color:white;letter-spacing:.04em;margin-top:.5rem;}
+    .result-body{background:white;padding:1.5rem;}
+    .result-row{display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);}
+    .result-row:last-child{border-bottom:none;}
+    .result-label{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+    .result-val{font-size:1rem;font-weight:600;color:var(--ink);text-align:right;}
+    .result-val--big{font-family:var(--fd);font-size:1.6rem;color:var(--navy);}
+    .empty-msg{color:rgba(255,255,255,.6);text-align:center;padding:2rem;}
+  </style>
+</head>
+<body>
+
+<div class="login-wrap" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="/images/asn-logo.svg" alt="" />
+      <div class="login-logo-text"><strong>ASN Pfeil Phönix</strong><span>Parkausweis-Prüfung</span></div>
+    </div>
+    <h1 class="login-title">Anmelden</h1>
+    <p class="login-sub">Nur für autorisierte Administratoren.</p>
+    <div class="field"><label>E-Mail</label><input type="email" id="login-email" /></div>
+    <div class="field"><label>Passwort</label><input type="password" id="login-password" /></div>
+    <button class="btn-login" id="btn-login">Einloggen</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<div class="check-wrap" id="check-wrap">
+  <div class="check-header">
+    <img src="/images/asn-logo.svg" alt="" />
+    <strong>Parkausweis-Prüfung</strong>
+  </div>
+
+  <div class="search-box">
+    <div class="search-row">
+      <input type="text" id="code-input" placeholder="Code eingeben, z.B. FM-2026-007" />
+      <button onclick="checkPermit()">Prüfen</button>
+    </div>
+  </div>
+
+  <div id="result-area"></div>
+</div>
+
+<script is:inline set:html={`window.__SB_URL__=${JSON.stringify(SUPABASE_URL)};window.__SB_KEY__=${JSON.stringify(SUPABASE_ANON)};`}></script>
+<script>
+const SB_URL = window.__SB_URL__;
+const SB_KEY = window.__SB_KEY__;
+let accessToken = null;
+
+function fmtDate(d) { if(!d) return '—'; return new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+
+async function sbFetch(path, opts={}) {
+  return fetch(`${SB_URL}${path}`, { ...opts, headers:{ 'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${accessToken||SB_KEY}`,...(opts.headers||{}) } });
+}
+
+window.checkPermit = async function() {
+  const code = document.getElementById('code-input').value.trim().toUpperCase();
+  const area = document.getElementById('result-area');
+  if (!code) return;
+  area.innerHTML = '<div class="empty-msg">Lädt…</div>';
+
+  const isTemp = code.startsWith('TEMP-');
+  const table = isTemp ? 'temp_parkausweise' : 'foerdermitglieder';
+
+  try {
+    const res = await sbFetch(`/rest/v1/${table}?permit_code=eq.${encodeURIComponent(code)}&select=*`);
+    const rows = await res.json();
+    if (!rows.length) { area.innerHTML = '<div class="empty-msg">❓ Kein Ausweis mit diesem Code gefunden.</div>'; return; }
+    const r = rows[0];
+
+    const today = new Date(); today.setHours(0,0,0,0);
+    const bis = r.gueltig_bis ? new Date(r.gueltig_bis) : null;
+    const isValid = bis ? bis >= today : false;
+    const statusOk = isTemp ? isValid : (isValid && r.status === 'genehmigt');
+
+    area.innerHTML = `
+      <div class="result-card">
+        <div class="result-status ${statusOk ? 'valid' : 'invalid'}">
+          <div class="result-status-icon">${statusOk ? '✓' : '✗'}</div>
+          <div class="result-status-text">${statusOk ? 'GÜLTIG' : 'UNGÜLTIG'}</div>
+        </div>
+        <div class="result-body">
+          <div class="result-row"><span class="result-label">Code</span><span class="result-val">${r.permit_code}</span></div>
+          <div class="result-row"><span class="result-label">Name</span><span class="result-val">${isTemp ? r.name : `${r.anrede||''} ${r.vorname} ${r.nachname}`}</span></div>
+          <div class="result-row"><span class="result-label">Kennzeichen</span><span class="result-val result-val--big">${r.kennzeichen}</span></div>
+          <div class="result-row"><span class="result-label">Parkplatz</span><span class="result-val result-val--big">${isTemp ? 'Temporär' : (r.parkplatz_nummer ? 'Nr. ' + r.parkplatz_nummer : '—')}</span></div>
+          <div class="result-row"><span class="result-label">Gültig</span><span class="result-val">${fmtDate(r.gueltig_von)} – ${fmtDate(r.gueltig_bis)}</span></div>
+          ${!isTemp ? `<div class="result-row"><span class="result-label">Status</span><span class="result-val">${r.status}</span></div>` : ''}
+          ${isTemp && r.grund ? `<div class="result-row"><span class="result-label">Anlass</span><span class="result-val">${r.grund}</span></div>` : ''}
+        </div>
+      </div>`;
+  } catch (err) {
+    area.innerHTML = `<div class="empty-msg">Fehler: ${err.message}</div>`;
+  }
+};
+
+document.getElementById('code-input').addEventListener('keydown', e => { if (e.key === 'Enter') checkPermit(); });
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.classList.remove('visible');
+  try {
+    const res = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+      method:'POST', headers:{'Content-Type':'application/json','apikey':SB_KEY}, body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || 'Login fehlgeschlagen');
+    accessToken = data.access_token;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('check-wrap').classList.add('visible');
+
+    // Auto-check if ?code= present in URL (from QR scan)
+    const params = new URLSearchParams(window.location.search);
+    const urlCode = params.get('code');
+    if (urlCode) {
+      document.getElementById('code-input').value = urlCode.toUpperCase();
+      checkPermit();
+    }
+  } catch (err) {
+    errEl.textContent = err.message; errEl.classList.add('visible');
+  }
+}
+document.getElementById('btn-login').addEventListener('click', doLogin);
+document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>

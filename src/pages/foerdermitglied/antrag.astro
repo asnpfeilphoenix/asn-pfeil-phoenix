@@ -1,0 +1,366 @@
+---
+// src/pages/foerdermitglied/antrag.astro
+import BaseLayout from '../../layouts/BaseLayout.astro';
+export const prerender = false;
+---
+
+<BaseLayout title="Fördermitgliedschaft beantragen" description="Antrag auf Fördermitgliedschaft mit Parkberechtigung beim ASN Pfeil Phönix e.V.">
+
+  <section class="fm-hero">
+    <div class="container">
+      <p class="section-eyebrow">ASN Pfeil Phönix e.V.</p>
+      <h1>Förder<em>mitgliedschaft</em></h1>
+      <p class="fm-hero-sub">Unterstütze unseren Verein als Fördermitglied und profitiere von einer festen Parkberechtigung auf unserem Gelände.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container fm-container">
+
+      <!-- Important notice -->
+      <div class="fm-notice">
+        <span class="fm-notice-icon">ℹ️</span>
+        <div>
+          <strong>Wichtiger Hinweis:</strong> Die Parkberechtigung ist ein <strong>Vorteil der Fördermitgliedschaft</strong> — kein eigenständiges Produkt. Sie wird ausschließlich im Rahmen der Mitgliedschaft gewährt und ist nicht separat erwerbbar. Anträge werden durch den Vorstand gemäß § 4 der Satzung geprüft.
+        </div>
+      </div>
+
+      <!-- Benefits -->
+      <div class="fm-benefits">
+        <div class="fm-benefit"><span>🚗</span><div>Fest zugewiesener, nummerierter Parkplatz</div></div>
+        <div class="fm-benefit"><span>🗳️</span><div>Stimmrecht auf der Mitgliederversammlung</div></div>
+        <div class="fm-benefit"><span>🎉</span><div>Zugang zu Vereinsveranstaltungen</div></div>
+        <div class="fm-benefit"><span>📬</span><div>Vereinskommunikation</div></div>
+      </div>
+
+      <!-- Availability -->
+      <div class="fm-availability" id="fm-availability">
+        <div class="loading-dots">Verfügbarkeit wird geladen…</div>
+      </div>
+
+      <!-- Form -->
+      <div class="fm-form-wrap">
+        <div class="fm-form-head">
+          <h2>Antrag stellen</h2>
+          <p>Bitte alle Felder vollständig ausfüllen.</p>
+        </div>
+        <div class="fm-form-body" id="form-body">
+
+          <div class="field-section-label">Persönliche Daten</div>
+          <div class="field-grid">
+            <div class="field-group full">
+              <label class="field-label">Anrede <span class="req">*</span></label>
+              <div class="anrede-row">
+                <label class="radio-inline"><input type="radio" name="anrede" value="Herr" /> Herr</label>
+                <label class="radio-inline"><input type="radio" name="anrede" value="Frau" /> Frau</label>
+                <label class="radio-inline"><input type="radio" name="anrede" value="Divers" /> Divers</label>
+              </div>
+              <div class="field-err" id="err-anrede">Bitte wählen.</div>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="vorname">Vorname <span class="req">*</span></label>
+              <input class="field-input" type="text" id="vorname" />
+              <div class="field-err" id="err-vorname">Pflichtfeld.</div>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="nachname">Nachname <span class="req">*</span></label>
+              <input class="field-input" type="text" id="nachname" />
+              <div class="field-err" id="err-nachname">Pflichtfeld.</div>
+            </div>
+            <div class="field-group full">
+              <label class="field-label" for="strasse">Straße, Haus-Nr. <span class="req">*</span></label>
+              <input class="field-input" type="text" id="strasse" />
+              <div class="field-err" id="err-strasse">Pflichtfeld.</div>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="plz">PLZ <span class="req">*</span></label>
+              <input class="field-input" type="text" id="plz" maxlength="5" />
+              <div class="field-err" id="err-plz">Bitte 5-stellige PLZ.</div>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="ort">Ort <span class="req">*</span></label>
+              <input class="field-input" type="text" id="ort" />
+              <div class="field-err" id="err-ort">Pflichtfeld.</div>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="telefon">Telefon <span class="req">*</span></label>
+              <input class="field-input" type="tel" id="telefon" />
+              <div class="field-err" id="err-telefon">Pflichtfeld.</div>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="email">E-Mail <span class="req">*</span></label>
+              <input class="field-input" type="email" id="email" />
+              <div class="field-hint">Für Bestätigung und den digitalen Parkausweis.</div>
+              <div class="field-err" id="err-email">Bitte gültige E-Mail-Adresse.</div>
+            </div>
+          </div>
+
+          <div class="field-section-label">Fahrzeugdaten</div>
+          <div class="field-grid">
+            <div class="field-group">
+              <label class="field-label" for="kennzeichen">Kennzeichen <span class="req">*</span></label>
+              <input class="field-input" type="text" id="kennzeichen" placeholder="N-AB 1234" style="text-transform:uppercase" />
+              <div class="field-err" id="err-kennzeichen">Pflichtfeld.</div>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="fahrzeug-farbe">Farbe</label>
+              <input class="field-input" type="text" id="fahrzeug-farbe" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="fahrzeug-marke">Marke</label>
+              <input class="field-input" type="text" id="fahrzeug-marke" placeholder="z.B. VW" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="fahrzeug-modell">Modell</label>
+              <input class="field-input" type="text" id="fahrzeug-modell" placeholder="z.B. Golf" />
+            </div>
+          </div>
+
+          <div class="field-section-label">Mitgliedsbeitrag & SEPA-Lastschrift</div>
+          <div class="fm-fee-box">
+            <span class="fm-fee-amount" id="fm-fee-amount">150 €</span>
+            <span class="fm-fee-label">pro Jahr — gültig bis 31.12., jährliche Verlängerung</span>
+          </div>
+          <div class="field-grid">
+            <div class="field-group full">
+              <label class="field-label" for="kontoinhaber">Kontoinhaber <span class="req">*</span></label>
+              <input class="field-input" type="text" id="kontoinhaber" />
+              <div class="field-err" id="err-kontoinhaber">Pflichtfeld.</div>
+            </div>
+            <div class="field-group full">
+              <label class="field-label" for="iban">IBAN <span class="req">*</span></label>
+              <input class="field-input" type="text" id="iban" placeholder="DE.." style="text-transform:uppercase" />
+              <div class="field-err" id="err-iban">Bitte gültige IBAN.</div>
+            </div>
+          </div>
+          <div class="notice notice--info" style="margin-top:1rem">
+            <span class="notice__icon">✅</span>
+            <div>Ich bin bis auf Widerruf damit einverstanden, dass der Jahresbeitrag mittels <strong>SEPA-Lastschrift im Februar</strong> eingezogen wird.</div>
+          </div>
+
+          <div class="field-section-label">Zustimmung</div>
+          <label class="check-row">
+            <input type="checkbox" id="satzung" />
+            <span>Ich erkenne die Satzung des ASN Pfeil Phönix e.V. an, insbesondere § 4, und bin mir bewusst, dass mein Antrag durch den Vorstand geprüft wird. Mir ist bekannt, dass die Parkberechtigung ein Vorteil der Mitgliedschaft ist und kein eigenständiges Produkt darstellt.</span>
+          </label>
+          <div class="field-err" id="err-satzung">Bitte bestätigen.</div>
+
+          <button class="btn-fm-submit" id="btn-submit">
+            <span id="btn-text">Antrag einreichen →</span>
+            <span id="btn-spinner" class="spinner" style="display:none"></span>
+          </button>
+        </div>
+
+        <div class="fm-success" id="form-success" style="display:none">
+          <div class="fm-success-icon">🎉</div>
+          <h3>Antrag eingereicht!</h3>
+          <p>Vielen Dank, <strong id="success-name"></strong>! Dein Antrag wird durch den Vorstand geprüft. Du erhältst eine E-Mail, sobald über deinen Antrag entschieden wurde.</p>
+          <div class="success-id" id="success-id"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style is:global>
+  .fm-hero { background: var(--navy); padding-block: clamp(2.5rem, 5vw, 4rem); }
+  .fm-hero h1 { color: var(--white); }
+  .fm-hero h1 em { color: var(--orange); font-style: normal; }
+  .fm-hero .section-eyebrow { color: rgba(255,255,255,.5); }
+  .fm-hero .section-eyebrow::before { background: var(--orange); }
+  .fm-hero-sub { color: rgba(255,255,255,.7); font-size: 1rem; margin-top: .75rem; max-width: 56ch; }
+
+  .fm-container { max-width: 820px; }
+
+  .fm-notice { display: flex; gap: 1rem; background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-lg); padding: 1.1rem 1.4rem; margin-bottom: 1.5rem; font-size: .88rem; color: #78350f; line-height: 1.6; }
+  .fm-notice-icon { font-size: 1.3rem; flex-shrink: 0; }
+
+  .fm-benefits { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .75rem; margin-bottom: 1.5rem; }
+  .fm-benefit { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem; display: flex; flex-direction: column; gap: .5rem; font-size: .85rem; color: var(--mid); }
+  .fm-benefit span { font-size: 1.6rem; }
+
+  .fm-availability { background: var(--navy-tint); border: 1px solid var(--navy-pale); border-radius: var(--radius-lg); padding: 1rem 1.4rem; margin-bottom: 2rem; font-size: .9rem; color: var(--navy); font-weight: 600; }
+  .fm-availability.full { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+  .loading-dots { color: var(--muted); font-weight: 400; }
+
+  .fm-form-wrap { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 4px 24px rgba(15,41,114,.07); }
+  .fm-form-head { background: var(--navy); padding: 1.5rem 2rem; border-bottom: 3px solid var(--orange); }
+  .fm-form-head h2 { font-family: var(--fd); font-size: 1.8rem; color: var(--white); }
+  .fm-form-head p { color: rgba(255,255,255,.6); font-size: .9rem; margin-top: .3rem; }
+  .fm-form-body { padding: 2rem; }
+
+  .field-section-label { font-size: .67rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--navy); margin: 1.5rem 0 .9rem; display: flex; align-items: center; gap: .6rem; }
+  .field-section-label:first-child { margin-top: 0; }
+  .field-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .field-grid .full { grid-column: 1 / -1; }
+  .field-group { display: flex; flex-direction: column; gap: .35rem; }
+  .field-label { font-size: .8rem; font-weight: 600; color: var(--mid); }
+  .req { color: #dc2626; }
+  .field-input { border: 2px solid var(--border); border-radius: var(--radius); padding: .6rem .85rem; font-family: var(--fb); font-size: .95rem; color: var(--ink); background: var(--white); width: 100%; transition: border-color .15s; }
+  .field-input:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(15,41,114,.1); }
+  .field-input.error { border-color: #dc2626; }
+  .field-err { font-size: .75rem; color: #dc2626; font-weight: 500; display: none; }
+  .field-err.visible { display: block; }
+  .field-hint { font-size: .74rem; color: var(--muted); }
+
+  .anrede-row { display: flex; gap: 1.25rem; }
+  .radio-inline { display: flex; align-items: center; gap: .4rem; font-size: .9rem; cursor: pointer; }
+  .radio-inline input { accent-color: var(--navy); width: 16px; height: 16px; }
+
+  .fm-fee-box { display: flex; align-items: baseline; gap: .75rem; background: var(--navy-tint); border-radius: var(--radius-lg); padding: 1rem 1.4rem; margin-bottom: 1rem; }
+  .fm-fee-amount { font-family: var(--fd); font-size: 2.2rem; color: var(--navy); }
+  .fm-fee-label { font-size: .82rem; color: var(--mid); }
+
+  .notice { display: flex; align-items: flex-start; gap: .7rem; border-radius: var(--radius); padding: .85rem 1rem; font-size: .85rem; line-height: 1.55; }
+  .notice--info { background: var(--navy-tint); color: var(--navy); }
+
+  .check-row { display: flex; align-items: flex-start; gap: .65rem; font-size: .85rem; color: var(--mid); line-height: 1.55; cursor: pointer; margin-top: .5rem; }
+  .check-row input { accent-color: var(--navy); width: 18px; height: 18px; margin-top: .1rem; flex-shrink: 0; }
+
+  .btn-fm-submit { display: flex; align-items: center; justify-content: center; gap: .5rem; width: 100%; margin-top: 1.75rem; background: var(--orange); color: var(--white); border: none; border-radius: var(--radius); padding: 1rem; font-family: var(--fd); font-size: 1.2rem; letter-spacing: .04em; cursor: pointer; transition: background .15s; }
+  .btn-fm-submit:hover { background: #c96508; }
+  .btn-fm-submit:disabled { opacity: .6; cursor: not-allowed; }
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.3); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .fm-success { text-align: center; padding: 3rem 2rem; }
+  .fm-success-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .fm-success h3 { font-family: var(--fd); font-size: 2rem; color: var(--navy); margin-bottom: .5rem; }
+  .fm-success p { color: var(--mid); max-width: 50ch; margin: 0 auto; line-height: 1.6; }
+  .success-id { display: inline-block; background: var(--navy); color: var(--orange); font-family: var(--fd); font-size: 1.1rem; letter-spacing: .06em; padding: .4rem 1.1rem; border-radius: var(--radius); margin-top: 1rem; }
+
+  @media (max-width: 600px) {
+    .field-grid { grid-template-columns: 1fr; }
+    .field-grid .full { grid-column: 1; }
+  }
+</style>
+
+<script>
+(() => {
+  const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL || window.__SB_URL_FALLBACK__;
+  const $ = id => document.getElementById(id);
+  const val = id => { const e = $(id); return e ? e.value.trim() : ''; };
+
+  let foerderFee = 150; // fallback, overwritten by CSV value once loaded
+
+  // Fee comes from public/data/beitraege.csv — same source as every other
+  // membership fee in this project, so club admins only ever edit one file.
+  async function loadFee() {
+    try {
+      const res = await fetch('/data/beitraege.csv');
+      const text = await res.text();
+      const lines = text.trim().split('\n');
+      const headerCols = lines[0].split(',');
+      const abtIdx = headerCols.indexOf('abteilung');
+      const betragIdx = headerCols.indexOf('betrag_jaehrlich');
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(',');
+        if (cols[abtIdx] === 'foerdermitglied') {
+          foerderFee = parseFloat(cols[betragIdx]);
+          break;
+        }
+      }
+    } catch { /* keep fallback */ }
+    $('fm-fee-amount').textContent = `${foerderFee} €`;
+  }
+
+  // Parking availability comes from Supabase (operational capacity, not a fee)
+  async function loadAvailability() {
+    try {
+      const res = await fetch('/api/foerdermitglied-verfuegbarkeit');
+      const data = await res.json();
+      const box = $('fm-availability');
+      if (data.frei > 0) {
+        box.innerHTML = `🟢 <strong>${data.frei} von ${data.max}</strong> Parkplätzen verfügbar.`;
+        box.classList.remove('full');
+      } else {
+        box.innerHTML = `🔴 Alle ${data.max} Parkplätze sind belegt. Neue Anträge werden automatisch auf die <strong>Warteliste</strong> gesetzt (aktuell ${data.warteliste} wartend) und benachrichtigt, sobald ein Platz frei wird.`;
+        box.classList.add('full');
+      }
+    } catch {
+      $('fm-availability').innerHTML = 'Verfügbarkeit konnte nicht geladen werden.';
+    }
+  }
+  loadFee();
+  loadAvailability();
+
+  function showErr(id, visible) {
+    const e = $(id);
+    if (e) e.classList.toggle('visible', visible);
+  }
+
+  function validate() {
+    let ok = true;
+    const anrede = document.querySelector('input[name="anrede"]:checked');
+    showErr('err-anrede', !anrede); if (!anrede) ok = false;
+
+    const fields = [
+      ['vorname','err-vorname', v=>v.length>0],
+      ['nachname','err-nachname', v=>v.length>0],
+      ['strasse','err-strasse', v=>v.length>0],
+      ['plz','err-plz', v=>/^\d{5}$/.test(v)],
+      ['ort','err-ort', v=>v.length>0],
+      ['telefon','err-telefon', v=>v.length>0],
+      ['email','err-email', v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)],
+      ['kennzeichen','err-kennzeichen', v=>v.length>0],
+      ['kontoinhaber','err-kontoinhaber', v=>v.length>0],
+      ['iban','err-iban', v=>v.replace(/\s/g,'').length>=15],
+    ];
+    fields.forEach(([id,err,check]) => {
+      const valid = check(val(id));
+      showErr(err, !valid);
+      $(id)?.classList.toggle('error', !valid);
+      if (!valid) ok = false;
+    });
+
+    const satzungOk = $('satzung')?.checked;
+    showErr('err-satzung', !satzungOk);
+    if (!satzungOk) ok = false;
+
+    return ok;
+  }
+
+  $('btn-submit').addEventListener('click', async () => {
+    if (!validate()) return;
+    const btn = $('btn-submit');
+    $('btn-text').style.display = 'none';
+    $('btn-spinner').style.display = '';
+    btn.disabled = true;
+
+    const payload = {
+      anrede: document.querySelector('input[name="anrede"]:checked')?.value,
+      vorname: val('vorname'), nachname: val('nachname'),
+      strasse: val('strasse'), plz: val('plz'), ort: val('ort'),
+      telefon: val('telefon'), email: val('email'),
+      kennzeichen: val('kennzeichen').toUpperCase(),
+      fahrzeug_marke: val('fahrzeug-marke'), fahrzeug_modell: val('fahrzeug-modell'), fahrzeug_farbe: val('fahrzeug-farbe'),
+      kontoinhaber: val('kontoinhaber'), iban: val('iban').replace(/\s/g,'').toUpperCase(),
+      satzung_anerkannt: true,
+      betrag_jaehrlich: foerderFee,
+    };
+
+    try {
+      const res = await fetch('/api/submit-foerdermitglied', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        $('form-body').style.display = 'none';
+        $('form-success').style.display = '';
+        $('success-name').textContent = `${payload.vorname} ${payload.nachname}`;
+        $('success-id').textContent = `Antrag-ID: ${data.antragId}`;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else throw new Error(data.error || 'Unbekannter Fehler');
+    } catch (err) {
+      alert(`Fehler: ${err.message}\n\nBitte erneut versuchen oder den Verein kontaktieren.`);
+      $('btn-text').style.display = '';
+      $('btn-spinner').style.display = 'none';
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
