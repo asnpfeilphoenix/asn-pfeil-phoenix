@@ -6,6 +6,8 @@ import type { APIRoute } from 'astro';
 import nodemailer from 'nodemailer';
 import PDFDocument from 'pdfkit';
 import QRCode from 'qrcode';
+import SVGtoPDF from 'svg-to-pdfkit';
+import logoSvg from '../../assets/asn-logo.svg?raw';
 
 function fmtDate(d: string | null): string {
   if (!d) return '—';
@@ -25,8 +27,8 @@ async function generatePermitPDF(opts: {
     doc.on('end', () => resolve(Buffer.concat(chunks)));
     doc.on('error', reject);
     const navy = '#0f2972', orange = '#E8780A', mid = '#4a4f5c', light = '#e4e6ee';
-    doc.rect(50, 50, 200, 30).stroke(navy);
-    doc.fillColor(navy).font('Helvetica-Bold').fontSize(13).text('ASN-PFEIL-PHÖNIX e.V.', 58, 59);
+    doc.fillColor(navy);
+    SVGtoPDF(doc, logoSvg, 50, 42, { width: 61.5, height: 62, preserveAspectRatio: 'xMidYMid meet' });
     doc.fillColor(mid).font('Helvetica').fontSize(8).text('Marienbergstraße 41', 350, 50, { width: 195, align: 'right' }).text('90411 Nürnberg', { width: 195, align: 'right' });
     doc.fillColor(orange).font('Helvetica-Bold').fontSize(22).text('PARKAUSWEIS', 50, 110);
     doc.fillColor(navy).font('Helvetica').fontSize(11).text(opts.permitCode, 50, 138);

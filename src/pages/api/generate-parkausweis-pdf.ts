@@ -4,6 +4,8 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import PDFDocument from 'pdfkit';
 import QRCode from 'qrcode';
+import SVGtoPDF from 'svg-to-pdfkit';
+import logoSvg from '../../assets/asn-logo.svg?raw';
 
 function fmtDate(d: string | null): string {
   if (!d) return '—';
@@ -39,8 +41,8 @@ async function generatePermitPDF(opts: {
     const light = '#e4e6ee';
 
     // Header
-    doc.rect(50, 50, 200, 30).stroke(navy);
-    doc.fillColor(navy).font('Helvetica-Bold').fontSize(13).text('ASN-PFEIL-PHÖNIX e.V.', 58, 59);
+    doc.fillColor(navy);
+    SVGtoPDF(doc, logoSvg, 50, 42, { width: 61.5, height: 62, preserveAspectRatio: 'xMidYMid meet' });
     doc.fillColor(mid).font('Helvetica').fontSize(8)
       .text('Marienbergstraße 41', 350, 50, { width: 195, align: 'right' })
       .text('90411 Nürnberg', { width: 195, align: 'right' });
@@ -55,14 +57,15 @@ async function generatePermitPDF(opts: {
       doc.fillColor('white').font('Helvetica-Bold').fontSize(8.5).text('SPENDEN-DANKESCHÖN', 50, 161, { width: 165, align: 'center' });
     }
 
-    // Status bar
+    // Status bar — pushed down when the donor badge is present, to avoid overlap
+    const statusBarY = opts.isTemp ? 188 : 165;
     const isExpired = opts.gueltigBis ? new Date(opts.gueltigBis) < new Date() : false;
-    doc.rect(50, 165, 495, 26).fill(isExpired ? '#fee2e2' : '#dcfce7');
+    doc.rect(50, statusBarY, 495, 26).fill(isExpired ? '#fee2e2' : '#dcfce7');
     doc.fillColor(isExpired ? '#991b1b' : '#166534').font('Helvetica-Bold').fontSize(11)
-      .text(isExpired ? '✗ ABGELAUFEN' : '✓ GÜLTIG', 60, 173);
+      .text(isExpired ? '✗ ABGELAUFEN' : '✓ GÜLTIG', 60, statusBarY + 8);
 
     // Details box
-    const boxY = 210;
+    const boxY = statusBarY + 45;
     doc.rect(50, boxY, 495, 160).fillAndStroke('#f8f9fc', light);
     doc.fillColor(mid).font('Helvetica').fontSize(9).text('NAME', 70, boxY + 18);
     doc.fillColor('black').font('Helvetica-Bold').fontSize(14).text(opts.name, 70, boxY + 32);
