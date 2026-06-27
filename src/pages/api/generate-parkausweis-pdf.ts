@@ -14,7 +14,9 @@ async function generatePermitPDF(opts: {
   permitCode: string;
   name: string;
   kennzeichen: string;
-  parkplatzLabel: string; // e.g. "Nr. 7" or "Temporär — kein fester Platz"
+  parkplatzLabel: string; // e.g. "Nr. 7" or "Unreservierter Stellplatz"
+  parkplatzNummer: number | null; // null for temp / unassigned
+  isTemp: boolean;
   gueltigVon: string | null;
   gueltigBis: string | null;
   adresse?: string;
@@ -48,6 +50,11 @@ async function generatePermitPDF(opts: {
     doc.fillColor(orange).font('Helvetica-Bold').fontSize(22).text('PARKAUSWEIS', 50, 110);
     doc.fillColor(navy).font('Helvetica').fontSize(11).text(opts.permitCode, 50, 138);
 
+    if (opts.isTemp) {
+      doc.roundedRect(50, 156, 165, 18, 9).fill(orange);
+      doc.fillColor('white').font('Helvetica-Bold').fontSize(8.5).text('SPENDEN-DANKESCHÖN', 50, 161, { width: 165, align: 'center' });
+    }
+
     // Status bar
     const isExpired = opts.gueltigBis ? new Date(opts.gueltigBis) < new Date() : false;
     doc.rect(50, 165, 495, 26).fill(isExpired ? '#fee2e2' : '#dcfce7');
@@ -80,16 +87,22 @@ async function generatePermitPDF(opts: {
     doc.link(410, boxY + 50, 90, 90, opts.checkUrl);
     doc.fillColor(mid).font('Helvetica').fontSize(7).text('Zur Prüfung scannen', 405, boxY + 143, { width: 100, align: 'center' });
 
-    // Important notice
+    // Important notice — wording differs for donor thank-you vs. Fördermitglied permits
     const noticeY = boxY + 180;
     doc.rect(50, noticeY, 495, 70).fillAndStroke('#fffbeb', '#fde68a');
     doc.fillColor('#78350f').font('Helvetica-Bold').fontSize(8).text('WICHTIGER HINWEIS', 65, noticeY + 12);
-    doc.font('Helvetica').fontSize(8.5).text(
-      'Die Parkberechtigung ist ein Vorteil der Mitgliedschaft beim ASN Pfeil Phönix e.V. und kein eigenständiges Produkt. ' +
-      'Fahrzeuge ohne gültigen Parkausweis oder auf falschem Stellplatz können kostenpflichtig abgeschleppt werden. ' +
-      'Bei Ablauf der Mitgliedschaft verliert dieser Ausweis automatisch seine Gültigkeit.',
-      65, noticeY + 26, { width: 460, lineGap: 1 }
-    );
+
+    const noticeText = opts.isTemp
+      ? 'Dieser Parkausweis ist ein Dankeschön des ASN Pfeil Phönix e.V. für Ihre Spende an den Verein und kein Mitgliedschaftsnachweis. ' +
+        'Er berechtigt zum Parken auf einem freien, nicht reservierten Stellplatz auf dem Vereinsgelände — bitte keine nummerierten oder ' +
+        'anderweitig gekennzeichneten Plätze nutzen, da diese festen Mitgliedern zugewiesen sind. Nach Ablauf des Gültigkeitszeitraums ' +
+        'verliert dieser Ausweis automatisch seine Gültigkeit.'
+      : `Dieser Ausweis berechtigt ausschließlich zum Parken auf dem zugewiesenen Stellplatz ${opts.parkplatzNummer ? 'Nr. ' + opts.parkplatzNummer : ''}. ` +
+        'Das Parken auf anderen Stellplätzen ist nicht gestattet. Die Parkberechtigung ist ein Vorteil der Mitgliedschaft beim ASN Pfeil ' +
+        'Phönix e.V. und kein eigenständiges Produkt. Fahrzeuge ohne gültigen Parkausweis oder auf falschem Stellplatz können ' +
+        'kostenpflichtig abgeschleppt werden. Bei Ablauf der Mitgliedschaft verliert dieser Ausweis automatisch seine Gültigkeit.';
+
+    doc.fillColor('#78350f').font('Helvetica').fontSize(8.5).text(noticeText, 65, noticeY + 26, { width: 460, lineGap: 1 });
 
     // Footer
     doc.moveTo(50, 740).lineTo(545, 740).strokeColor(light).stroke();
@@ -129,7 +142,9 @@ export const GET: APIRoute = async ({ request, url }) => {
       permitCode: r.permit_code,
       name: isTemp ? r.name : `${r.anrede || ''} ${r.vorname} ${r.nachname}`.trim(),
       kennzeichen: r.kennzeichen,
-      parkplatzLabel: isTemp ? 'Temporär' : (r.parkplatz_nummer ? `Nr. ${r.parkplatz_nummer}` : '—'),
+      parkplatzLabel: isTemp ? 'Unreservierter Stellplatz' : (r.parkplatz_nummer ? `Nr. ${r.parkplatz_nummer}` : '—'),
+      parkplatzNummer: isTemp ? null : (r.parkplatz_nummer ?? null),
+      isTemp,
       gueltigVon: r.gueltig_von, gueltigBis: r.gueltig_bis,
       adresse: isTemp ? r.adresse : `${r.strasse || ''}, ${r.plz || ''} ${r.ort || ''}`,
       grund: isTemp ? r.grund : undefined,

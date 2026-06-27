@@ -115,6 +115,8 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
     .modal-box p{font-size:.9rem;color:var(--mid);line-height:1.6;margin-bottom:1.25rem;}
     .modal-box textarea{width:100%;border:2px solid var(--border);border-radius:var(--radius);padding:.6rem .8rem;font-family:var(--fb);font-size:.9rem;margin-bottom:1.25rem;resize:vertical;}
     .modal-btns{display:flex;gap:.75rem;}
+    .modal-err{color:var(--red);font-size:.82rem;margin-bottom:.75rem;display:none;}
+    .modal-err.visible{display:block;}
     .btn-cancel{flex:1;background:transparent;border:2px solid var(--border);color:var(--mid);border-radius:var(--radius);padding:.7rem;font-family:var(--fb);font-size:.9rem;font-weight:600;cursor:pointer;}
     .btn-confirm{flex:1;border:none;border-radius:var(--radius);padding:.7rem;font-family:var(--fb);font-size:.9rem;font-weight:600;cursor:pointer;color:white;}
   </style>
@@ -171,6 +173,23 @@ const SUPABASE_ANON = import.meta.env.SUPABASE_ANON_KEY || '';
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeEndModal()">Abbrechen</button>
       <button class="btn-confirm" style="background:var(--amber)" id="btn-confirm-end">Beenden</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="reassign-overlay">
+  <div class="modal-box">
+    <h3>Parkplatz ändern</h3>
+    <p id="reassign-msg" style="margin-bottom:1rem"></p>
+    <div class="field" style="margin-bottom:1rem">
+      <label style="font-size:.8rem;font-weight:600;color:var(--mid);display:block;margin-bottom:.3rem">Neue Platznummer</label>
+      <input type="number" id="reassign-input" min="1" style="width:100%;border:2px solid var(--border);border-radius:var(--radius);padding:.6rem .8rem;font-family:var(--fb);font-size:1rem" />
+    </div>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">Der/die Fördermitglied erhält automatisch einen aktualisierten Parkausweis per E-Mail.</p>
+    <div class="modal-err" id="reassign-err"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeReassignModal()">Abbrechen</button>
+      <button class="btn-confirm" id="btn-confirm-reassign">Zuweisen</button>
     </div>
   </div>
 </div>
@@ -249,6 +268,7 @@ function renderTable(rows, status) {
             <button class="btn-sm btn-sm--reject" onclick="openRejectModal('${r.antrag_id}')">Ablehnen</button>` : ''}
           ${status==='genehmigt' ? `
             <button class="btn-sm btn-sm--view" onclick="viewPermit('${r.permit_code}')">Ausweis</button>
+            <button class="btn-sm" style="color:var(--navy)" onclick="openReassignModal('${r.antrag_id}','${r.vorname} ${r.nachname}',${r.parkplatz_nummer})">Platz ändern</button>
             <button class="btn-sm btn-sm--end" onclick="openEndModal('${r.antrag_id}','${r.vorname} ${r.nachname}')">Beenden</button>` : ''}
         </div></td>
       </tr>`).join('')}</tbody>
@@ -380,6 +400,35 @@ document.getElementById('btn-confirm-end').addEventListener('click', async () =>
     toast(data.promoted ? `Beendet — ${data.promoted_name} von Warteliste übernommen (Platz Nr. ${data.parkplatz_nummer})` : 'Mitgliedschaft beendet', 'success');
     closeEndModal(); loadAndRender();
   } catch (err) { toast('Fehler: ' + err.message, 'error'); }
+});
+
+let reassignTarget = null;
+window.openReassignModal = function(antrag_id, name, currentSpace) {
+  reassignTarget = antrag_id;
+  document.getElementById('reassign-msg').textContent = `${name} — aktueller Platz: Nr. ${currentSpace}`;
+  document.getElementById('reassign-input').value = currentSpace;
+  document.getElementById('reassign-err').classList.remove('visible');
+  document.getElementById('reassign-overlay').classList.add('visible');
+};
+window.closeReassignModal = function() { document.getElementById('reassign-overlay').classList.remove('visible'); reassignTarget = null; };
+document.getElementById('btn-confirm-reassign').addEventListener('click', async () => {
+  if (!reassignTarget) return;
+  const errEl = document.getElementById('reassign-err');
+  errEl.classList.remove('visible');
+  const newSpace = document.getElementById('reassign-input').value;
+  const btn = document.getElementById('btn-confirm-reassign');
+  btn.disabled = true; btn.textContent = 'Wird zugewiesen…';
+  try {
+    const res = await apiFetch('/api/foerdermitglied-reassign', { antrag_id: reassignTarget, new_parkplatz_nummer: newSpace });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    toast(`Platz Nr. ${data.parkplatz_nummer} zugewiesen — Ausweis aktualisiert und versendet`, 'success');
+    closeReassignModal(); loadAndRender();
+  } catch (err) {
+    errEl.textContent = err.message; errEl.classList.add('visible');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Zuweisen';
+  }
 });
 
 window.viewPermit = async function(code) {

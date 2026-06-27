@@ -1,5 +1,6 @@
-// src/pages/api/foerdermitglied-end.ts
-// Ends a membership, frees the parking space, and auto-promotes the oldest waitlisted applicant
+// src/pages/api/foerdermitglied-reassign.ts
+// Lets an admin manually assign or change the specific parking space
+// for an already-approved Fördermitglied, then regenerates and resends the permit.
 export const prerender = false;
 import type { APIRoute } from 'astro';
 import nodemailer from 'nodemailer';
@@ -64,9 +65,14 @@ async function generatePermitPDF(opts: {
 export const POST: APIRoute = async ({ request }) => {
   const headers = { 'Content-Type': 'application/json' };
   try {
-    const { antrag_id } = await request.json();
+    const { antrag_id, new_parkplatz_nummer } = await request.json();
     const authHeader = request.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers });
+
+    const newSpace = parseInt(new_parkplatz_nummer);
+    if (!antrag_id || !newSpace || newSpace < 1) {
+      return new Response(JSON.stringify({ error: 'antrag_id und eine gültige Platznummer sind erforderlich.' }), { status: 400, headers });
+    }
 
     const SUPABASE_URL = import.meta.env.SUPABASE_URL;
     const SUPABASE_KEY = import.meta.env.SUPABASE_SERVICE_KEY;
@@ -78,69 +84,57 @@ export const POST: APIRoute = async ({ request }) => {
     const CHECK_URL = import.meta.env.PARKAUSWEIS_CHECK_URL || 'https://asn-pfeil-phoenix.vercel.app/verwaltung/parkausweis-check';
     const sbHeaders = { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` };
 
-    // End the membership
-    await fetch(`${SUPABASE_URL}/rest/v1/foerdermitglieder?antrag_id=eq.${antrag_id}`, {
-      method: 'PATCH', headers: { ...sbHeaders, 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ status: 'beendet', beendet_am: new Date().toISOString() }),
-    });
+    // Fetch the applicant
+    const appRes = await fetch(`${SUPABASE_URL}/rest/v1/foerdermitglieder?antrag_id=eq.${antrag_id}&select=*`, { headers: sbHeaders });
+    const appRows = await appRes.json();
+    if (!appRows.length) return new Response(JSON.stringify({ error: 'Antrag nicht gefunden.' }), { status: 404, headers });
+    const applicant = appRows[0];
+    if (applicant.status !== 'genehmigt') {
+      return new Response(JSON.stringify({ error: 'Nur genehmigten Mitgliedern kann ein Platz zugewiesen werden.' }), { status: 400, headers });
+    }
 
-    // Find oldest waitlisted applicant
-    const wlRes = await fetch(`${SUPABASE_URL}/rest/v1/foerdermitglieder?status=eq.warteliste&order=eingegangen_am.asc&limit=1&select=*`, { headers: sbHeaders });
-    const wlRows = await wlRes.json();
-    if (!wlRows.length) return new Response(JSON.stringify({ success: true, promoted: false }), { status: 200, headers });
-
-    const promoted = wlRows[0];
-
-    // Determine a free parking space
-    const configRes = await fetch(`${SUPABASE_URL}/rest/v1/foerdermitglied_config?id=eq.config&select=*`, { headers: sbHeaders });
+    // Check max_plaetze
+    const configRes = await fetch(`${SUPABASE_URL}/rest/v1/foerdermitglied_config?id=eq.config&select=max_plaetze`, { headers: sbHeaders });
     const config = (await configRes.json())[0];
     const maxPlaetze = config?.max_plaetze ?? 15;
-    const gueltigJahr = config?.gueltig_jahr ?? new Date().getFullYear();
+    if (newSpace > maxPlaetze) {
+      return new Response(JSON.stringify({ error: `Platznummer darf maximal ${maxPlaetze} sein.` }), { status: 400, headers });
+    }
 
-    const occRes = await fetch(`${SUPABASE_URL}/rest/v1/foerdermitglieder?status=eq.genehmigt&select=parkplatz_nummer`, { headers: sbHeaders });
-    const occupied = new Set((await occRes.json()).map((r: any) => r.parkplatz_nummer).filter((n: any) => n != null));
-    let freeSpace: number | null = null;
-    for (let i = 1; i <= maxPlaetze; i++) { if (!occupied.has(i)) { freeSpace = i; break; } }
-    if (freeSpace === null) return new Response(JSON.stringify({ success: true, promoted: false, reason: 'no_space' }), { status: 200, headers });
+    // Check the target space isn't already taken by someone else
+    const occRes = await fetch(`${SUPABASE_URL}/rest/v1/foerdermitglieder?status=eq.genehmigt&parkplatz_nummer=eq.${newSpace}&antrag_id=neq.${antrag_id}&select=vorname,nachname`, { headers: sbHeaders });
+    const occRows = await occRes.json();
+    if (occRows.length) {
+      return new Response(JSON.stringify({ error: `Platz Nr. ${newSpace} ist bereits an ${occRows[0].vorname} ${occRows[0].nachname} vergeben.` }), { status: 409, headers });
+    }
 
-    const now = new Date();
-    const gueltigVon = now.toISOString().split('T')[0];
-    const gueltigBis = `${gueltigJahr}-12-31`;
-
-    const counterRes = await fetch(`${SUPABASE_URL}/rest/v1/rpc/increment_invoice_counter`, {
-      method: 'POST', headers: sbHeaders, body: JSON.stringify({ counter_id: `foerdermitglied_${gueltigJahr}` }),
-    });
-    let counterNum = 1;
-    if (counterRes.ok) counterNum = await counterRes.json();
-    const permitCode = `FM-${gueltigJahr}-${String(counterNum).padStart(3, '0')}`;
-
-    await fetch(`${SUPABASE_URL}/rest/v1/foerdermitglieder?antrag_id=eq.${promoted.antrag_id}`, {
+    // Update
+    await fetch(`${SUPABASE_URL}/rest/v1/foerdermitglieder?antrag_id=eq.${antrag_id}`, {
       method: 'PATCH', headers: { ...sbHeaders, 'Prefer': 'return=minimal' },
-      body: JSON.stringify({
-        status: 'genehmigt', parkplatz_nummer: freeSpace, permit_code: permitCode,
-        gueltig_von: gueltigVon, gueltig_bis: gueltigBis, genehmigt_am: now.toISOString(),
-        warteliste_benachrichtigt_am: now.toISOString(),
-      }),
+      body: JSON.stringify({ parkplatz_nummer: newSpace }),
     });
 
-    if (SMTP_USER && SMTP_PASS) {
+    // Regenerate + resend permit
+    if (SMTP_USER && SMTP_PASS && applicant.permit_code) {
       const pdf = await generatePermitPDF({
-        permitCode, name: `${promoted.anrede || ''} ${promoted.vorname} ${promoted.nachname}`.trim(),
-        kennzeichen: promoted.kennzeichen, parkplatzLabel: `Nr. ${freeSpace}`,
-        gueltigVon, gueltigBis, checkUrl: `${CHECK_URL}?code=${permitCode}`,
+        permitCode: applicant.permit_code,
+        name: `${applicant.anrede || ''} ${applicant.vorname} ${applicant.nachname}`.trim(),
+        kennzeichen: applicant.kennzeichen, parkplatzLabel: `Nr. ${newSpace}`,
+        gueltigVon: applicant.gueltig_von, gueltigBis: applicant.gueltig_bis,
+        checkUrl: `${CHECK_URL}?code=${applicant.permit_code}`,
       });
       const transporter = nodemailer.createTransport({ host: SMTP_HOST, port: SMTP_PORT, secure: false, auth: { user: SMTP_USER, pass: SMTP_PASS } });
       await transporter.sendMail({
-        from: `"ASN Pfeil Phoenix" <${FROM_EMAIL}>`, to: promoted.email,
-        subject: `Ein Parkplatz ist frei geworden - Parkausweis ${permitCode}`,
-        text: `Hallo ${promoted.vorname} ${promoted.nachname},\n\nein Parkplatz ist frei geworden! Du stehst nicht mehr auf der Warteliste - dir wurde der Parkplatz Nr. ${freeSpace} fest zugewiesen.\n\nGueltig: ${fmtDate(gueltigVon)} bis ${fmtDate(gueltigBis)}\n\nDeinen digitalen Parkausweis findest du als PDF im Anhang.\n\nMit sportlichen Gruessen\nDer Vorstand des ASN Pfeil Phoenix e.V.`,
-        attachments: [{ filename: `Parkausweis-${permitCode}.pdf`, content: pdf, contentType: 'application/pdf' }],
+        from: `"ASN Pfeil Phoenix" <${FROM_EMAIL}>`, to: applicant.email,
+        subject: `Dein Parkausweis wurde aktualisiert - neuer Stellplatz Nr. ${newSpace}`,
+        text: `Hallo ${applicant.vorname} ${applicant.nachname},\n\ndir wurde ein neuer Stellplatz zugewiesen: Nr. ${newSpace}.\n\nDeinen aktualisierten Parkausweis findest du als PDF im Anhang. Der bisherige Ausweis mit der alten Platznummer ist nicht mehr gueltig.\n\nMit sportlichen Gruessen\nDer Vorstand des ASN Pfeil Phoenix e.V.`,
+        attachments: [{ filename: `Parkausweis-${applicant.permit_code}.pdf`, content: pdf, contentType: 'application/pdf' }],
       });
     }
 
-    return new Response(JSON.stringify({ success: true, promoted: true, promoted_name: `${promoted.vorname} ${promoted.nachname}`, parkplatz_nummer: freeSpace }), { status: 200, headers });
-  } catch (err) {
-    console.error('Foerdermitglied-End-Fehler:', err);
-    return new Response(JSON.stringify({ error: 'Interner Serverfehler.' }), { status: 500, headers });
+    return new Response(JSON.stringify({ success: true, parkplatz_nummer: newSpace }), { status: 200, headers });
+  } catch (err: any) {
+    console.error('Foerdermitglied-Reassign-Fehler:', err);
+    return new Response(JSON.stringify({ error: err.message || 'Interner Serverfehler.' }), { status: 500, headers });
   }
 };

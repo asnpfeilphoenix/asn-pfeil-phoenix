@@ -58,7 +58,8 @@ async function generatePermitPDF(opts: {
     const noticeY = boxY + 180;
     doc.rect(50, noticeY, 495, 70).fillAndStroke('#fffbeb', '#fde68a');
     doc.fillColor('#78350f').font('Helvetica-Bold').fontSize(8).text('WICHTIGER HINWEIS', 65, noticeY + 12);
-    doc.font('Helvetica').fontSize(8.5).text(
+    doc.fillColor('#78350f').font('Helvetica').fontSize(8.5).text(
+      `Dieser Ausweis berechtigt ausschließlich zum Parken auf dem zugewiesenen Stellplatz ${opts.parkplatzLabel}. Das Parken auf anderen Stellplätzen ist nicht gestattet. ` +
       'Die Parkberechtigung ist ein Vorteil der Mitgliedschaft beim ASN Pfeil Phönix e.V. und kein eigenständiges Produkt. ' +
       'Fahrzeuge ohne gültigen Parkausweis oder auf falschem Stellplatz können kostenpflichtig abgeschleppt werden. ' +
       'Bei Ablauf der Mitgliedschaft verliert dieser Ausweis automatisch seine Gültigkeit.',
