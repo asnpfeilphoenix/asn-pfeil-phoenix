@@ -179,6 +179,10 @@ async function sbFetch(path, opts={}) {
   return fetch(`${SB_URL}${path}`, { ...opts, headers:{ 'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${accessToken||SB_KEY}`,...(opts.headers||{}) } });
 }
 function fmtDate(d) { if(!d) return '—'; return new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+function esc(v) {
+  if (v === null || v === undefined) return '';
+  return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 
 window.resetForm = function() {
   ['f-name','f-adresse','f-kennzeichen','f-grund','f-von','f-bis'].forEach(id => document.getElementById(id).value = '');
@@ -228,6 +232,13 @@ document.getElementById('btn-download').addEventListener('click', async () => {
   a.href = URL.createObjectURL(blob); a.download = `Parkausweis-${lastCode}.pdf`; a.click();
 });
 
+// Delegated listener for the recent-list PDF buttons — reads the code
+// from a data-* attribute rather than an onclick string.
+document.getElementById('recent-list').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-code]');
+  if (btn) downloadOne(btn.dataset.code);
+});
+
 async function loadRecent() {
   const el = document.getElementById('recent-list');
   try {
@@ -237,9 +248,9 @@ async function loadRecent() {
     el.innerHTML = `<table>
       <thead><tr><th>Code</th><th>Name</th><th>Kennzeichen</th><th>Gültig</th><th></th></tr></thead>
       <tbody>${rows.map(r => `<tr>
-        <td><strong>${r.permit_code}</strong></td><td>${r.name}</td><td>${r.kennzeichen}</td>
+        <td><strong>${esc(r.permit_code)}</strong></td><td>${esc(r.name)}</td><td>${esc(r.kennzeichen)}</td>
         <td>${fmtDate(r.gueltig_von)} – ${fmtDate(r.gueltig_bis)}</td>
-        <td><button class="btn-sm" onclick="downloadOne('${r.permit_code}')">PDF</button></td>
+        <td><button class="btn-sm" data-code="${esc(r.permit_code)}">PDF</button></td>
       </tr>`).join('')}</tbody>
     </table>`;
   } catch { el.innerHTML = '<div style="padding:1.5rem;color:var(--red)">Fehler beim Laden.</div>'; }

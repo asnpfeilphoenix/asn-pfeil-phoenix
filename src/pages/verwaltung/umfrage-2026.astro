@@ -297,6 +297,20 @@ function freqMap(vals) {
   return f;
 }
 
+// Escape user-supplied text before inserting into innerHTML. This
+// matters most for free-text survey answers and the F27 contact
+// field, which is explicitly NOT anonymous and the most sensitive
+// data on this page.
+function esc(v) {
+  if (v === null || v === undefined) return '';
+  return String(v)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // ── Label maps ─────────────────────────────────────────────
 const LBL = {
   q1: { selbst: 'Für mich selbst', kind: 'Im Namen meines Kindes', beides: 'Für mich & mein Kind' },
@@ -352,7 +366,7 @@ function freqBlock(qnum, title, vals, labelMap) {
     <div class="freq-list">
       ${sorted.map(([k, v]) => `
         <div class="fbar-row">
-          <div class="fbar-label">${labelMap[k] || k}</div>
+          <div class="fbar-label">${labelMap[k] || esc(k)}</div>
           <div class="fbar-track"><div class="fbar-fill" style="width:${Math.round(v/maxVal*100)}%"></div></div>
           <div class="fbar-count">${v}</div>
         </div>`).join('')}
@@ -366,7 +380,7 @@ function freitextBlock(qnum, title, vals) {
     <div class="q-num">${qnum}</div>
     <div class="q-title">${title} <span class="q-n">(${filled.length} Antworten)</span></div>
     ${filled.length
-      ? `<div class="ftext-list">${filled.map(v => `<div class="ftext-item">${v.replace(/</g,'&lt;')}</div>`).join('')}</div>`
+      ? `<div class="ftext-list">${filled.map(v => `<div class="ftext-item">${esc(v)}</div>`).join('')}</div>`
       : '<div class="q-empty">Keine Antworten.</div>'}
   </div>`;
 }
@@ -488,7 +502,7 @@ function renderStats(rows) {
           <div class="q-num">F27</div>
           <div class="q-title">Kontaktangaben <span style="color:var(--red);font-size:.78rem;font-weight:400">(⚠ nicht anonym)</span></div>
           ${(() => { const c = sub.filter(r => r.q31_kontakt).map(r => r.q31_kontakt);
-            return c.length ? `<div class="ftext-list">${c.map(v => `<div class="ftext-item">👤 ${v.replace(/</g,'&lt;')}</div>`).join('')}</div>` : '<div class="q-empty">Keine Kontaktangaben.</div>'; })()}
+            return c.length ? `<div class="ftext-list">${c.map(v => `<div class="ftext-item">👤 ${esc(v)}</div>`).join('')}</div>` : '<div class="q-empty">Keine Kontaktangaben.</div>'; })()}
         </div>
       </div>
     </div>
@@ -512,11 +526,11 @@ function renderResponses(rows) {
         <thead><tr><th>Code</th><th>Datum</th><th>Status</th><th>Sprache</th><th></th></tr></thead>
         <tbody>
           ${rows.map(r => `<tr>
-            <td><span class="code-mono">${r.code}</span></td>
+            <td><span class="code-mono">${esc(r.code)}</span></td>
             <td style="color:var(--mid);font-size:.85rem">${fmt(r.eingegangen_am)}</td>
             <td><span class="badge ${r.status === 'submitted' ? 'badge--submitted' : 'badge--progress'}">${r.status === 'submitted' ? 'Abgeschlossen' : 'In Bearbeitung'}</span></td>
             <td style="color:var(--mid)">${r.sprache === 'en' ? '🇬🇧 EN' : '🇩🇪 DE'}</td>
-            <td><button class="btn-del" onclick="deleteOne('${r.id}','${r.code}')">Löschen</button></td>
+            <td><button class="btn-del" data-action="delete" data-id="${esc(r.id)}" data-code="${esc(r.code)}">Löschen</button></td>
           </tr>`).join('')}
         </tbody>
       </table>
@@ -590,6 +604,15 @@ window.downloadCsv = function() {
   a.download = 'umfrage-2026.csv'; a.click();
   toast(`${rows.length} Antworten exportiert`, 'success');
 };
+
+// Delegated listener for the Einzelantworten table — reads ids from
+// data-* attributes (never executed as code) rather than building
+// onclick strings from values.
+document.getElementById('admin-content').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-action="delete"]');
+  if (!btn) return;
+  deleteOne(btn.dataset.id, btn.dataset.code);
+});
 
 // ── Delete ──────────────────────────────────────────────────
 window.deleteOne = function(id, code) {

@@ -75,17 +75,37 @@ async function generatePermitPDF(opts: {
   });
 }
 
+async function verifyForderAdmin(request: Request, SUPABASE_URL: string, SERVICE_KEY: string): Promise<string | null> {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  const token = authHeader.slice(7);
+  const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${token}` },
+  });
+  if (!userRes.ok) return null;
+  const user = await userRes.json();
+  if (!user.email) return null;
+  const roleRes = await fetch(`${SUPABASE_URL}/rest/v1/admin_roles?email=eq.${encodeURIComponent(user.email)}&select=abteilungen`, {
+    headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` },
+  });
+  const rows = await roleRes.json();
+  const tags = rows[0]?.abteilungen || [];
+  if (!tags.includes('all') && !tags.includes('foerdermitglieder')) return null;
+  return user.email;
+}
+
 export const POST: APIRoute = async ({ request }) => {
   const headers = { 'Content-Type': 'application/json' };
   try {
     const { antrag_id } = await request.json();
     if (!antrag_id) return new Response(JSON.stringify({ error: 'antrag_id fehlt.' }), { status: 400, headers });
 
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers });
-
     const SUPABASE_URL = import.meta.env.SUPABASE_URL;
     const SUPABASE_KEY = import.meta.env.SUPABASE_SERVICE_KEY;
+
+    const callerEmail = await verifyForderAdmin(request, SUPABASE_URL, SUPABASE_KEY);
+    if (!callerEmail) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 403, headers });
+
     const SMTP_HOST = import.meta.env.SMTP_HOST || 'smtp.gmail.com';
     const SMTP_PORT = parseInt(import.meta.env.SMTP_PORT || '587');
     const SMTP_USER = import.meta.env.SMTP_USER;
@@ -151,7 +171,7 @@ export const POST: APIRoute = async ({ request }) => {
       method: 'PATCH', headers: { ...sbHeaders, 'Prefer': 'return=minimal' },
       body: JSON.stringify({
         status: 'genehmigt', parkplatz_nummer: assignedSpace, permit_code: permitCode,
-        gueltig_von: gueltigVon, gueltig_bis: gueltigBis, genehmigt_am: now.toISOString(),
+        gueltig_von: gueltigVon, gueltig_bis: gueltigBis, genehmigt_am: now.toISOString(), genehmigt_von: callerEmail,
       }),
     });
 

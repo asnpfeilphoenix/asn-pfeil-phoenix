@@ -127,6 +127,18 @@ function getSavedSession() {
 
 function fmtDate(d) { if(!d) return '—'; return new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}); }
 
+// Escape user-supplied text before inserting into innerHTML — donor
+// names, license plates, and "Anlass" text are not admin-controlled.
+function esc(v) {
+  if (v === null || v === undefined) return '';
+  return String(v)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 async function sbFetch(path, opts={}) {
   return fetch(`${SB_URL}${path}`, { ...opts, headers:{ 'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${accessToken||SB_KEY}`,...(opts.headers||{}) } });
 }
@@ -158,17 +170,17 @@ window.checkPermit = async function() {
           <div class="result-status-text">${statusOk ? 'GÜLTIG' : 'UNGÜLTIG'}</div>
         </div>
         <div class="result-body">
-          <div class="result-row"><span class="result-label">Code</span><span class="result-val">${r.permit_code}</span></div>
-          <div class="result-row"><span class="result-label">Name</span><span class="result-val">${isTemp ? r.name : `${r.anrede||''} ${r.vorname} ${r.nachname}`}</span></div>
-          <div class="result-row"><span class="result-label">Kennzeichen</span><span class="result-val result-val--big">${r.kennzeichen}</span></div>
-          <div class="result-row"><span class="result-label">Parkplatz</span><span class="result-val result-val--big">${isTemp ? 'Temporär' : (r.parkplatz_nummer ? 'Nr. ' + r.parkplatz_nummer : '—')}</span></div>
+          <div class="result-row"><span class="result-label">Code</span><span class="result-val">${esc(r.permit_code)}</span></div>
+          <div class="result-row"><span class="result-label">Name</span><span class="result-val">${isTemp ? esc(r.name) : `${esc(r.anrede)} ${esc(r.vorname)} ${esc(r.nachname)}`}</span></div>
+          <div class="result-row"><span class="result-label">Kennzeichen</span><span class="result-val result-val--big">${esc(r.kennzeichen)}</span></div>
+          <div class="result-row"><span class="result-label">Parkplatz</span><span class="result-val result-val--big">${isTemp ? 'Temporär' : (r.parkplatz_nummer ? 'Nr. ' + esc(r.parkplatz_nummer) : '—')}</span></div>
           <div class="result-row"><span class="result-label">Gültig</span><span class="result-val">${fmtDate(r.gueltig_von)} – ${fmtDate(r.gueltig_bis)}</span></div>
-          ${!isTemp ? `<div class="result-row"><span class="result-label">Status</span><span class="result-val">${r.status}</span></div>` : ''}
-          ${isTemp && r.grund ? `<div class="result-row"><span class="result-label">Anlass</span><span class="result-val">${r.grund}</span></div>` : ''}
+          ${!isTemp ? `<div class="result-row"><span class="result-label">Status</span><span class="result-val">${esc(r.status)}</span></div>` : ''}
+          ${isTemp && r.grund ? `<div class="result-row"><span class="result-label">Anlass</span><span class="result-val">${esc(r.grund)}</span></div>` : ''}
         </div>
       </div>`;
   } catch (err) {
-    area.innerHTML = `<div class="empty-msg">Fehler: ${err.message}</div>`;
+    area.innerHTML = `<div class="empty-msg">Fehler: ${esc(err.message)}</div>`;
   }
 };
 

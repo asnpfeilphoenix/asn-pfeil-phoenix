@@ -64,13 +64,29 @@ async function generatePermitPDF(opts: {
   });
 }
 
+async function verifyForderAdmin(request: Request, SUPABASE_URL: string, SERVICE_KEY: string): Promise<string | null> {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  const token = authHeader.slice(7);
+  const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${token}` },
+  });
+  if (!userRes.ok) return null;
+  const user = await userRes.json();
+  if (!user.email) return null;
+  const roleRes = await fetch(`${SUPABASE_URL}/rest/v1/admin_roles?email=eq.${encodeURIComponent(user.email)}&select=abteilungen`, {
+    headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` },
+  });
+  const rows = await roleRes.json();
+  const tags = rows[0]?.abteilungen || [];
+  if (!tags.includes('all') && !tags.includes('foerdermitglieder')) return null;
+  return user.email;
+}
+
 export const POST: APIRoute = async ({ request }) => {
   const headers = { 'Content-Type': 'application/json' };
   try {
     const { antrag_id, new_parkplatz_nummer } = await request.json();
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers });
-
     const newSpace = parseInt(new_parkplatz_nummer);
     if (!antrag_id || !newSpace || newSpace < 1) {
       return new Response(JSON.stringify({ error: 'antrag_id und eine gültige Platznummer sind erforderlich.' }), { status: 400, headers });
@@ -78,6 +94,10 @@ export const POST: APIRoute = async ({ request }) => {
 
     const SUPABASE_URL = import.meta.env.SUPABASE_URL;
     const SUPABASE_KEY = import.meta.env.SUPABASE_SERVICE_KEY;
+
+    const callerEmail = await verifyForderAdmin(request, SUPABASE_URL, SUPABASE_KEY);
+    if (!callerEmail) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 403, headers });
+
     const SMTP_HOST = import.meta.env.SMTP_HOST || 'smtp.gmail.com';
     const SMTP_PORT = parseInt(import.meta.env.SMTP_PORT || '587');
     const SMTP_USER = import.meta.env.SMTP_USER;
@@ -113,7 +133,7 @@ export const POST: APIRoute = async ({ request }) => {
     // Update
     await fetch(`${SUPABASE_URL}/rest/v1/foerdermitglieder?antrag_id=eq.${antrag_id}`, {
       method: 'PATCH', headers: { ...sbHeaders, 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ parkplatz_nummer: newSpace }),
+      body: JSON.stringify({ parkplatz_nummer: newSpace, platz_geaendert_von: callerEmail, platz_geaendert_am: new Date().toISOString() }),
     });
 
     // Regenerate + resend permit

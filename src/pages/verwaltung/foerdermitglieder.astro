@@ -246,6 +246,19 @@ async function apiFetch(path, body) {
 function fmtDate(d) { if(!d) return '—'; return new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}); }
 function fmtDateTime(d) { if(!d) return '—'; return new Date(d).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Berlin'}); }
 
+// Escape user-supplied text before inserting into innerHTML — names,
+// Kennzeichen, rejection reasons etc. come from the public form and
+// must never be treated as HTML/JS by the admin's browser.
+function esc(v) {
+  if (v === null || v === undefined) return '';
+  return String(v)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 const STATUS_LABEL = { beantragt:'Beantragt', genehmigt:'Genehmigt', warteliste:'Warteliste', abgelehnt:'Abgelehnt', beendet:'Beendet' };
 
 function renderTable(rows, status) {
@@ -256,25 +269,40 @@ function renderTable(rows, status) {
     <div style="overflow-x:auto"><table>
       <thead><tr><th>Name</th><th>Kennzeichen</th><th>Eingegangen</th>${status==='genehmigt'?'<th>Platz</th><th>Gültig bis</th>':''}${status==='abgelehnt'?'<th>Grund</th>':''}<th>Kontakt</th><th></th></tr></thead>
       <tbody>${filtered.map(r => `<tr>
-        <td><strong>${r.anrede||''} ${r.vorname} ${r.nachname}</strong></td>
-        <td class="code-mono">${r.kennzeichen}</td>
+        <td><strong>${esc(r.anrede)} ${esc(r.vorname)} ${esc(r.nachname)}</strong></td>
+        <td class="code-mono">${esc(r.kennzeichen)}</td>
         <td style="color:var(--muted);font-size:.82rem">${fmtDateTime(r.eingegangen_am)}</td>
-        ${status==='genehmigt'?`<td><strong>Nr. ${r.parkplatz_nummer}</strong></td><td>${fmtDate(r.gueltig_bis)}</td>`:''}
-        ${status==='abgelehnt'?`<td style="font-size:.82rem;color:var(--muted)">${r.abgelehnt_grund||'—'}</td>`:''}
-        <td style="font-size:.82rem;color:var(--muted)">${r.email}<br>${r.telefon||''}</td>
+        ${status==='genehmigt'?`<td><strong>Nr. ${esc(r.parkplatz_nummer)}</strong></td><td>${fmtDate(r.gueltig_bis)}</td>`:''}
+        ${status==='abgelehnt'?`<td style="font-size:.82rem;color:var(--muted)">${esc(r.abgelehnt_grund) || '—'}</td>`:''}
+        <td style="font-size:.82rem;color:var(--muted)">${esc(r.email)}<br>${esc(r.telefon)}</td>
         <td><div class="row-actions">
           ${status==='beantragt'||status==='warteliste' ? `
-            <button class="btn-sm btn-sm--approve" onclick="approveApplicant('${r.antrag_id}')">Genehmigen</button>
-            <button class="btn-sm btn-sm--reject" onclick="openRejectModal('${r.antrag_id}')">Ablehnen</button>` : ''}
+            <button class="btn-sm btn-sm--approve" data-action="approve" data-id="${esc(r.antrag_id)}">Genehmigen</button>
+            <button class="btn-sm btn-sm--reject" data-action="reject" data-id="${esc(r.antrag_id)}">Ablehnen</button>` : ''}
           ${status==='genehmigt' ? `
-            <button class="btn-sm btn-sm--view" onclick="viewPermit('${r.permit_code}')">Ausweis</button>
-            <button class="btn-sm" style="color:var(--navy)" onclick="openReassignModal('${r.antrag_id}','${r.vorname} ${r.nachname}',${r.parkplatz_nummer})">Platz ändern</button>
-            <button class="btn-sm btn-sm--end" onclick="openEndModal('${r.antrag_id}','${r.vorname} ${r.nachname}')">Beenden</button>` : ''}
+            <button class="btn-sm btn-sm--view" data-action="view-permit" data-code="${esc(r.permit_code)}">Ausweis</button>
+            <button class="btn-sm" style="color:var(--navy)" data-action="reassign" data-id="${esc(r.antrag_id)}" data-name="${esc(r.vorname + ' ' + r.nachname)}" data-space="${esc(r.parkplatz_nummer)}">Platz ändern</button>
+            <button class="btn-sm btn-sm--end" data-action="end" data-id="${esc(r.antrag_id)}" data-name="${esc(r.vorname + ' ' + r.nachname)}">Beenden</button>` : ''}
         </div></td>
       </tr>`).join('')}</tbody>
     </table></div>
   </div>`;
 }
+
+// Delegated listener — attached once to the stable container, survives
+// every admin-content.innerHTML replacement. Reads identifiers from
+// data-* attributes (never executed as code) instead of building
+// onclick strings out of user-supplied text.
+document.getElementById('admin-content').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const { action, id, code, name, space } = btn.dataset;
+  if (action === 'approve') approveApplicant(id);
+  if (action === 'reject') openRejectModal(id);
+  if (action === 'view-permit') viewPermit(code);
+  if (action === 'reassign') openReassignModal(id, name, space);
+  if (action === 'end') openEndModal(id, name);
+});
 
 function renderSettings(config) {
   return `<div class="settings-card">
