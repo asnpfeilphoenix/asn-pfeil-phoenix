@@ -1,11 +1,16 @@
 ---
 // src/pages/umfrage/index.astro
 import BaseLayout from '../../layouts/BaseLayout.astro';
-export const prerender = true;
+export const prerender = false; // needs to be false so close date is checked server-side at request time
+
+// ── Survey close date — Europe/Berlin timezone ──────────────────────
+// Change this date to reopen or extend the survey.
+const CLOSE_DATE = new Date('2026-07-04T23:59:00+02:00');
+const isClosed = new Date() > CLOSE_DATE;
 
 // ── Replace these with your actual YouTube video IDs once uploaded ──
-const VIDEO_DE = 'IF9p7kMU9sE'; // placeholder — replace with German video ID
-const VIDEO_EN = '99GxFY8ISaE'; // placeholder — replace with English video ID
+const VIDEO_DE = 'IF9p7kMU9sE';
+const VIDEO_EN = '99GxFY8ISaE';
 ---
 
 <BaseLayout title="Mitgliederbefragung 2026 — ASN Pfeil Phönix" description="Nimm an der Mitgliederbefragung 2026 des ASN Pfeil Phönix teil und gestalte unseren Fünfjahresplan mit.">
@@ -25,6 +30,24 @@ const VIDEO_EN = '99GxFY8ISaE'; // placeholder — replace with English video ID
   <section class="section">
     <div class="container entry-container">
 
+    {isClosed ? (
+      /* ── Survey closed ───────────────────────────────────── */
+      <div class="closed-card">
+        <div class="closed-icon">🎉</div>
+        <div class="closed-text-de" id="closed-de">
+          <h2>Die Umfrage ist abgeschlossen</h2>
+          <p>Vielen Dank an alle Mitglieder, die sich die Zeit genommen haben, ihre Meinung zu teilen. Die Teilnahme hat uns sehr gefreut.</p>
+          <p>Die Ergebnisse werden nun ausgewertet und bei der <strong>Jahreshauptversammlung im Oktober 2026</strong> präsentiert.</p>
+        </div>
+        <div class="closed-text-en" id="closed-en" style="display:none">
+          <h2>The survey is now closed</h2>
+          <p>Thank you to all members who took the time to share their views. We are delighted with the response.</p>
+          <p>The results are now being analysed and will be presented at the <strong>Jahreshauptversammlung in October 2026</strong>.</p>
+        </div>
+      </div>
+    ) : (
+      /* ── Survey open ─────────────────────────────────────── */
+      <>
       <!-- Intro text -->
       <div class="intro-card">
         <div class="intro-text" id="intro-text-de">
@@ -115,6 +138,8 @@ const VIDEO_EN = '99GxFY8ISaE'; // placeholder — replace with English video ID
         <p class="privacy-note" id="privacy-note-de">🔒 Alle Antworten sind vollständig anonym. Es werden keine personenbezogenen Daten gespeichert, es sei denn, du hinterlässt freiwillig Kontaktdaten im letzten Abschnitt.</p>
         <p class="privacy-note" id="privacy-note-en" style="display:none">🔒 All responses are completely anonymous. No personal data is stored unless you voluntarily leave contact details in the final section.</p>
       </div>
+      </>
+    )}
 
     </div>
   </section>
@@ -127,6 +152,12 @@ const VIDEO_EN = '99GxFY8ISaE'; // placeholder — replace with English video ID
   .umfrage-hero h1 em { color: var(--orange); font-style: normal; }
   .umfrage-hero .section-eyebrow { color: rgba(255,255,255,.5); }
   .umfrage-hero .section-eyebrow::before { background: var(--orange); }
+
+  /* Closed state */
+  .closed-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2.5rem 2rem; text-align: center; box-shadow: 0 2px 16px rgba(15,41,114,.06); max-width: 600px; margin: 0 auto; }
+  .closed-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+  .closed-card h2 { font-family: var(--fd); font-size: 1.8rem; color: var(--navy); margin-bottom: 1rem; }
+  .closed-card p { color: var(--mid); line-height: 1.7; margin-bottom: .75rem; max-width: 50ch; margin-left: auto; margin-right: auto; }
 
   .lang-switch { display: flex; gap: .5rem; margin-top: 1.25rem; }
   .lang-btn { background: rgba(255,255,255,.12); color: rgba(255,255,255,.7); border: 1px solid rgba(255,255,255,.2); border-radius: var(--radius); padding: .4em 1em; font-family: var(--fb); font-size: .85rem; cursor: pointer; transition: all .15s; }
@@ -190,7 +221,7 @@ const VIDEO_EN = '99GxFY8ISaE'; // placeholder — replace with English video ID
       if (el) el.style.display = visible ? '' : 'none';
     };
 
-    // Text blocks
+    // Text blocks (open state)
     show('intro-text-de', l === 'de'); show('intro-text-en', l === 'en');
     show('video-title-de', l === 'de'); show('video-title-en', l === 'en');
     show('btn-start-text-de', l === 'de'); show('btn-start-text-en', l === 'en');
@@ -198,6 +229,8 @@ const VIDEO_EN = '99GxFY8ISaE'; // placeholder — replace with English video ID
     show('resume-label-de', l === 'de'); show('resume-label-en', l === 'en');
     show('resume-btn-de', l === 'de'); show('resume-btn-en', l === 'en');
     show('privacy-note-de', l === 'de'); show('privacy-note-en', l === 'en');
+    // Closed state
+    show('closed-de', l === 'de'); show('closed-en', l === 'en');
 
     // Placeholder
     const codeInput = document.getElementById('resume-code');

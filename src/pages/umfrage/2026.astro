@@ -1,7 +1,10 @@
 ---
 // src/pages/umfrage/2026.astro
 import BaseLayout from '../../layouts/BaseLayout.astro';
-export const prerender = true;
+export const prerender = false; // must be false so close date is evaluated at request time
+
+const CLOSE_DATE = new Date('2026-07-04T23:59:00+02:00');
+const isClosed = new Date() > CLOSE_DATE;
 ---
 
 <BaseLayout title="Mitgliederbefragung 2026" description="Anonyme Mitgliederbefragung des ASN Pfeil Phönix e.V. 2026">
@@ -21,6 +24,19 @@ export const prerender = true;
 
   <section class="section">
     <div class="container survey-container">
+
+    {isClosed ? (
+      /* ── Survey closed ─────────────────────────────────────── */
+      <div class="survey-closed">
+        <div class="survey-closed-icon">🎉</div>
+        <h2 class="survey-closed-title">Die Umfrage ist abgeschlossen</h2>
+        <p class="survey-closed-de">Vielen Dank an alle Mitglieder, die sich die Zeit genommen haben, ihre Meinung zu teilen. Die Ergebnisse werden bei der <strong>Jahreshauptversammlung im Oktober 2026</strong> präsentiert.</p>
+        <p class="survey-closed-en" style="display:none">Thank you to all members who took the time to share their views. Results will be presented at the <strong>Jahreshauptversammlung in October 2026</strong>.</p>
+        <a href="/" class="btn btn--primary" style="margin-top:1.5rem">← Zur Startseite</a>
+      </div>
+    ) : (
+      /* ── Survey open ──────────────────────────────────────── */
+      <>
 
       <!-- Resume code entry -->
       <div class="resume-box" id="resume-box">
@@ -576,6 +592,10 @@ export const prerender = true;
       </div>
 
     </div>
+    </>
+    )}
+
+    </div>
   </section>
 
 </BaseLayout>
@@ -587,6 +607,12 @@ export const prerender = true;
   .survey-hero .section-eyebrow { color: rgba(255,255,255,.5); }
   .survey-hero .section-eyebrow::before { background: var(--orange); }
   .hero-sub { color: rgba(255,255,255,.65); font-size: 1rem; margin-top: .4rem; }
+
+  /* Closed state */
+  .survey-closed { text-align: center; padding: 3rem 1rem; }
+  .survey-closed-icon { font-size: 4rem; margin-bottom: 1rem; }
+  .survey-closed-title { font-family: var(--fd); font-size: 2.2rem; color: var(--navy); margin-bottom: 1rem; }
+  .survey-closed p { color: var(--mid); max-width: 52ch; margin: 0 auto .75rem; line-height: 1.7; }
 
   .lang-switch { display: flex; gap: .5rem; margin-top: 1.25rem; }
   .lang-btn { background: rgba(255,255,255,.12); color: rgba(255,255,255,.7); border: 1px solid rgba(255,255,255,.2); border-radius: var(--radius); padding: .4em 1em; font-family: var(--fb); font-size: .85rem; cursor: pointer; transition: all .15s; }
