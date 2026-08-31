@@ -11,7 +11,7 @@ jobs:
         run: |
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
             -X POST \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/get_foerdermitglied_verfuegbarkeit" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/heartbeat" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Content-Type: application/json" \
