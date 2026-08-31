@@ -9,8 +9,14 @@ jobs:
     steps:
       - name: Query Supabase
         run: |
-          curl -s \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/antraege?select=antrag_id&limit=1" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Accept: application/json"
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/admin_roles?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_KEY }}" \
+            -H "Accept: application/json")
+          echo "Response code: $RESPONSE"
+          if [ "$RESPONSE" != "200" ]; then
+            echo "Heartbeat failed with status $RESPONSE"
+            exit 1
+          fi
+          echo "Heartbeat OK"
