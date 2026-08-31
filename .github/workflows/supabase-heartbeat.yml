@@ -10,10 +10,12 @@ jobs:
       - name: Query Supabase
         run: |
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/admin_roles?select=id&limit=1" \
-            -H "apikey: ${{ secrets.SUPABASE_SERVICE_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_KEY }}" \
-            -H "Accept: application/json")
+            -X POST \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/get_foerdermitglied_verfuegbarkeit" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{}')
           echo "Response code: $RESPONSE"
           if [ "$RESPONSE" != "200" ]; then
             echo "Heartbeat failed with status $RESPONSE"
