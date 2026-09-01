@@ -10,17 +10,14 @@ jobs:
       - name: Query Supabase
         run: |
           RESULT=$(curl -s -w "\n%{http_code}" \
-            -X POST \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/heartbeat" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/_heartbeat?select=last_ping" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Content-Type: application/json" \
-            -d '{}')
+            -H "Accept: application/json")
           BODY=$(echo "$RESULT" | head -n -1)
           CODE=$(echo "$RESULT" | tail -n 1)
           echo "Response code: $CODE"
           echo "Response body: $BODY"
-          echo "URL used: ${{ secrets.SUPABASE_URL }}/rest/v1/rpc/heartbeat"
           if [ "$CODE" != "200" ]; then
             echo "Heartbeat failed"
             exit 1
