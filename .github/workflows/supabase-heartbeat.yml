@@ -8,15 +8,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Query Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/admin_roles?select=id&limit=1" \
-            -H "apikey: ${{ secrets.SUPABASE_SERVICE_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_KEY }}" \
+          RESULT=$(curl -s -w "\n%{http_code}" \
+            "${SUPABASE_URL}/rest/v1/admin_roles?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}" \
             -H "Accept: application/json")
-          echo "Response code: $RESPONSE"
-          if [ "$RESPONSE" != "200" ]; then
-            echo "Heartbeat failed with status $RESPONSE"
+          BODY=$(echo "$RESULT" | head -n -1)
+          CODE=$(echo "$RESULT" | tail -n 1)
+          echo "Response code: $CODE"
+          echo "Response body: $BODY"
+          if [ "$CODE" != "200" ]; then
+            echo "Heartbeat failed"
             exit 1
           fi
           echo "Heartbeat OK"
