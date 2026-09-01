@@ -12,6 +12,8 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
+          echo "Using URL: ${SUPABASE_URL}"
+          echo "Key prefix: ${SUPABASE_KEY:0:20}..."
           RESULT=$(curl -s -w "\n%{http_code}" \
             "${SUPABASE_URL}/rest/v1/admin_roles?select=id&limit=1" \
             -H "apikey: ${SUPABASE_KEY}" \
