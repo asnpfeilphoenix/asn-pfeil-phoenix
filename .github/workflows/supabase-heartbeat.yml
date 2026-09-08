@@ -1,7 +1,7 @@
 name: Supabase Heartbeat
 on:
   schedule:
-    - cron: '0 9 * * 1,3,5'  # Monday, Wednesday, Friday at 9am UTC
+    - cron: '0 12 * * *'  # Daily at noon UTC
   workflow_dispatch:
 jobs:
   ping:
@@ -12,8 +12,6 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
-          echo "Using URL: ${SUPABASE_URL}"
-          echo "Key prefix: ${SUPABASE_KEY:0:20}..."
           RESULT=$(curl -s -w "\n%{http_code}" \
             "${SUPABASE_URL}/rest/v1/admin_roles?select=id&limit=1" \
             -H "apikey: ${SUPABASE_KEY}" \
