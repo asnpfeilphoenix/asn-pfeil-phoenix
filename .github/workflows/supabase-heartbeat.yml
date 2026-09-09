@@ -7,22 +7,26 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Query Supabase
+      - name: Ping Supabase with a write
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
-          RESULT=$(curl -s -w "\n%{http_code}" \
-            "${SUPABASE_URL}/rest/v1/admin_roles?select=id&limit=1" \
+          # UPDATE a real row so Supabase registers genuine write activity.
+          # We touch David's admin_roles row — sets the name to its current
+          # value, so nothing actually changes in the data.
+          RESULT=$(curl -s -w "\n%{http_code}" -X PATCH \
+            "${SUPABASE_URL}/rest/v1/admin_roles?email=eq.david%40elsweiler.co.uk" \
             -H "apikey: ${SUPABASE_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_KEY}" \
-            -H "Accept: application/json")
-          BODY=$(echo "$RESULT" | head -n -1)
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d '{"name":"David Elsweiler"}')
           CODE=$(echo "$RESULT" | tail -n 1)
           echo "Response code: $CODE"
-          echo "Response body: $BODY"
-          if [ "$CODE" != "200" ]; then
-            echo "Heartbeat failed"
+          if [ "$CODE" != "204" ]; then
+            echo "Heartbeat failed with status $CODE"
+            echo "Body: $(echo "$RESULT" | head -n -1)"
             exit 1
           fi
-          echo "Heartbeat OK"
+          echo "Heartbeat OK — write confirmed"
