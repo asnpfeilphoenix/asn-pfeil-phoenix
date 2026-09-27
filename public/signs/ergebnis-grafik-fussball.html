@@ -659,19 +659,46 @@ function rr(cx,x,y,w,h,r){
 }
 
 /* ══ RENDER ════════════════════════════════════════════════ */
-const NAVY   = '#0f2972';
+const NAVY   = '#0a1e5e';   // deep navy ground
 const NAVYD  = '#091d52';
 const NAVYM  = '#1a3d94';
-const ROYAL  = '#2251cc';   // royal blue accent — replaces orange everywhere
+const ROYAL  = '#2251cc';
 const WHITE  = '#FFFFFF';
 
-/* Outcome colours — white-friendly on navy */
 const OC = {
-  W: { dot: '#4ade80', score: '#4ade80' },  // green
-  D: { dot: '#fbbf24', score: '#fbbf24' },  // amber
-  L: { dot: '#f87171', score: '#f87171' },  // red
+  W: { dot: '#4ade80', score: '#4ade80' },
+  D: { dot: '#fbbf24', score: '#fbbf24' },
+  L: { dot: '#f87171', score: '#f87171' },
 };
 function ocCol(oc, key) { return (OC[oc]||OC['D'])[key]; }
+
+/* ── Draw the diagonal-header background ── */
+function drawDiagHeader(cx, W, H, HDR_H, SKEW) {
+  /* Deep navy ground */
+  cx.fillStyle = NAVY;
+  cx.fillRect(0, 0, W, H);
+
+  /* Header slab — slightly lighter navy */
+  cx.fillStyle = '#0f2972';
+  cx.beginPath();
+  cx.moveTo(0, 0); cx.lineTo(W, 0);
+  cx.lineTo(W, HDR_H); cx.lineTo(0, HDR_H + SKEW);
+  cx.closePath(); cx.fill();
+
+  /* Royal accent stripe along the diagonal edge */
+  cx.fillStyle = ROYAL;
+  cx.beginPath();
+  cx.moveTo(0, HDR_H + SKEW - 10); cx.lineTo(W, HDR_H - 10);
+  cx.lineTo(W, HDR_H + 6);         cx.lineTo(0, HDR_H + SKEW + 6);
+  cx.closePath(); cx.fill();
+
+  /* Second thin ghost stripe */
+  cx.fillStyle = 'rgba(34,81,204,0.30)';
+  cx.beginPath();
+  cx.moveTo(0, HDR_H + SKEW + 12); cx.lineTo(W, HDR_H + 12);
+  cx.lineTo(W, HDR_H + 18);        cx.lineTo(0, HDR_H + SKEW + 18);
+  cx.closePath(); cx.fill();
+}
 
 function render() {
   const fmt = document.getElementById('formatSelect').value;
@@ -686,59 +713,55 @@ function render() {
 
   const hasSponsors = sponsorImgs.some(Boolean);
   const isSingle    = matchCount === 1;
-  const PAD         = Math.round(W * 0.038);
-  const HDR_H       = Math.round(H * 0.13);
-  const FTR_H       = Math.round(H * 0.05);
-  const BODY_H      = H - HDR_H - FTR_H;
+  const PAD         = Math.round(W * 0.048);
 
-  /* Sponsor column — ONLY in the body, never behind the header */
-  const SP_COL    = hasSponsors ? Math.round(W * 0.20) : 0;
-  const SP_PAD    = Math.round(SP_COL * 0.07);
+  /* Header: flat slab height + diagonal overhang */
+  const HDR_FLAT  = Math.round(H * 0.115);
+  const HDR_SKEW  = Math.round(W * 0.065);   // diagonal drop left→right
+  const HDR_H     = HDR_FLAT + HDR_SKEW;     // total header zone (incl. diagonal)
+  const FTR_H     = Math.round(H * 0.05);
+  const BODY_H    = H - HDR_H - FTR_H;
+
+  /* Sponsor column — only in body */
+  const SP_COL    = hasSponsors ? Math.round(W * 0.18) : 0;
+  const SP_PAD    = Math.round(SP_COL * 0.08);
   const CONTENT_X = SP_COL;
   const CONTENT_W = W - SP_COL;
 
-  /* ── BACKGROUND ── */
-  cx.fillStyle = NAVY;
-  cx.fillRect(0, 0, W, H);
+  /* ── DIAGONAL HEADER BACKGROUND ── */
+  drawDiagHeader(cx, W, H, HDR_FLAT, HDR_SKEW);
 
-  /* ── HEADER — always full width ── */
-  cx.fillStyle = NAVYD;
-  cx.fillRect(0, 0, W, HDR_H);
-
-  /* Royal blue accent line below header — full width */
-  cx.fillStyle = ROYAL;
-  cx.fillRect(0, HDR_H - 3, W, 3);
-
-  /* Logo top-right */
+  /* ── LOGO — diamond frame, top right ── */
   if (logo) {
-    const LS = Math.round(HDR_H * 0.6);
+    const LS = Math.round(HDR_FLAT * 0.72);
     const LX = W - PAD - LS;
-    const LY = (HDR_H - LS) / 2;
+    const LY = (HDR_FLAT - LS) / 2;
     cx.save();
     cx.fillStyle = WHITE;
     cx.translate(LX + LS/2, LY + LS/2);
     cx.rotate(Math.PI/4);
-    const ds = LS * 0.63;
+    const ds = LS * 0.65;
     rr(cx, -ds/2, -ds/2, ds, ds, 4); cx.fill();
     cx.restore();
     cx.drawImage(logo, LX, LY, LS, LS);
   }
 
-  /* Club name + subtitle — start from left edge always */
-  const titlePx = Math.round(HDR_H * 0.32);
-  const subPx   = Math.round(HDR_H * 0.14);
-  cx.fillStyle = WHITE; cx.textAlign = 'left'; cx.textBaseline = 'alphabetic';
+  /* ── CLUB NAME + SUBTITLE in header ── */
+  const titlePx = Math.round(HDR_FLAT * 0.38);
+  const subPx   = Math.round(HDR_FLAT * 0.155);
+  cx.fillStyle = WHITE;
   cx.font = `${titlePx}px 'Bebas Neue',sans-serif`;
-  cx.fillText('ASN Pfeil Phönix', PAD, HDR_H * 0.5);
-  cx.fillStyle = 'rgba(255,255,255,0.55)';
+  cx.textAlign = 'left'; cx.textBaseline = 'top';
+  cx.fillText('ASN PFEIL PHÖNIX', PAD, Math.round(HDR_FLAT * 0.1));
+  cx.fillStyle = 'rgba(255,255,255,0.48)';
   cx.font = `500 ${subPx}px 'DM Sans',sans-serif`;
-  cx.fillText('⚽ Fußball' + (hl ? '  ·  ' + hl : ''), PAD, HDR_H * 0.5 + titlePx * 1.1);
+  cx.fillText('⚽ Fußball' + (hl ? '  ·  ' + hl : ''), PAD, Math.round(HDR_FLAT * 0.1) + titlePx + Math.round(subPx * 0.35));
 
-  /* ── SPONSOR COLUMN — body only, below header ── */
+  /* ── SPONSOR COLUMN — below diagonal, body only ── */
   if (hasSponsors) {
-    cx.fillStyle = NAVYM;
+    cx.fillStyle = 'rgba(255,255,255,0.05)';
     cx.fillRect(0, HDR_H, SP_COL, BODY_H + FTR_H);
-    cx.fillStyle = 'rgba(255,255,255,0.12)';
+    cx.fillStyle = 'rgba(255,255,255,0.1)';
     cx.fillRect(SP_COL - 1, HDR_H, 1, BODY_H + FTR_H);
 
     const activeSponsors = sponsorImgs.filter(Boolean);
@@ -756,19 +779,11 @@ function render() {
   }
 
   /* ── BODY ROW METRICS ── */
-  // Fixed compact heights — content drives the size, not the available space
-  // We scale everything to fit, but never inflate rows with dead space.
   const N_TEAMS   = allResults.length;
   const N_MATCHES = allResults.reduce((s, r) => s + r.matches.length, 0);
-
-  // Desired proportions: section header ≈ 55% of a match row
-  // Total "units": N_TEAMS * 0.55 + N_MATCHES * 1.0 (single: just N_MATCHES * 1)
-  const totalUnits = isSingle
-    ? N_MATCHES
-    : N_TEAMS * 0.55 + N_MATCHES;
-
+  const totalUnits = isSingle ? N_MATCHES : N_TEAMS * 0.5 + N_MATCHES;
   const ROW_H = Math.floor(BODY_H / Math.max(totalUnits, 1));
-  const GH    = isSingle ? 0 : Math.round(ROW_H * 0.55);
+  const GH    = isSingle ? 0 : Math.round(ROW_H * 0.5);
 
   let curY = HDR_H;
 
@@ -776,44 +791,43 @@ function render() {
 
     /* ── Section header (multi only) ── */
     if (!isSingle) {
-      /* Left accent bar — royal blue */
-      cx.fillStyle = ROYAL;
-      cx.fillRect(CONTENT_X, curY, 3, GH);
+      /* Outcome colour left stripe for the whole team */
+      const firstOc = outcome(td.matches[0]);
+      cx.fillStyle = firstOc ? ocCol(firstOc, 'dot') : ROYAL;
+      cx.fillRect(CONTENT_X, curY + 6, 5, GH - 12);
 
       /* Team name */
-      const tnPx = Math.round(GH * 0.54);
-      cx.fillStyle = WHITE;
+      const tnPx = Math.round(GH * 0.5);
       cx.font = `${tnPx}px 'Bebas Neue',sans-serif`;
+      cx.fillStyle = WHITE;
       cx.textAlign = 'left'; cx.textBaseline = 'middle';
-      cx.fillText(td.teamName.toUpperCase(), CONTENT_X + PAD * 0.75, curY + GH / 2);
+      cx.fillText(td.teamName.toUpperCase(), CONTENT_X + 20, curY + GH / 2);
 
-      /* Competition name — muted, right of team name, properly measured */
+      /* Competition — muted */
       const compName = (td.matches[0]?.competitionName||'').trim();
       if (compName) {
-        const compPx = Math.round(GH * 0.3);
+        const compPx = Math.round(GH * 0.26);
         cx.font = `${tnPx}px 'Bebas Neue',sans-serif`;
         const teamW = cx.measureText(td.teamName.toUpperCase()).width;
         cx.font = `400 ${compPx}px 'DM Sans',sans-serif`;
-        cx.fillStyle = 'rgba(255,255,255,0.4)';
+        cx.fillStyle = 'rgba(255,255,255,0.35)';
         cx.textBaseline = 'middle';
-        // How much space is left (leave room for form dots)
-        const dotsW = td.matches.length * (GH * 0.14 * 2 + 4);
-        const compMaxW = CONTENT_W - PAD * 0.75 - teamW - GH * 0.2 - dotsW - PAD * 2;
-        cx.fillText(
-          ellipsis(cx, compName, Math.max(compMaxW, 0)),
-          CONTENT_X + PAD * 0.75 + teamW + Math.round(GH * 0.2),
-          curY + GH / 2
-        );
+        const dotsW = td.matches.length * (GH * 0.13 * 2 + 4);
+        const compMaxW = CONTENT_W - 20 - teamW - GH * 0.18 - dotsW - PAD * 2;
+        if (compMaxW > 30) {
+          cx.fillText(ellipsis(cx, compName, compMaxW),
+            CONTENT_X + 20 + teamW + Math.round(GH * 0.18), curY + GH / 2);
+        }
       }
 
       /* Form dots — right side */
       const dots = td.matches.map(m => outcome(m)).filter(Boolean);
-      const DR = Math.round(GH * 0.14);
-      let dx = W - PAD - (dots.length - 1) * (DR * 2 + 4) - DR;
+      const DR = Math.round(GH * 0.13);
+      let dx = W - PAD - (dots.length - 1) * (DR * 2 + 5) - DR;
       dots.forEach(oc => {
         cx.beginPath(); cx.arc(dx, curY + GH/2, DR, 0, Math.PI*2);
         cx.fillStyle = ocCol(oc, 'dot'); cx.fill();
-        dx += DR*2 + 4;
+        dx += DR*2 + 5;
       });
 
       curY += GH;
@@ -821,185 +835,148 @@ function render() {
 
     /* ── Match rows ── */
     td.matches.forEach((m, mi) => {
-      /* Hairline divider between rows only (not after last in group) */
       if (mi > 0 || !isSingle) {
-        cx.fillStyle = 'rgba(255,255,255,0.07)';
-        cx.fillRect(CONTENT_X + PAD, curY, CONTENT_W - PAD*2, 1);
+        cx.fillStyle = 'rgba(255,255,255,0.06)';
+        cx.fillRect(CONTENT_X, curY, CONTENT_W, 1);
       }
-
       const oc = outcome(m);
-
       if (isSingle) {
         renderSingleRow(cx, m, oc, td.teamName, CONTENT_X, curY, CONTENT_W, ROW_H, PAD, W);
       } else {
         renderMultiRow(cx, m, oc, CONTENT_X, curY, CONTENT_W, ROW_H, PAD, W);
       }
-
       curY += ROW_H;
     });
 
-    /* Separator between teams in multi mode */
     if (!isSingle && ti < allResults.length - 1) {
-      cx.fillStyle = 'rgba(255,255,255,0.12)';
+      cx.fillStyle = 'rgba(255,255,255,0.1)';
       cx.fillRect(CONTENT_X, curY, CONTENT_W, 1);
     }
   });
 
   /* ── FOOTER ── */
+  const fy = H - FTR_H;
   cx.fillStyle = NAVYD;
-  cx.fillRect(0, H - FTR_H, W, FTR_H);
+  cx.fillRect(0, fy, W, FTR_H);
   cx.fillStyle = ROYAL;
-  cx.fillRect(0, H - FTR_H, W, 2);
-  const ffs   = Math.round(FTR_H * 0.3);
+  cx.fillRect(0, fy, W, 2);
+  const ffs   = Math.round(FTR_H * 0.32);
   const today = new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
-  cx.fillStyle = 'rgba(255,255,255,0.4)';
+  cx.fillStyle = 'rgba(255,255,255,0.38)';
   cx.font = `500 ${ffs}px 'DM Sans',sans-serif`;
   cx.textAlign = 'left'; cx.textBaseline = 'middle';
-  cx.fillText('asn-pfeil-phoenix.de', PAD, H - FTR_H/2);
+  cx.fillText('asn-pfeil-phoenix.de', PAD, fy + FTR_H/2);
   cx.textAlign = 'right';
-  cx.fillText(`Daten: bfv.de  ·  Stand: ${today}`, W - PAD, H - FTR_H/2);
+  cx.fillText(`Daten: bfv.de  ·  Stand: ${today}`, W - PAD, fy + FTR_H/2);
 }
 
-/* ══ SINGLE-MATCH ROW ══════════════════════════════════════
-   Stacked layout within ROW_H:
-     Line 1: TEAM NAME  competition
-     Line 2: HOME TEAM NAME  (right-aligned, Bebas)
-     Line 3: BIG SCORE  (centred, Bebas, outcome colour)
-     Line 4: GUEST TEAM NAME  (left-aligned, Bebas)
-     Line 5: date · time
-   All lines use ellipsis within CONTENT_W — no overflow.
+/* ══ SINGLE-MATCH ROW — Option B style ════════════════════
+   Score anchored left in outcome colour (big, dominant).
+   Team name + home vs guest stack to the right of it.
+   Date bottom-right, whisper-small.
 ════════════════════════════════════════════════════════════ */
 function renderSingleRow(cx, m, oc, teamName, CX, ry, CW, RH, PAD, W) {
-  const TN_PX   = Math.round(RH * 0.11);   // team header
-  const COMP_PX = Math.round(RH * 0.07);   // competition
-  const NAME_PX = Math.round(RH * 0.155);  // home/guest names
-  const SCOR_PX = Math.round(RH * 0.28);   // score
-  const DATE_PX = Math.round(RH * 0.08);   // date
+  const col = ocCol(oc, 'score');
+  const MID = ry + RH / 2;
 
-  const GAP_SM  = Math.round(RH * 0.025);  // gap between lines
-  const GAP_MD  = Math.round(RH * 0.018);
+  /* Outcome colour left stripe */
+  cx.fillStyle = col;
+  cx.fillRect(CX, ry + Math.round(RH * 0.12), 5, Math.round(RH * 0.76));
 
-  /* Total block height */
-  const BLOCK_H = TN_PX + GAP_SM + NAME_PX + GAP_MD + SCOR_PX + GAP_MD + NAME_PX + GAP_SM + DATE_PX;
-  const blockTop = ry + (RH - BLOCK_H) / 2;
+  /* Giant score — left-anchored */
+  const SCOR_PX = Math.round(RH * 0.52);
+  cx.font = `${SCOR_PX}px 'Bebas Neue',sans-serif`;
+  cx.fillStyle = col;
+  cx.textAlign = 'left'; cx.textBaseline = 'middle';
+  const scoreX = CX + 22;
+  cx.fillText(m.result || '-:-', scoreX, MID + Math.round(RH * 0.04));
+  const scoreW = cx.measureText(m.result || '-:-').width;
 
-  /* Y baselines / midpoints for each line */
-  let y = blockTop;
-  const Y_TN    = y + TN_PX;            y += TN_PX + GAP_SM;
-  const Y_HOME  = y + NAME_PX / 2;      y += NAME_PX + GAP_MD;
-  const Y_SCORE = y + SCOR_PX / 2;      y += SCOR_PX + GAP_MD;
-  const Y_GUEST = y + NAME_PX / 2;      y += NAME_PX + GAP_SM;
-  const Y_DATE  = y + DATE_PX;
+  /* Right-of-score info block */
+  const infoX = scoreX + scoreW + Math.round(RH * 0.06);
+  const infoW = W - infoX - PAD;
 
-  /* Available text width within the content area */
-  const TW = CW - PAD * 2;  // full content width minus padding both sides
-
-  /* ── Line 1: team name + competition ── */
+  /* Team name */
+  const TN_PX = Math.round(RH * 0.165);
   cx.font = `${TN_PX}px 'Bebas Neue',sans-serif`;
   cx.fillStyle = WHITE;
-  cx.textAlign = 'left'; cx.textBaseline = 'alphabetic';
-  cx.fillText(teamName.toUpperCase(), CX + PAD, Y_TN);
+  cx.textAlign = 'left'; cx.textBaseline = 'middle';
+  cx.fillText(ellipsis(cx, teamName.toUpperCase(), infoW), infoX, MID - Math.round(RH * 0.175));
 
+  /* Competition — muted, same line as team name */
   const compStr = (m.competitionName||'').trim();
   if (compStr) {
     cx.font = `${TN_PX}px 'Bebas Neue',sans-serif`;
-    const teamW = cx.measureText(teamName.toUpperCase()).width;
-    const gapAfter = Math.round(TN_PX * 0.35);
-    cx.font = `400 ${COMP_PX}px 'DM Sans',sans-serif`;
-    cx.fillStyle = 'rgba(255,255,255,0.38)';
-    const compMaxW = TW - teamW - gapAfter;
-    if (compMaxW > 20) {
-      cx.fillText(ellipsis(cx, compStr, compMaxW), CX + PAD + teamW + gapAfter,
-        Y_TN - Math.round((TN_PX - COMP_PX) * 0.1));
-    }
+    const tnW = cx.measureText(teamName.toUpperCase()).width;
+    cx.font = `400 ${Math.round(RH * 0.08)}px 'DM Sans',sans-serif`;
+    cx.fillStyle = 'rgba(255,255,255,0.33)';
+    const cMaxW = infoW - tnW - 16;
+    if (cMaxW > 20) cx.fillText(ellipsis(cx, compStr, cMaxW), infoX + tnW + 14, MID - Math.round(RH * 0.175));
   }
 
-  /* ── Line 2: HOME team name ── */
-  cx.font = `${NAME_PX}px 'Bebas Neue',sans-serif`;
-  cx.fillStyle = WHITE;
-  cx.textAlign = 'center'; cx.textBaseline = 'middle';
-  cx.fillText(ellipsis(cx, cleanName(m.homeTeamName), TW), CX + PAD + TW / 2, Y_HOME);
+  /* Home vs Guest — centred in info block */
+  const HOME_PX = Math.round(RH * 0.125);
+  const isHome = (m.homeTeamName||'').toLowerCase().includes('pfeil');
+  const isGuest = (m.guestTeamName||'').toLowerCase().includes('pfeil');
+  cx.font = `${isHome ? '600' : '400'} ${HOME_PX}px 'DM Sans',sans-serif`;
+  cx.fillStyle = isHome ? WHITE : 'rgba(255,255,255,0.6)';
+  cx.textBaseline = 'middle';
+  cx.fillText(ellipsis(cx, cleanName(m.homeTeamName), infoW * 0.48), infoX, MID + Math.round(RH * 0.04));
 
-  /* ── Line 3: SCORE ── */
-  cx.font = `${SCOR_PX}px 'Bebas Neue',sans-serif`;
-  cx.fillStyle = ocCol(oc, 'score');
-  cx.textAlign = 'center'; cx.textBaseline = 'middle';
-  cx.fillText(m.result || '-:-', CX + PAD + TW / 2, Y_SCORE);
+  cx.font = `400 ${Math.round(RH * 0.095)}px 'DM Sans',sans-serif`;
+  cx.fillStyle = 'rgba(255,255,255,0.35)';
+  cx.fillText('vs', infoX + infoW * 0.49, MID + Math.round(RH * 0.04));
 
-  /* ── Line 4: GUEST team name ── */
-  cx.font = `${NAME_PX}px 'Bebas Neue',sans-serif`;
-  cx.fillStyle = 'rgba(255,255,255,0.75)';
-  cx.textAlign = 'center'; cx.textBaseline = 'middle';
-  cx.fillText(ellipsis(cx, cleanName(m.guestTeamName), TW), CX + PAD + TW / 2, Y_GUEST);
+  cx.font = `${isGuest ? '600' : '400'} ${HOME_PX}px 'DM Sans',sans-serif`;
+  cx.fillStyle = isGuest ? WHITE : 'rgba(255,255,255,0.6)';
+  cx.fillText(ellipsis(cx, cleanName(m.guestTeamName), infoW * 0.48), infoX + infoW * 0.53, MID + Math.round(RH * 0.04));
 
-  /* ── Line 5: date · time ── */
-  cx.font = `500 ${DATE_PX}px 'DM Sans',sans-serif`;
-  cx.fillStyle = 'rgba(255,255,255,0.38)';
-  cx.textAlign = 'left'; cx.textBaseline = 'alphabetic';
-  cx.fillText(fmtDate(m.kickoffDate) + (m.kickoffTime ? ' · ' + m.kickoffTime : ''), CX + PAD, Y_DATE);
+  /* Date — bottom right */
+  cx.font = `400 ${Math.round(RH * 0.09)}px 'DM Sans',sans-serif`;
+  cx.fillStyle = 'rgba(255,255,255,0.25)';
+  cx.textAlign = 'right'; cx.textBaseline = 'middle';
+  cx.fillText(fmtDate(m.kickoffDate) + (m.kickoffTime ? ' · ' + m.kickoffTime : ''), W - PAD, MID + Math.round(RH * 0.265));
 }
 
-/* ══ MULTI-MATCH ROW ═══════════════════════════════════════
-   One line per match: ● date  home  SCORE  guest
+/* ══ MULTI-MATCH ROW — Option B style ═════════════════════
+   Score left-anchored in outcome colour.
+   Team + opponents compact to the right.
 ════════════════════════════════════════════════════════════ */
 function renderMultiRow(cx, m, oc, CX, ry, CW, RH, PAD, W) {
-  const rcy     = ry + RH / 2;
-  const NAME_PX = Math.round(RH * 0.35);
-  const DATE_PX = Math.round(RH * 0.27);
-  const SCOR_PX = Math.round(RH * 0.46);
-  const DOT_R   = Math.round(RH * 0.13);
+  const col  = ocCol(oc, 'score');
+  const rcy  = ry + RH / 2;
 
-  const scoreStr = m.result || '-:-';
-  const dateStr  = fmtDate(m.kickoffDate) + (m.kickoffTime ? ' · ' + m.kickoffTime : '');
-
-  /* Pre-measure both so we can divide the name space correctly */
+  /* Score — left, large, coloured */
+  const SCOR_PX = Math.round(RH * 0.62);
   cx.font = `${SCOR_PX}px 'Bebas Neue',sans-serif`;
-  const scoreW = cx.measureText(scoreStr).width;
-  cx.font = `500 ${DATE_PX}px 'DM Sans',sans-serif`;
-  const dateW = cx.measureText(dateStr).width;
-
-  /* Fixed left elements: PAD + dot + gap + date + gap */
-  const leftFixed = PAD + DOT_R*2 + Math.round(RH*0.1) + dateW + Math.round(RH*0.14);
-  /* Score sits at right edge */
-  const rightFixed = scoreW + PAD;
-  /* Remaining space split evenly between home and guest */
-  const nameTotal = CW - leftFixed - rightFixed - Math.round(RH*0.06);
-  const nameHalf  = nameTotal / 2;
-
-  let cx_ = CX + PAD;
-
-  /* Outcome dot */
-  cx.beginPath();
-  cx.arc(cx_ + DOT_R, rcy, DOT_R, 0, Math.PI*2);
-  cx.fillStyle = ocCol(oc, 'dot'); cx.fill();
-  cx_ += DOT_R*2 + Math.round(RH*0.1);
-
-  /* Date */
-  cx.font = `500 ${DATE_PX}px 'DM Sans',sans-serif`;
-  cx.fillStyle = 'rgba(255,255,255,0.45)';
+  cx.fillStyle = col;
   cx.textAlign = 'left'; cx.textBaseline = 'middle';
-  cx.fillText(dateStr, cx_, rcy);
-  cx_ += dateW + Math.round(RH*0.14);
+  const scoreX = CX + 20;
+  cx.fillText(m.result || '-:-', scoreX, rcy);
+  const scoreW = cx.measureText(m.result || '-:-').width;
 
-  /* Home — right-aligned in its half */
+  const infoX = scoreX + scoreW + Math.round(RH * 0.18);
+  const infoW = W - infoX - PAD;
+
+  /* Home vs guest — compact */
+  const NAME_PX = Math.round(RH * 0.28);
   const hi = (m.homeTeamName||'').toLowerCase().includes('pfeil');
-  cx.font = `${hi?'600':'400'} ${NAME_PX}px 'DM Sans',sans-serif`;
-  cx.fillStyle = hi ? WHITE : 'rgba(255,255,255,0.65)';
-  cx.textAlign = 'right'; cx.textBaseline = 'middle';
-  cx.fillText(ellipsis(cx, cleanName(m.homeTeamName), nameHalf - PAD*0.2), cx_ + nameHalf, rcy);
-
-  /* Guest — left-aligned in its half */
   const gi = (m.guestTeamName||'').toLowerCase().includes('pfeil');
-  cx.font = `${gi?'600':'400'} ${NAME_PX}px 'DM Sans',sans-serif`;
-  cx.fillStyle = gi ? WHITE : 'rgba(255,255,255,0.65)';
-  cx.textAlign = 'left'; cx.textBaseline = 'middle';
-  cx.fillText(ellipsis(cx, cleanName(m.guestTeamName), nameHalf - PAD*0.2), cx_ + nameHalf, rcy);
 
-  /* Score — right edge */
-  cx.font = `${SCOR_PX}px 'Bebas Neue',sans-serif`;
-  cx.fillStyle = ocCol(oc, 'score');
+  cx.font = `${hi ? '600' : '500'} ${NAME_PX}px 'DM Sans',sans-serif`;
+  cx.fillStyle = hi ? WHITE : 'rgba(255,255,255,0.72)';
+  cx.textAlign = 'left'; cx.textBaseline = 'middle';
+  cx.fillText(ellipsis(cx, cleanName(m.homeTeamName), infoW * 0.46), infoX, rcy - Math.round(RH * 0.14));
+
+  cx.font = `${gi ? '600' : '400'} ${Math.round(NAME_PX * 0.88)}px 'DM Sans',sans-serif`;
+  cx.fillStyle = gi ? WHITE : 'rgba(255,255,255,0.5)';
+  cx.fillText(ellipsis(cx, cleanName(m.guestTeamName), infoW * 0.46), infoX, rcy + Math.round(RH * 0.14));
+
+  /* Date — far right */
+  cx.font = `400 ${Math.round(RH * 0.22)}px 'DM Sans',sans-serif`;
+  cx.fillStyle = 'rgba(255,255,255,0.3)';
   cx.textAlign = 'right'; cx.textBaseline = 'middle';
-  cx.fillText(scoreStr, W - PAD, rcy);
+  cx.fillText(fmtDate(m.kickoffDate), W - PAD, rcy);
 }
 
 /* ══ BOOT ══════════════════════════════════════════════════ */
