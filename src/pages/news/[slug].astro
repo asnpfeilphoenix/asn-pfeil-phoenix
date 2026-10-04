@@ -1,17 +1,17 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection, getEntry } from 'astro:content';
+import { getCollection, getEntry, render } from 'astro:content';
 
 export async function getStaticPaths() {
   const posts = await getCollection('news', ({ data }) => !data.draft);
   return posts.map(post => ({
-    params: { slug: post.slug },
+    params: { slug: post.id },
     props: { post },
   }));
 }
 
 const { post } = Astro.props;
-const { Content } = await post.render();
+const { Content } = await render(post);
 
 function formatDate(date: Date) {
   return date.toLocaleDateString('de-DE', {
@@ -22,7 +22,7 @@ function formatDate(date: Date) {
 // Related posts (same sport, not this post)
 const all = await getCollection('news', ({ data }) => !data.draft);
 const related = all
-  .filter(p => p.slug !== post.slug && p.data.sport === post.data.sport)
+  .filter(p => p.id !== post.id && p.data.sport === post.data.sport)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 3);
 ---
@@ -89,7 +89,7 @@ const related = all
         <h2 class="related-head">Weitere {post.data.sport}-Berichte</h2>
         <div class="grid-3">
           {related.map(p => (
-            <a href={`/news/${p.slug}`} class="card">
+            <a href={`/news/${p.id}`} class="card">
               {p.data.image && <img class="card__img" src={p.data.image} alt={p.data.title} loading="lazy" />}
               <div class="card__body">
                 <div class="card__meta">
