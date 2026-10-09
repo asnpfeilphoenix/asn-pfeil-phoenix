@@ -34,7 +34,7 @@ const sports = ['fussball', 'tennis', 'kegeln', 'dart', 'radsport', 'allgemein']
 
       <div class="grid-3" id="news-grid">
         {posts.map(post => (
-          <a href={`/news/${post.slug}`} class="card" data-sport={post.data.sport}>
+          <a href={`/news/${post.id.replace(/\.mdx?$/, '')}`} class="card" data-sport={post.data.sport}>
             {post.data.image && <img class="card__img" src={post.data.image} alt={post.data.title} loading="lazy" />}
             <div class="card__body">
               <div class="card__meta">

@@ -132,7 +132,7 @@ const depts = [
 
           <div class="news-list">
             {latestPosts.slice(1).map(post => (
-              <a href={`/news/${post.slug}`} class="news-item">
+              <a href={`/news/${post.id.replace(/\.mdx?$/, '')}`} class="news-item">
                 <div class="news-item__thumb">
                   {post.data.sport === 'fussball' ? '⚽' : post.data.sport === 'tennis' ? '🎾' : post.data.sport === 'kegeln' ? '🎳' : post.data.sport === 'dart' ? '🎯' : post.data.sport === 'radsport' ? '🚴' : '📋'}
                 </div>

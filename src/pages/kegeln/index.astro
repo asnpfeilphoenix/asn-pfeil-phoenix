@@ -97,7 +97,7 @@ const posts = (await getCollection('news', ({ data }) => !data.draft && data.spo
         <h2>Kegeln-News</h2>
         <div class="grid-3">
           {posts.map(post => (
-            <a href={`/news/${post.slug}`} class="card">
+            <a href={`/news/${post.id.replace(/\.mdx?$/, '')}`} class="card">
               <div class="card__body">
                 <div class="card__meta">
                   <span class="tag tag--kegeln">Kegeln</span>
