@@ -113,7 +113,7 @@ const depts = [
 
       {latestPosts.length > 0 ? (
         <div class="news-layout">
-          <a href={`/news/${latestPosts[0].slug}`} class="news-feat">
+          <a href={`/news/${latestPosts[0].id.replace(/\.mdx?$/, "")}`} class="news-feat">
             {latestPosts[0].data.image ? (
               <img class="news-feat__img" src={latestPosts[0].data.image} alt={latestPosts[0].data.title} />
             ) : (
