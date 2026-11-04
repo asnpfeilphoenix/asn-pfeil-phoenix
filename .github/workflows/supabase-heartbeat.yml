@@ -1,13 +1,16 @@
 name: Supabase Heartbeat
+
 on:
   schedule:
-    - cron: '0 12 * * *'  # Daily at noon UTC
+    # Every 6 hours at minute 17 (avoids GitHub's busiest minute at :00)
+    - cron: '17 */6 * * *'
   workflow_dispatch:
+
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase with a write
+      - name: Ping Supabase with a write (service key)
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
@@ -30,3 +33,20 @@ jobs:
             exit 1
           fi
           echo "Heartbeat OK — write confirmed"
+
+      - name: Read from the database (anon key, like a real visitor)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          # Three reads per run. These do not fail the job: with row-level
+          # security the result may be empty, which is fine. The point is
+          # to send ordinary user-style requests to the database.
+          for i in 1 2 3; do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+              "${SUPABASE_URL}/rest/v1/admin_roles?select=*&limit=1" \
+              -H "apikey: ${SUPABASE_ANON_KEY}" \
+              -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
+            echo "Anon read $i: HTTP $CODE"
+            sleep 2
+          done
