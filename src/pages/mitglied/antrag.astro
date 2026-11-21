@@ -96,6 +96,14 @@ const abteilungenJSON = JSON.stringify(abteilungen);
             <p>Welchem Sport möchtest du nachgehen?</p>
           </div>
 
+          <div class="fm-teaser">
+            <span class="fm-teaser__icon">🤝</span>
+            <div class="fm-teaser__body">
+              <strong>Fördermitgliedschaft</strong> — Unterstütze unseren Verein ohne Abteilungsbindung und sichere dir einen reservierten Parkplatz auf unserem Gelände.
+            </div>
+            <a href="/foerdermitglied/antrag" class="fm-teaser__link">Zum Antrag →</a>
+          </div>
+
           <div class="sport-grid" id="sport-grid"></div>
 
           <div id="kategorie-section" class="js-hidden">
@@ -621,6 +629,23 @@ const abteilungenJSON = JSON.stringify(abteilungen);
   .success-note { font-size: .82rem; color: var(--muted); }
 
   .js-hidden { display: none; }
+
+  /* Fördermitglied teaser banner */
+  .fm-teaser {
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--navy-tint); border: 1px solid var(--navy-pale);
+    border-radius: var(--radius-lg); padding: .85rem 1.1rem;
+    margin-bottom: 1.5rem; font-size: .88rem; color: var(--navy);
+  }
+  .fm-teaser__icon { font-size: 1.4rem; flex-shrink: 0; }
+  .fm-teaser__body { flex: 1; line-height: 1.5; color: var(--mid); }
+  .fm-teaser__body strong { color: var(--navy); }
+  .fm-teaser__link {
+    flex-shrink: 0; font-weight: 700; font-size: .82rem; color: var(--navy);
+    border: 2px solid var(--navy); border-radius: var(--radius);
+    padding: .3em .85em; white-space: nowrap; transition: background .15s, color .15s;
+  }
+  .fm-teaser__link:hover { background: var(--navy); color: var(--white); }
 
   @media (max-width: 600px) {
     .field-grid { grid-template-columns: 1fr; }
