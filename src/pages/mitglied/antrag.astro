@@ -96,14 +96,6 @@ const abteilungenJSON = JSON.stringify(abteilungen);
             <p>Welchem Sport möchtest du nachgehen?</p>
           </div>
 
-          <div class="fm-teaser">
-            <span class="fm-teaser__icon">🤝</span>
-            <div class="fm-teaser__body">
-              <strong>Fördermitgliedschaft</strong> — Unterstütze unseren Verein ohne Abteilungsbindung und sichere dir einen reservierten Parkplatz auf unserem Gelände.
-            </div>
-            <a href="/foerdermitglied/antrag" class="fm-teaser__link">Zum Antrag →</a>
-          </div>
-
           <div class="sport-grid" id="sport-grid"></div>
 
           <div id="kategorie-section" class="js-hidden">
@@ -630,22 +622,17 @@ const abteilungenJSON = JSON.stringify(abteilungen);
 
   .js-hidden { display: none; }
 
-  /* Fördermitglied teaser banner */
-  .fm-teaser {
-    display: flex; align-items: center; gap: 1rem;
-    background: var(--navy-tint); border: 1px solid var(--navy-pale);
-    border-radius: var(--radius-lg); padding: .85rem 1.1rem;
-    margin-bottom: 1.5rem; font-size: .88rem; color: var(--navy);
+  /* Fördermitglied highlighted kategorie item */
+  .kategorie-item--foerder {
+    border-color: var(--orange);
+    background: rgba(232,120,10,.04);
+    text-decoration: none; color: inherit;
   }
-  .fm-teaser__icon { font-size: 1.4rem; flex-shrink: 0; }
-  .fm-teaser__body { flex: 1; line-height: 1.5; color: var(--mid); }
-  .fm-teaser__body strong { color: var(--navy); }
-  .fm-teaser__link {
-    flex-shrink: 0; font-weight: 700; font-size: .82rem; color: var(--navy);
-    border: 2px solid var(--navy); border-radius: var(--radius);
-    padding: .3em .85em; white-space: nowrap; transition: background .15s, color .15s;
+  .kategorie-item--foerder:hover {
+    border-color: var(--orange);
+    background: rgba(232,120,10,.09);
   }
-  .fm-teaser__link:hover { background: var(--navy); color: var(--white); }
+  .kategorie-item--foerder .kategorie-item__price { color: var(--orange); }
 
   @media (max-width: 600px) {
     .field-grid { grid-template-columns: 1fr; }
@@ -734,6 +721,19 @@ const abteilungenJSON = JSON.stringify(abteilungen);
   function buildKategorieList(abteilung) {
     const rows=beitraege.filter(r=>r.abteilung===abteilung);
     const list=$('kategorie-list'); list.innerHTML='';
+
+    // Allgemein: prepend Fördermitgliedschaft as a highlighted link item
+    if(abteilung==='allgemein'){
+      const fr=beitraege.find(r=>r.abteilung==='foerdermitglied');
+      if(fr){
+        const a=document.createElement('a');
+        a.href='/foerdermitglied/antrag';
+        a.className='kategorie-item kategorie-item--foerder';
+        a.innerHTML=`<div class="kategorie-item__body"><div class="kategorie-item__label">Fördermitgliedschaft</div><div class="kategorie-item__sub">Ohne Abteilungsbindung · inkl. Parkberechtigung → Zum Antrag</div></div><div class="kategorie-item__price">${fr.betrag_jaehrlich} €<small>pro Jahr</small></div>`;
+        list.appendChild(a);
+      }
+    }
+
     rows.forEach(row=>{
       const item=document.createElement('label');
       item.className='kategorie-item';
