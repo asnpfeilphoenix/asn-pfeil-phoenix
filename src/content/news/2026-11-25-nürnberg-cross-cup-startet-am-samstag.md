@@ -13,4 +13,4 @@ image: /images/uploads/_T9A1863.jpeg
 draft: true
 ---
 
-Foto Gregor Kramny
+Foto: Gregor Kramny
