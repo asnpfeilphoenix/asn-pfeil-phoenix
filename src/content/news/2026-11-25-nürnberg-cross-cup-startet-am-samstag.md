@@ -10,7 +10,7 @@ date: 2026-11-25
 sport: radsport
 author: Stefan Böhm
 image: /images/uploads/_T9A1863.jpeg
-draft: true
+draft: false
 ---
 
 Foto: Gregor Kramny
